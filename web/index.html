@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Showroom Developer Portal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen">
+            <div class="login-container">
+                <div class="logo">
+                    <h1>Showroom Portal</h1>
+                    <p>Create and manage your game showrooms</p>
+                </div>
+                
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="your@email.com">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Magic Link</button>
+                </form>
+                
+                <div id="login-message" class="message"></div>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen" class="screen hidden">
+            <header class="header">
+                <div class="header-content">
+                    <h1>My Projects</h1>
+                    <div class="header-actions">
+                        <button id="create-project-btn" class="btn btn-primary">+ New Project</button>
+                        <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main">
+                <div id="projects-list" class="projects-grid">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </main>
+        </div>
+
+        <!-- Project Detail Screen -->
+        <div id="project-screen" class="screen hidden">
+            <header class="header">
+                <div class="header-content">
+                    <button id="back-to-dashboard" class="btn btn-secondary">← Back</button>
+                    <h1 id="project-title">Project Details</h1>
+                </div>
+            </header>
+
+            <main class="main">
+                <div class="project-detail">
+                    <div class="project-info">
+                        <div class="form-group">
+                            <label for="project-title-input">Project Title</label>
+                            <input type="text" id="project-title-input" placeholder="My Awesome Game">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="project-slug">URL Slug</label>
+                            <input type="text" id="project-slug" placeholder="my-awesome-game" readonly>
+                            <small>This will be your public URL: /manifest/my-awesome-game</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="short-desc">Short Description</label>
+                            <textarea id="short-desc" placeholder="Brief description of your game..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="long-desc">Long Description</label>
+                            <textarea id="long-desc" placeholder="Detailed description of your game..."></textarea>
+                        </div>
+                        
+                        <button id="save-project" class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                    <div class="assets-section">
+                        <h3>Assets</h3>
+                        
+                        <div class="asset-upload">
+                            <h4>Logo</h4>
+                            <div class="upload-area" data-kind="logo">
+                                <input type="file" id="logo-upload" accept="image/*" hidden>
+                                <div class="upload-content">
+                                    <div id="logo-preview" class="asset-preview"></div>
+                                    <button type="button" class="upload-btn">Upload Logo</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="asset-upload">
+                            <h4>Header Image</h4>
+                            <div class="upload-area" data-kind="header">
+                                <input type="file" id="header-upload" accept="image/*" hidden>
+                                <div class="upload-content">
+                                    <div id="header-preview" class="asset-preview"></div>
+                                    <button type="button" class="upload-btn">Upload Header</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="asset-upload">
+                            <h4>Screenshots</h4>
+                            <div class="upload-area" data-kind="screenshot">
+                                <input type="file" id="screenshot-upload" accept="image/*" multiple hidden>
+                                <div class="upload-content">
+                                    <div id="screenshot-preview" class="asset-preview grid"></div>
+                                    <button type="button" class="upload-btn">Upload Screenshots</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="asset-upload">
+                            <h4>Trailer Video</h4>
+                            <div class="upload-area" data-kind="trailer">
+                                <input type="file" id="trailer-upload" accept="video/*" hidden>
+                                <div class="upload-content">
+                                    <div id="trailer-preview" class="asset-preview"></div>
+                                    <button type="button" class="upload-btn">Upload Trailer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="portal.js"></script>
+</body>
+</html>
