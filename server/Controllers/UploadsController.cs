@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using ShowroomBackend.Services;
 using ShowroomBackend.Models;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +9,7 @@ namespace ShowroomBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UploadsController : ControllerBase
     {
         private readonly ISupabaseService _supabaseService;
@@ -23,11 +26,8 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
                 // Verify project belongs to user
                 var project = await _supabaseService.GetProjectByIdAsync(projectId);
@@ -56,7 +56,7 @@ namespace ShowroomBackend.Controllers
 
                 // Upload file to Supabase Storage
                 using var stream = request.File.OpenReadStream();
-                var fileKey = await _supabaseService.UploadFileAsync(stream, request.File.FileName, request.File.ContentType);
+                var fileKey = await _supabaseService.UploadFileAsync(stream, request.File.FileName, "showrooms");
                 
                 if (string.IsNullOrEmpty(fileKey))
                 {
@@ -99,11 +99,8 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
                 // Verify project belongs to user
                 var project = await _supabaseService.GetProjectByIdAsync(projectId);
@@ -127,11 +124,8 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
                 var success = await _supabaseService.DeleteAssetAsync(assetId);
                 if (!success)
