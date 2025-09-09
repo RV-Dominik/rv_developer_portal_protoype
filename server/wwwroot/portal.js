@@ -94,14 +94,17 @@ class ShowroomPortal {
                     this.currentUser = data.user;
                     this.showDashboard();
                 } else {
-                    this.showAuthSection();
+                    // Don't show auth section automatically - keep landing page visible
+                    this.showLandingPage();
                 }
             } else {
-                this.showAuthSection();
+                // Don't show auth section automatically - keep landing page visible
+                this.showLandingPage();
             }
         } catch (error) {
             console.error('Auth check failed:', error);
-            this.showAuthSection();
+            // Don't show auth section automatically - keep landing page visible
+            this.showLandingPage();
         }
     }
 
@@ -216,6 +219,22 @@ class ShowroomPortal {
             `;
             this.bindEvents();
         }
+    }
+
+    showLandingPage() {
+        const heroSection = document.getElementById('hero-section');
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const projectDetailSection = document.getElementById('project-detail-section');
+        const logoutButton = document.getElementById('logout-button');
+        
+        if (heroSection) heroSection.classList.remove('hidden');
+        if (authSection) authSection.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.add('hidden');
+        if (projectDetailSection) projectDetailSection.classList.add('hidden');
+        
+        // Hide logout button when not authenticated
+        if (logoutButton) logoutButton.style.display = 'none';
     }
 
     showAuthSection() {
