@@ -386,10 +386,14 @@ namespace ShowroomBackend.Services
                 var contentType = GetContentType(fileName);
                 content.Headers.Add("Content-Type", contentType);
                 
-                // Add authorization header
-                content.Headers.Add("Authorization", $"Bearer {_supabaseServiceKey}");
+                // Create request message and add authorization header
+                var request = new HttpRequestMessage(HttpMethod.Post, storageUrl)
+                {
+                    Content = content
+                };
+                request.Headers.Add("Authorization", $"Bearer {_supabaseServiceKey}");
                 
-                var response = await _httpClient.PostAsync(storageUrl, content);
+                var response = await _httpClient.SendAsync(request);
                 
                 if (response.IsSuccessStatusCode)
                 {
