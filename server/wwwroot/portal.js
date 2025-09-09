@@ -1143,6 +1143,7 @@ class ShowroomPortal {
             
             if (response.ok) {
                 const projects = await response.json();
+                console.log('Loaded projects from server:', projects);
                 this.projects = projects;
                 this.displayProjects(projects);
             } else {
@@ -1173,6 +1174,12 @@ class ShowroomPortal {
             return;
         }
         
+        // Debug: Log the first project to see its structure
+        if (projects.length > 0) {
+            console.log('First project data structure:', projects[0]);
+            console.log('Available fields:', Object.keys(projects[0]));
+        }
+        
         projectsList.innerHTML = projects.map(project => `
             <div class="project-card" onclick="portal.showProjectDetail('${project.id}')">
                 <div class="project-header">
@@ -1180,10 +1187,10 @@ class ShowroomPortal {
                     <span class="project-status ${project.onboardingStep || 'basics'}">${this.getStatusText(project.onboardingStep)}</span>
                 </div>
                 <div class="project-content">
-                    <p class="project-description">${project.shortDescription || 'No description provided'}</p>
+                    <p class="project-description">${project.shortDescription || project.ShortDescription || 'No description provided'}</p>
                     <div class="project-meta">
-                        <span class="project-genre">${project.genre || 'No genre'}</span>
-                        <span class="project-track">${project.publishingTrack || 'No track'}</span>
+                        <span class="project-genre">${project.genre || project.Genre || 'No genre'}</span>
+                        <span class="project-track">${project.publishingTrack || project.PublishingTrack || 'No track'}</span>
                     </div>
                 </div>
                 <div class="project-actions">

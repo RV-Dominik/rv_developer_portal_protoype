@@ -139,6 +139,9 @@ namespace ShowroomBackend.Services
                         PropertyNameCaseInsensitive = true
                     });
                     
+                    _logger.LogInformation("Retrieved {Count} projects for user {UserId}: {Projects}", 
+                        projects?.Length ?? 0, userId, content);
+                    
                     return projects?.ToList() ?? new List<Project>();
                 }
                 
