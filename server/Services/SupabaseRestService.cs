@@ -208,12 +208,28 @@ namespace ShowroomBackend.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var projects = JsonSerializer.Deserialize<Project[]>(responseContent, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
                     
-                    return projects?.FirstOrDefault();
+                    // Supabase PATCH operations may return empty response or the updated record
+                    if (string.IsNullOrWhiteSpace(responseContent))
+                    {
+                        // If empty response, fetch the updated project
+                        return await GetProjectByIdAsync(id);
+                    }
+                    
+                    try
+                    {
+                        var projects = JsonSerializer.Deserialize<Project[]>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                        
+                        return projects?.FirstOrDefault();
+                    }
+                    catch (JsonException)
+                    {
+                        // If JSON parsing fails, fetch the updated project
+                        return await GetProjectByIdAsync(id);
+                    }
                 }
                 
                 return null;
@@ -306,12 +322,28 @@ namespace ShowroomBackend.Services
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    var assets = JsonSerializer.Deserialize<Asset[]>(responseContent, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
                     
-                    return assets?.FirstOrDefault();
+                    // Supabase POST operations may return empty response or the created record
+                    if (string.IsNullOrWhiteSpace(responseContent))
+                    {
+                        // If empty response, return the asset we created (it should have the ID from the request)
+                        return asset;
+                    }
+                    
+                    try
+                    {
+                        var assets = JsonSerializer.Deserialize<Asset[]>(responseContent, new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+                        
+                        return assets?.FirstOrDefault();
+                    }
+                    catch (JsonException)
+                    {
+                        // If JSON parsing fails, return the asset we created
+                        return asset;
+                    }
                 }
                 
                 return null;

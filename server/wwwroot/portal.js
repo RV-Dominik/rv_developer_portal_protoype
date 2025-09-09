@@ -865,14 +865,15 @@ class ShowroomPortal {
     }
 
     bindFileUploadEvents() {
-        const uploadAreas = ['logo-upload', 'cover-upload', 'screenshots-upload'];
+        const uploadAreas = ['logo-upload', 'cover-upload', 'screenshots-upload', 'trailer-upload'];
         uploadAreas.forEach(areaId => {
             const area = document.getElementById(areaId);
-            const input = area.querySelector('input[type="file"]');
-            
-            if (area && input) {
-                area.addEventListener('click', () => input.click());
-                input.addEventListener('change', (e) => this.handleFileUpload(e, areaId));
+            if (area) {
+                const input = area.querySelector('input[type="file"]');
+                if (input) {
+                    area.addEventListener('click', () => input.click());
+                    input.addEventListener('change', (e) => this.handleFileUpload(e, areaId));
+                }
             }
         });
     }
@@ -1068,13 +1069,16 @@ class ShowroomPortal {
             
             if (response.ok) {
                 const projects = await response.json();
+                this.projects = projects;
                 this.displayProjects(projects);
             } else {
                 console.error('Failed to load projects:', response.status);
+                this.projects = [];
                 this.displayProjects([]);
             }
         } catch (error) {
             console.error('Error loading projects:', error);
+            this.projects = [];
             this.displayProjects([]);
         }
     }
@@ -1127,6 +1131,15 @@ class ShowroomPortal {
             'completed': 'Completed'
         };
         return statusMap[step] || 'Not Started';
+    }
+
+    showProjectDetail(projectId) {
+        // For now, just start the onboarding process for the project
+        // In the future, this could show a detailed project view
+        const project = this.projects?.find(p => p.id === projectId);
+        if (project) {
+            this.startOnboarding(project);
+        }
     }
 
     showLandingPage() {
