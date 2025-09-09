@@ -946,3 +946,410 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.75rem;
   }
 }
+
+/* ===== ONBOARDING WIZARD STYLES ===== */
+
+/* Wizard Grid Layout */
+.wizard-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .wizard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* Wizard Card */
+.wizard-card {
+  background: var(--card-dark);
+  border: 1px solid var(--rv-blue-20);
+  border-radius: 12px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.wizard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--rv-blue), var(--rv-green));
+}
+
+/* Wizard Stepper */
+.wizard-stepper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.wizard-stepper::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: var(--rv-blue-20);
+  z-index: 1;
+}
+
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--card-light);
+  border: 2px solid var(--rv-blue-20);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--rv-grey-2);
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
+}
+
+.step-label {
+  font-size: 0.8rem;
+  color: var(--rv-grey-2);
+  text-align: center;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.wizard-step.active .step-number {
+  background: var(--rv-blue);
+  border-color: var(--rv-blue);
+  color: var(--rv-black);
+  box-shadow: 0 0 20px var(--rv-blue-35);
+}
+
+.wizard-step.active .step-label {
+  color: var(--rv-blue);
+}
+
+.wizard-step.completed .step-number {
+  background: var(--rv-green);
+  border-color: var(--rv-green);
+  color: var(--rv-black);
+}
+
+.wizard-step.completed .step-label {
+  color: var(--rv-green);
+}
+
+/* Wizard Content */
+.wizard-content {
+  position: relative;
+}
+
+.step-header {
+  margin-bottom: 2rem;
+}
+
+.step-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--rv-white);
+  margin-bottom: 0.5rem;
+  font-family: "Plaak 45 B Foch 205 Tf", sans-serif;
+}
+
+.step-description {
+  color: var(--rv-grey-1);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Wizard Actions */
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rv-blue-20);
+}
+
+.wizard-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+/* File Upload Areas */
+.file-upload-area {
+  border: 2px dashed var(--rv-blue-20);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--card-light);
+}
+
+.file-upload-area:hover {
+  border-color: var(--rv-blue);
+  background: var(--rv-blue-20);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-icon {
+  font-size: 2rem;
+  opacity: 0.7;
+}
+
+.upload-text {
+  font-weight: 500;
+  color: var(--rv-white);
+}
+
+.upload-hint {
+  font-size: 0.8rem;
+  color: var(--rv-grey-2);
+}
+
+/* Checkbox Styles */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--rv-white);
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--rv-blue-20);
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: var(--rv-blue);
+  border-color: var(--rv-blue);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--rv-black);
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* Review Section */
+.review-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--card-light);
+  border-radius: 8px;
+  border: 1px solid var(--rv-blue-20);
+}
+
+.review-section h4 {
+  color: var(--rv-blue);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--rv-blue-20);
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-item strong {
+  color: var(--rv-white);
+  font-weight: 500;
+}
+
+.review-item span {
+  color: var(--rv-grey-1);
+}
+
+/* Preview Pane */
+.preview-pane {
+  background: var(--card-dark);
+  border: 1px solid var(--rv-blue-20);
+  border-radius: 12px;
+  padding: 2rem;
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+.preview-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rv-blue-20);
+}
+
+.preview-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--rv-white);
+  margin-bottom: 0.5rem;
+  font-family: "Plaak 45 B Foch 205 Tf", sans-serif;
+}
+
+.preview-subtitle {
+  color: var(--rv-grey-1);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.preview-card {
+  background: var(--card-light);
+  border: 1px solid var(--rv-blue-20);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.preview-card h4 {
+  color: var(--rv-blue);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.preview-field {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.preview-field strong {
+  color: var(--rv-white);
+  font-weight: 500;
+}
+
+.preview-field span {
+  color: var(--rv-grey-1);
+}
+
+.asset-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.asset-placeholder {
+  aspect-ratio: 1;
+  background: var(--card-dark);
+  border: 2px dashed var(--rv-blue-20);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--rv-grey-2);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.status-label {
+  color: var(--rv-white);
+  font-weight: 500;
+}
+
+.status-value {
+  color: var(--rv-grey-1);
+  padding: 0.25rem 0.5rem;
+  background: var(--card-dark);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+/* Responsive Wizard */
+@media (max-width: 768px) {
+  .wizard-card {
+    padding: 1.5rem;
+  }
+  
+  .wizard-stepper {
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+  
+  .step-label {
+    font-size: 0.7rem;
+  }
+  
+  .step-title {
+    font-size: 1.25rem;
+  }
+  
+  .wizard-actions {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .wizard-nav {
+    justify-content: center;
+  }
+  
+  .file-upload-area {
+    padding: 1.5rem;
+  }
+  
+  .preview-pane {
+    position: static;
+    margin-top: 1rem;
+  }
+}

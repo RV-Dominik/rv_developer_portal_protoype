@@ -261,76 +261,544 @@ class ShowroomPortal {
     startOnboarding(project) {
         const dashboardSection = document.getElementById('dashboard-section');
         if (!dashboardSection) return;
-        const step = project.onboardingStep || 'basics';
+        
+        // Store current project for wizard
+        this.currentOnboardingProject = project;
+        this.currentOnboardingStep = project.onboardingStep || 'basics';
+        
+        this.renderOnboardingWizard();
+    }
+
+    renderOnboardingWizard() {
+        const dashboardSection = document.getElementById('dashboard-section');
+        if (!dashboardSection || !this.currentOnboardingProject) return;
+        
+        const project = this.currentOnboardingProject;
+        const step = this.currentOnboardingStep;
+        
         dashboardSection.innerHTML = `
             <div class="section-header">
-                <h2 class="section-title">Onboarding</h2>
-                <p class="section-subtitle">Let's get your project ready for the Readyverse</p>
+                <h2 class="section-title">Project Onboarding</h2>
+                <p class="section-subtitle">Complete these steps to get your project ready for the Readyverse</p>
             </div>
             <div class="wizard-grid">
                 <div class="wizard-card">
                     <div class="wizard-stepper">
-                        <span class="wizard-step ${step==='basics'?'active':''}">Basics</span>
-                        <span class="wizard-step ${step==='assets'?'active':''}">Assets</span>
-                        <span class="wizard-step ${step==='integration'?'active':''}">Integration</span>
-                        <span class="wizard-step ${step==='compliance'?'active':''}">Compliance</span>
-                        <span class="wizard-step ${step==='review'?'active':''}">Review</span>
+                        <div class="wizard-step ${step === 'basics' ? 'active' : step === 'completed' ? 'completed' : ''}" data-step="basics">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Basics</div>
+                        </div>
+                        <div class="wizard-step ${step === 'assets' ? 'active' : ['basics', 'integration', 'compliance', 'review'].includes(step) ? 'completed' : ''}" data-step="assets">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Assets</div>
+                        </div>
+                        <div class="wizard-step ${step === 'integration' ? 'active' : ['compliance', 'review'].includes(step) ? 'completed' : ''}" data-step="integration">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Integration</div>
+                        </div>
+                        <div class="wizard-step ${step === 'compliance' ? 'active' : step === 'review' ? 'completed' : ''}" data-step="compliance">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Compliance</div>
+                        </div>
+                        <div class="wizard-step ${step === 'review' ? 'active' : ''}" data-step="review">
+                            <div class="step-number">5</div>
+                            <div class="step-label">Review</div>
+                        </div>
                     </div>
-                    <form id="onboarding-basics" class="auth-form">
-                        <div class="form-group">
-                            <label class="form-label" for="ob-company">Company Name</label>
-                            <input id="ob-company" class="form-input" value="${project.companyName||''}" placeholder="Company Inc.">
+                    
+                    <div class="wizard-content">
+                        <div class="step-header">
+                            <h3 class="step-title" id="step-title">${this.getStepTitle(step)}</h3>
+                            <p class="step-description" id="step-description">${this.getStepDescription(step)}</p>
                         </div>
                         
-                        <div class="flex gap-20">
-                            <button type="submit" class="btn btn-primary">Save & Continue</button>
-                            <button type="button" class="btn btn-secondary" id="ob-exit">Exit</button>
-                        </div>
-                    </form>
+                        <form id="onboarding-form" class="auth-form">
+                            <div id="step-content">
+                                ${this.getStepContent(step, project)}
+                            </div>
+                            
+                            <div class="wizard-actions">
+                                <div class="wizard-nav">
+                                    <button type="button" class="btn btn-secondary" id="wizard-back" ${step === 'basics' ? 'style="display: none;"' : ''}>Back</button>
+                                    <button type="button" class="btn btn-outline" id="wizard-skip" ${step === 'review' ? 'style="display: none;"' : ''}>Skip Step</button>
+                                    <button type="button" class="btn btn-outline" id="wizard-exit">Exit</button>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="wizard-next">
+                                    ${step === 'review' ? 'Complete Onboarding' : 'Save & Continue'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
+                
                 <div class="preview-pane">
                     <div class="preview-overlay">
-                        <div class="preview-title" id="pv-title">${project.name}</div>
-                        <div class="preview-subtitle" id="pv-sub">${project.shortDescription||'Your short description will appear here'}</div>
+                        <div class="preview-header">
+                            <div class="preview-title" id="pv-title">${project.name}</div>
+                            <div class="preview-subtitle" id="pv-sub">${project.shortDescription || 'Your project description will appear here'}</div>
+                        </div>
+                        <div class="preview-content" id="preview-content">
+                            ${this.getStepPreview(step, project)}
+                        </div>
                     </div>
                 </div>
             </div>
         `;
 
-        const form = document.getElementById('onboarding-basics');
-        const exit = document.getElementById('ob-exit');
+        this.bindOnboardingEvents();
+    }
+
+    getStepTitle(step) {
+        const titles = {
+            'basics': 'Project Basics',
+            'assets': 'Game Assets',
+            'integration': 'Technical Integration',
+            'compliance': 'Compliance & Legal',
+            'review': 'Review & Submit'
+        };
+        return titles[step] || 'Onboarding';
+    }
+
+    getStepDescription(step) {
+        const descriptions = {
+            'basics': 'Tell us about your game and company details',
+            'assets': 'Upload logos, screenshots, and other game assets',
+            'integration': 'Configure Pass SSO and Readyverse SDK integration',
+            'compliance': 'Complete age rating and legal requirements',
+            'review': 'Review all information before submitting for approval'
+        };
+        return descriptions[step] || '';
+    }
+
+    getStepContent(step, project) {
+        switch (step) {
+            case 'basics':
+                return `
+                    <div class="form-group">
+                        <label class="form-label" for="ob-short-description">Short Description *</label>
+                        <textarea id="ob-short-description" class="form-input" rows="3" placeholder="A brief description of your game..." required>${project.shortDescription || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-full-description">Full Description</label>
+                        <textarea id="ob-full-description" class="form-input" rows="4" placeholder="Detailed description of your game, features, and gameplay...">${project.fullDescription || ''}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-genre">Genre *</label>
+                        <select id="ob-genre" class="form-input" required>
+                            <option value="">Select Genre</option>
+                            <option value="Action" ${project.genre === 'Action' ? 'selected' : ''}>Action</option>
+                            <option value="RPG" ${project.genre === 'RPG' ? 'selected' : ''}>RPG</option>
+                            <option value="Strategy" ${project.genre === 'Strategy' ? 'selected' : ''}>Strategy</option>
+                            <option value="Simulation" ${project.genre === 'Simulation' ? 'selected' : ''}>Simulation</option>
+                            <option value="Puzzle" ${project.genre === 'Puzzle' ? 'selected' : ''}>Puzzle</option>
+                            <option value="Adventure" ${project.genre === 'Adventure' ? 'selected' : ''}>Adventure</option>
+                            <option value="Other" ${project.genre === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-publishing-track">Publishing Track *</label>
+                        <select id="ob-publishing-track" class="form-input" required>
+                            <option value="">Select Publishing Track</option>
+                            <option value="Platform Games" ${project.publishingTrack === 'Platform Games' ? 'selected' : ''}>Platform Games (Epic/Steam)</option>
+                            <option value="Self Hosted" ${project.publishingTrack === 'Self Hosted' ? 'selected' : ''}>Self Hosted</option>
+                            <option value="Readyverse Hosted" ${project.publishingTrack === 'Readyverse Hosted' ? 'selected' : ''}>Readyverse Hosted</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-build-status">Build Status</label>
+                        <select id="ob-build-status" class="form-input">
+                            <option value="">Select Status</option>
+                            <option value="In Development" ${project.buildStatus === 'In Development' ? 'selected' : ''}>In Development</option>
+                            <option value="Beta" ${project.buildStatus === 'Beta' ? 'selected' : ''}>Beta</option>
+                            <option value="Production-Ready" ${project.buildStatus === 'Production-Ready' ? 'selected' : ''}>Production-Ready</option>
+                        </select>
+                    </div>
+                `;
+                
+            case 'assets':
+                return `
+                    <div class="form-group">
+                        <label class="form-label">Game Logo *</label>
+                        <div class="file-upload-area" id="logo-upload">
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">Click to upload game logo</div>
+                                <div class="upload-hint">PNG, JPG up to 2MB</div>
+                            </div>
+                            <input type="file" id="ob-logo" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Cover Art *</label>
+                        <div class="file-upload-area" id="cover-upload">
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">🖼️</div>
+                                <div class="upload-text">Click to upload cover art</div>
+                                <div class="upload-hint">PNG, JPG up to 5MB</div>
+                            </div>
+                            <input type="file" id="ob-cover" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Screenshots</label>
+                        <div class="file-upload-area" id="screenshots-upload">
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">📸</div>
+                                <div class="upload-text">Click to upload screenshots</div>
+                                <div class="upload-hint">PNG, JPG up to 2MB each (max 5 images)</div>
+                            </div>
+                            <input type="file" id="ob-screenshots" accept="image/*" multiple style="display: none;">
+                        </div>
+                    </div>
+                `;
+                
+            case 'integration':
+                return `
+                    <div class="form-group">
+                        <label class="form-label">Pass SSO Integration Status *</label>
+                        <select id="ob-pass-sso" class="form-input" required>
+                            <option value="">Select Status</option>
+                            <option value="Not Started" ${project.passSsoIntegrationStatus === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                            <option value="In Progress" ${project.passSsoIntegrationStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Complete" ${project.passSsoIntegrationStatus === 'Complete' ? 'selected' : ''}>Complete</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Readyverse SDK Integration Status *</label>
+                        <select id="ob-sdk-integration" class="form-input" required>
+                            <option value="">Select Status</option>
+                            <option value="Not Started" ${project.readyverseSdkIntegrationStatus === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                            <option value="In Progress" ${project.readyverseSdkIntegrationStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Complete" ${project.readyverseSdkIntegrationStatus === 'Complete' ? 'selected' : ''}>Complete</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-game-url">Game URL</label>
+                        <input type="url" id="ob-game-url" class="form-input" placeholder="https://yourgame.com" value="${project.gameUrl || ''}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-requires-launcher" ${project.requiresLauncher ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            Requires Readyverse Launcher to run
+                        </label>
+                    </div>
+                `;
+                
+            case 'compliance':
+                return `
+                    <div class="form-group">
+                        <label class="form-label">Age Rating *</label>
+                        <select id="ob-age-rating" class="form-input" required>
+                            <option value="">Select Age Rating</option>
+                            <option value="E" ${project.ageRating === 'E' ? 'selected' : ''}>E - Everyone</option>
+                            <option value="E10+" ${project.ageRating === 'E10+' ? 'selected' : ''}>E10+ - Everyone 10+</option>
+                            <option value="T" ${project.ageRating === 'T' ? 'selected' : ''}>T - Teen</option>
+                            <option value="M" ${project.ageRating === 'M' ? 'selected' : ''}>M - Mature</option>
+                            <option value="AO" ${project.ageRating === 'AO' ? 'selected' : ''}>AO - Adults Only</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-legal-completed" ${project.legalRequirementsCompleted ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            Legal requirements completed
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-privacy-policy" ${project.privacyPolicyProvided ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            Privacy policy provided
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-terms-accepted" ${project.termsAccepted ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            Terms of service accepted
+                        </label>
+                    </div>
+                `;
+                
+            case 'review':
+                return `
+                    <div class="review-section">
+                        <h4>Project Information</h4>
+                        <div class="review-item">
+                            <strong>Name:</strong> <span id="review-name">${project.name}</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Description:</strong> <span id="review-description">${project.shortDescription || 'Not provided'}</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Genre:</strong> <span id="review-genre">${project.genre || 'Not selected'}</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Publishing Track:</strong> <span id="review-track">${project.publishingTrack || 'Not selected'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="review-section">
+                        <h4>Integration Status</h4>
+                        <div class="review-item">
+                            <strong>Pass SSO:</strong> <span id="review-pass-sso">${project.passSsoIntegrationStatus || 'Not started'}</span>
+                        </div>
+                        <div class="review-item">
+                            <strong>Readyverse SDK:</strong> <span id="review-sdk">${project.readyverseSdkIntegrationStatus || 'Not started'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="review-section">
+                        <h4>Compliance</h4>
+                        <div class="review-item">
+                            <strong>Age Rating:</strong> <span id="review-age-rating">${project.ageRating || 'Not selected'}</span>
+                        </div>
+                    </div>
+                `;
+                
+            default:
+                return '<p>Step content not found.</p>';
+        }
+    }
+
+    getStepPreview(step, project) {
+        switch (step) {
+            case 'basics':
+                return `
+                    <div class="preview-card">
+                        <h4>Project Preview</h4>
+                        <div class="preview-field">
+                            <strong>Name:</strong> ${project.name}
+                        </div>
+                        <div class="preview-field">
+                            <strong>Description:</strong> ${project.shortDescription || 'Will be filled in this step'}
+                        </div>
+                        <div class="preview-field">
+                            <strong>Genre:</strong> ${project.genre || 'Will be selected'}
+                        </div>
+                    </div>
+                `;
+            case 'assets':
+                return `
+                    <div class="preview-card">
+                        <h4>Asset Preview</h4>
+                        <div class="asset-preview">
+                            <div class="asset-placeholder">Game Logo</div>
+                            <div class="asset-placeholder">Cover Art</div>
+                        </div>
+                    </div>
+                `;
+            case 'integration':
+                return `
+                    <div class="preview-card">
+                        <h4>Integration Status</h4>
+                        <div class="status-item">
+                            <span class="status-label">Pass SSO:</span>
+                            <span class="status-value">${project.passSsoIntegrationStatus || 'Not started'}</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Readyverse SDK:</span>
+                            <span class="status-value">${project.readyverseSdkIntegrationStatus || 'Not started'}</span>
+                        </div>
+                    </div>
+                `;
+            case 'compliance':
+                return `
+                    <div class="preview-card">
+                        <h4>Compliance Status</h4>
+                        <div class="status-item">
+                            <span class="status-label">Age Rating:</span>
+                            <span class="status-value">${project.ageRating || 'Not selected'}</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Legal:</span>
+                            <span class="status-value">${project.legalRequirementsCompleted ? 'Complete' : 'Pending'}</span>
+                        </div>
+                    </div>
+                `;
+            case 'review':
+                return `
+                    <div class="preview-card">
+                        <h4>Ready to Submit</h4>
+                        <p>All information has been collected. Review the details and submit for approval.</p>
+                    </div>
+                `;
+            default:
+                return '<div class="preview-card"><p>Preview not available</p></div>';
+        }
+    }
+
+    bindOnboardingEvents() {
+        // Form submission
+        const form = document.getElementById('onboarding-form');
+        form.addEventListener('submit', this.handleOnboardingSubmit.bind(this));
         
-        exit.addEventListener('click', () => this.showProjectsList());
-        form.addEventListener('submit', async (ev) => {
-            ev.preventDefault();
-            const payload = {
-                step: 'assets',
-                companyName: document.getElementById('ob-company').value.trim() || undefined
-            };
-            const btn = form.querySelector('button[type="submit"]');
-            const orig = btn.textContent;
-            btn.innerHTML = '<span class="loading"></span> Saving...';
-            btn.disabled = true;
-            try {
-                const resp = await fetch(`${this.apiBaseUrl}/api/projects/${project.id}/onboarding/step`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!resp.ok) {
-                    const err = await resp.json().catch(() => ({}));
-                    this.showMessage(err.error || 'Failed to save step', 'error');
-                    return;
-                }
-                this.showMessage('Saved. Next: Upload assets.', 'success');
-                this.showProjectsList();
-            } catch (e) {
-                console.error('Onboarding save error', e);
-                this.showMessage('Network error. Please try again.', 'error');
-            } finally {
-                btn.textContent = orig;
-                btn.disabled = false;
+        // Navigation buttons
+        const backBtn = document.getElementById('wizard-back');
+        const skipBtn = document.getElementById('wizard-skip');
+        const exitBtn = document.getElementById('wizard-exit');
+        
+        backBtn.addEventListener('click', this.goToPreviousStep.bind(this));
+        skipBtn.addEventListener('click', this.skipCurrentStep.bind(this));
+        exitBtn.addEventListener('click', this.exitOnboarding.bind(this));
+        
+        // File upload handlers
+        this.bindFileUploadEvents();
+    }
+
+    bindFileUploadEvents() {
+        const uploadAreas = ['logo-upload', 'cover-upload', 'screenshots-upload'];
+        uploadAreas.forEach(areaId => {
+            const area = document.getElementById(areaId);
+            const input = area.querySelector('input[type="file"]');
+            
+            if (area && input) {
+                area.addEventListener('click', () => input.click());
+                input.addEventListener('change', (e) => this.handleFileUpload(e, areaId));
             }
+        });
+    }
+
+    handleFileUpload(event, areaId) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const area = document.getElementById(areaId);
+        const placeholder = area.querySelector('.upload-placeholder');
+        
+        // Show file name
+        placeholder.innerHTML = `
+            <div class="upload-icon">✓</div>
+            <div class="upload-text">${file.name}</div>
+            <div class="upload-hint">Click to change</div>
+        `;
+    }
+
+    async handleOnboardingSubmit(event) {
+        event.preventDefault();
+        
+        const formData = this.collectStepData();
+        const nextStep = this.getNextStep();
+        
+        try {
+            // Save current step data
+            await this.saveOnboardingStep(formData);
+            
+            if (nextStep) {
+                // Move to next step
+                this.currentOnboardingStep = nextStep;
+                this.renderOnboardingWizard();
+            } else {
+                // Complete onboarding
+                await this.completeOnboarding();
+                this.showMessage('Onboarding completed successfully!', 'success');
+                this.showProjectsList();
+            }
+        } catch (error) {
+            console.error('Onboarding error:', error);
+            this.showMessage('Error saving onboarding data', 'error');
+        }
+    }
+
+    collectStepData() {
+        const step = this.currentOnboardingStep;
+        const data = { step };
+        
+        switch (step) {
+            case 'basics':
+                data.shortDescription = document.getElementById('ob-short-description')?.value.trim();
+                data.fullDescription = document.getElementById('ob-full-description')?.value.trim();
+                data.genre = document.getElementById('ob-genre')?.value;
+                data.publishingTrack = document.getElementById('ob-publishing-track')?.value;
+                data.buildStatus = document.getElementById('ob-build-status')?.value;
+                break;
+            case 'assets':
+                // File uploads would be handled separately
+                break;
+            case 'integration':
+                data.passSsoIntegrationStatus = document.getElementById('ob-pass-sso')?.value;
+                data.readyverseSdkIntegrationStatus = document.getElementById('ob-sdk-integration')?.value;
+                data.gameUrl = document.getElementById('ob-game-url')?.value.trim();
+                data.requiresLauncher = document.getElementById('ob-requires-launcher')?.checked;
+                break;
+            case 'compliance':
+                data.ageRating = document.getElementById('ob-age-rating')?.value;
+                data.legalRequirementsCompleted = document.getElementById('ob-legal-completed')?.checked;
+                data.privacyPolicyProvided = document.getElementById('ob-privacy-policy')?.checked;
+                data.termsAccepted = document.getElementById('ob-terms-accepted')?.checked;
+                break;
+        }
+        
+        return data;
+    }
+
+    getNextStep() {
+        const steps = ['basics', 'assets', 'integration', 'compliance', 'review'];
+        const currentIndex = steps.indexOf(this.currentOnboardingStep);
+        return currentIndex < steps.length - 1 ? steps[currentIndex + 1] : null;
+    }
+
+    getPreviousStep() {
+        const steps = ['basics', 'assets', 'integration', 'compliance', 'review'];
+        const currentIndex = steps.indexOf(this.currentOnboardingStep);
+        return currentIndex > 0 ? steps[currentIndex - 1] : null;
+    }
+
+    async saveOnboardingStep(data) {
+        const response = await fetch(`${this.apiBaseUrl}/api/projects/${this.currentOnboardingProject.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.getAuthToken()}`
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save onboarding step');
+        }
+        
+        // Update local project data
+        Object.assign(this.currentOnboardingProject, data);
+    }
+
+    goToPreviousStep() {
+        const previousStep = this.getPreviousStep();
+        if (previousStep) {
+            this.currentOnboardingStep = previousStep;
+            this.renderOnboardingWizard();
+        }
+    }
+
+    skipCurrentStep() {
+        const nextStep = this.getNextStep();
+        if (nextStep) {
+            this.currentOnboardingStep = nextStep;
+            this.renderOnboardingWizard();
+        }
+    }
+
+    exitOnboarding() {
+        this.showProjectsList();
+    }
+
+    async completeOnboarding() {
+        await this.saveOnboardingStep({
+            step: 'completed',
+            onboardingCompletedAt: new Date().toISOString()
         });
     }
 
