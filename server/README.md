@@ -1,161 +1,191 @@
-# Showroom Backend
+# Showroom Backend (ASP.NET Core)
 
-A Node.js/Express backend for the low-tier showroom prototype, designed to run on Render with Supabase integration.
+An ASP.NET Core 8.0 backend running in Docker on Render, with Supabase for Auth, Database, and Storage, and a static web portal served from `wwwroot`.
+
+## Tasks / TODOs
+
+- [x] Implement real Supabase magic link authentication
+- [x] Add proper JWT session management (HTTP-only cookie `auth_token`)
+- [x] Update frontend to handle real authentication flow (hash + query tokens)
+- [x] Fix auth flicker (landing page stays until user clicks Get Started)
+- [x] Relocate "What you can do" guide to dashboard (post-login)
+- [ ] Test complete authentication flow end-to-end
+- [ ] Deploy Swagger fixes to Render.com
+- [ ] Optional: Make dashboard guide collapsible/dismissible on first login
+
+### Required configuration checklist (Render + Supabase)
+
+- **Render Environment Variables**
+  - `SUPABASE_URL` = your Supabase project URL
+  - `SUPABASE_SERVICE_ROLE_KEY` = service role key
+  - `SUPABASE_ANON_KEY` = anon key
+  - `SUPABASE_BUCKET` = `showrooms`
+  - `PUBLIC_BASE_URL` = deployed app URL (e.g. `https://<your-service>.onrender.com`)
+  - `JWT_SECRET` = a strong, random string (64+ chars)
+  - `USE_MOCK_SUPABASE` = `false` for production, `true` for local/dev if desired
+
+- **Supabase → Authentication → URL Configuration**
+  - Site URL: `https://<your-service>.onrender.com`
+  - Redirect URLs: `https://<your-service>.onrender.com/?auth=callback`
+  - Remove localhost URLs in production
+
+- **Email Templates** (Supabase → Authentication → Templates)
+  - If the email looks broken, reset to default or ensure links respect the configured Site URL
+
+After configuring the above, request a magic link from the landing page, click the email link, and you should be redirected back to your domain, the app will verify tokens, set the session cookie, and show the dashboard.
 
 ## Features
 
-- **Authentication**: Magic link login via Supabase Auth
-- **Project Management**: CRUD operations for developer projects
-- **Asset Upload**: File upload to Supabase Storage with image processing
-- **Public API**: JSON manifest endpoint for Unity clients
-- **Developer Portal**: Static web interface for project management
+- **Authentication**: Real magic link login via Supabase Auth (JWT session cookie)
+- **Project Management**: CRUD for developer projects (Readyverse intake fields)
+- **Asset Upload**: Upload to Supabase Storage with signed URLs
+- **Public API**: JSON manifest endpoint for Unity/Unreal clients
+- **Developer Portal**: Static web app (HTML/CSS/JS) in `wwwroot`
 
 ## Quick Start
 
-### 1. Environment Setup
+### 1) Prerequisites
+- .NET SDK 8.0+
+- Docker (optional, for containerized runs)
 
-Copy the environment template:
-```bash
-cp env.example .env
-```
+### 2) Environment variables
+Set these in your environment or in Render (recommended for production):
 
-Fill in your Supabase credentials:
-```env
-# Supabase Configuration
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_BUCKET=showrooms
+Required:
+- `SUPABASE_URL` — your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` — service role key
+- `SUPABASE_ANON_KEY` — anon key
+- `SUPABASE_BUCKET` — e.g., `showrooms`
+- `PUBLIC_BASE_URL` — your deployed URL, e.g., `https://<service>.onrender.com`
+- `JWT_SECRET` — strong random string (64+ chars)
 
-# Application Configuration
-PUBLIC_BASE_URL=https://your-render-service.onrender.com
-ASSET_URL_TTL=3600
-SESSION_COOKIE=dev_portal_session
-
-# Service Selection
-# Set to "true" for mock service (development)
-# Set to "false" for real Supabase (production)
-USE_MOCK_SUPABASE=true
-```
+Optional:
+- `ASSET_URL_TTL` — signed URL TTL in seconds (default: `3600`)
+- `SESSION_COOKIE` — cookie name (default: `dev_portal_session`)
+- `USE_MOCK_SUPABASE` — `true` to use mock data locally, `false` to use real Supabase
 
 ### Service Selection
 
-The application automatically selects between mock and real Supabase services based on the `USE_MOCK_SUPABASE` environment variable:
+The backend switches services via `USE_MOCK_SUPABASE`:
+- `USE_MOCK_SUPABASE=true` → MockSupabaseService (dev/testing)
+- `USE_MOCK_SUPABASE=false` → SupabaseRestService (real Supabase)
 
-- **`USE_MOCK_SUPABASE=true`** - Uses MockSupabaseService (default, for development)
-- **`USE_MOCK_SUPABASE=false`** - Uses SupabaseRestService (for production with real Supabase)
+No code edits required.
 
-No code changes needed to switch between services!
+### 3) Supabase Setup
+- Follow `SUPABASE_SETUP.md` (schema, storage bucket, RLS policies)
+- Ensure a bucket named `showrooms` exists (the script is idempotent)
 
-### 2. Database Setup
+### 4) Local development
 
-Run the SQL schema in your Supabase SQL editor:
-```sql
--- See db/schema.sql for the complete schema
+PowerShell (Windows):
+```powershell
+setx ASPNETCORE_ENVIRONMENT Development
+$env:ASPNETCORE_URLS = "http://localhost:8080"
+dotnet restore
+dotnet run
 ```
 
-### 3. Storage Setup
-
-Create a storage bucket named `showrooms` in your Supabase dashboard with public access.
-
-### 4. Local Development
-
-```bash
-npm install
-npm run dev
+Or with Docker:
+```powershell
+docker compose up --build
 ```
 
-The server will start on `http://localhost:8080`
-
-### 5. Deploy to Render
-
-1. Connect your GitHub repository to Render
-2. Create a new Web Service
-3. Use the `render.yaml` configuration
-4. Set the environment variables in the Render dashboard
+### 5) Deploy to Render
+1. Connect the repo to Render
+2. Create a Web Service using `render.yaml` (env: docker)
+3. Set environment variables in Render dashboard
+4. Deploy; app listens on port 8080 inside container
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/magic-link` - Request magic link
-- `GET /api/auth/session` - Get current session
-- `POST /api/auth/logout` - Logout
+- `POST /api/auth/magic-link` — Request magic link
+- `POST /api/auth/verify` — Verify access/refresh tokens (sets `auth_token` cookie)
+- `GET /api/auth/session` — Get session (requires JWT cookie)
+- `POST /api/auth/logout` — Logout (clears cookie)
 
 ### Projects
-- `POST /api/projects` - Create project
-- `GET /api/projects` - List user projects
-- `GET /api/projects/:id` - Get project details
-- `PUT /api/projects/:id` - Update project
-- `DELETE /api/projects/:id` - Delete project
+- `POST /api/projects`
+- `GET /api/projects`
+- `GET /api/projects/:id`
+- `PUT /api/projects/:id`
+- `DELETE /api/projects/:id`
 
 ### Assets
-- `POST /api/uploads/:projectId` - Upload asset
-- `GET /api/uploads/:projectId` - List project assets
-- `DELETE /api/uploads/:projectId/:assetId` - Delete asset
+- `POST /api/uploads/:projectId`
+- `GET /api/uploads/:projectId`
+- `DELETE /api/uploads/:projectId/:assetId`
 
 ### Public
-- `GET /api/manifest/:slug` - Get public manifest for Unity
+- `GET /api/manifest/:slug` — Public manifest for clients
 
 ## Project Structure
 
 ```
 server/
-├── index.ts              # Express app entrypoint
-├── routes/               # API route handlers
-│   ├── auth.ts          # Authentication routes
-│   ├── projects.ts      # Project CRUD routes
-│   ├── uploads.ts       # Asset upload routes
-│   └── manifest.ts      # Public manifest API
-├── db/                  # Database layer
-│   ├── schema.sql       # Database schema
-│   └── queries.ts       # Database query functions
-├── supabase/            # Supabase client
-│   └── client.ts        # Supabase configuration
-└── web/                 # Static portal files
-    ├── index.html       # Portal UI
-    ├── styles.css       # Portal styles
-    └── portal.js        # Portal JavaScript
+├── Controllers/             # ASP.NET Core API controllers
+│   ├── AuthController.cs
+│   ├── ProjectsController.cs
+│   ├── UploadsController.cs
+│   └── ManifestController.cs
+├── Models/                  # C# models and DTOs
+│   ├── Project.cs, Asset.cs, User.cs
+│   └── DTOs/
+├── Services/                # Supabase services (Mock + REST)
+│   ├── ISupabaseService.cs
+│   ├── MockSupabaseService.cs
+│   ├── SupabaseRestService.cs
+│   └── AuthenticationService.cs
+├── wwwroot/                 # Static portal (served)
+│   ├── index.html
+│   ├── styles.css
+│   └── portal.js
+├── Program.cs               # App startup
+├── ShowroomBackend.csproj   # Project file (.NET 8)
+├── Dockerfile               # Multi-stage Docker build
+├── render.yaml              # Render.com config (env: docker)
+├── SUPABASE_SETUP.md        # Supabase schema & setup
+└── SUPABASE_QUICK_SETUP.md  # Quick setup guide
 ```
 
 ## Development
 
-### Scripts
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm start` - Start production server
+### Commands
+- `dotnet restore` — restore packages
+- `dotnet build` — build
+- `dotnet run` — run
 
 ### Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `PORT` | Server port | No (default: 8080) |
 | `SUPABASE_URL` | Supabase project URL | Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
 | `SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
 | `SUPABASE_BUCKET` | Storage bucket name | Yes |
 | `PUBLIC_BASE_URL` | Public URL for the service | Yes |
-| `ASSET_URL_TTL` | Signed URL TTL in seconds | No (default: 3600) |
-| `SESSION_COOKIE` | Session cookie name | No (default: dev_portal_session) |
+| `JWT_SECRET` | Secret for signing app JWTs | Yes |
+| `ASSET_URL_TTL` | Signed URL TTL (seconds) | No (3600) |
+| `SESSION_COOKIE` | Session cookie name | No (dev_portal_session) |
+| `USE_MOCK_SUPABASE` | Toggle mock vs real Supabase | No (false) |
 
 ## Troubleshooting
 
 ### Common Issues
-
-1. **Magic link not working**: Check that `PUBLIC_BASE_URL` is set correctly
-2. **Upload failures**: Verify Supabase storage bucket exists and has correct permissions
-3. **Database errors**: Ensure schema is applied and RLS policies are configured
-4. **CORS issues**: Check that `PUBLIC_BASE_URL` includes the correct domain
+1. Magic link redirects to localhost: set Supabase Site URL and Redirect URLs to your Render domain; update `PUBLIC_BASE_URL`.
+2. Email template looks broken: reset Supabase email templates or ensure links use configured Site URL.
+3. Swagger not visible: ensure it's enabled in production (configured in `Program.cs`) and reachable at `/swagger`.
+4. CSP violations: headers are configured in `Program.cs`; adjust if adding new external assets.
+5. Storage/Uploads: ensure `showrooms` bucket exists and RLS/permissions follow `SUPABASE_SETUP.md`.
 
 ### Logs
-
-Check Render logs for detailed error information:
-```bash
-# In Render dashboard, go to your service and click "Logs"
-```
+Check Render logs in the service dashboard (Logs tab).
 
 ## Security Notes
 
-- Service role key should only be used server-side
-- RLS policies should be configured in Supabase
-- File uploads are validated for type and size
-- Signed URLs expire after configured TTL
+- Keep secrets out of source control; use Render env vars
+- `JWT_SECRET` must be strong and private
+- Service role key is server-only
+- RLS policies must be applied in Supabase
+- Signed URLs expire per `ASSET_URL_TTL`

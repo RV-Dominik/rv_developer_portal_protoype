@@ -44,11 +44,15 @@ class ShowroomPortal {
     }
 
     handleMagicLinkCallback() {
-        // Check if this is a magic link callback
-        const urlParams = new URLSearchParams(window.location.search);
-        const accessToken = urlParams.get('access_token');
-        const refreshToken = urlParams.get('refresh_token');
-        
+        // Check if this is a magic link callback (Supabase may use hash params)
+        const searchParams = new URLSearchParams(window.location.search);
+        const hashString = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+        const hashParams = new URLSearchParams(hashString);
+
+        // Prefer hash params (Supabase default), fallback to query params
+        const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
+
         if (accessToken) {
             this.verifyMagicLink(accessToken, refreshToken);
         }
@@ -75,6 +79,12 @@ class ShowroomPortal {
                 
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
+                if (window.location.hash) {
+                    // Remove hash without reloading
+                    const url = new URL(window.location);
+                    url.hash = '';
+                    window.history.replaceState({}, document.title, url);
+                }
             } else {
                 const error = await response.json();
                 this.showMessage(error.error || 'Authentication failed', 'error');
