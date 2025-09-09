@@ -19,6 +19,11 @@ namespace ShowroomBackend.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Create a new project
+        /// </summary>
+        /// <param name="dto">Project creation data</param>
+        /// <returns>Created project or error</returns>
         [HttpPost]
         public async Task<IActionResult> CreateProject([FromBody] ProjectCreateDto dto)
         {

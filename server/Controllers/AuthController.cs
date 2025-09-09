@@ -22,6 +22,11 @@ namespace ShowroomBackend.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Send a magic link to the user's email for authentication
+        /// </summary>
+        /// <param name="request">The magic link request containing the email</param>
+        /// <returns>Success message or error</returns>
         [HttpPost("magic-link")]
         public async Task<IActionResult> RequestMagicLink([FromBody] MagicLinkRequest request)
         {
