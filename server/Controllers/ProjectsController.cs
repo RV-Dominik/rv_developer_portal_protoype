@@ -40,13 +40,30 @@ namespace ShowroomBackend.Controllers
                     Id = Guid.NewGuid(),
                     Name = dto.Name,
                     Slug = GenerateSlug(dto.Name),
-                    Description = dto.Description,
-                    DeveloperName = dto.DeveloperName,
-                    DeveloperEmail = dto.DeveloperEmail,
-                    DeveloperWebsite = dto.DeveloperWebsite,
-                    Version = dto.Version,
-                    UnityVersion = dto.UnityVersion,
-                    UnrealVersion = dto.UnrealVersion,
+                    CompanyName = dto.CompanyName,
+                    PrimaryContactName = dto.PrimaryContactName,
+                    PrimaryContactEmail = dto.PrimaryContactEmail,
+                    PrimaryContactPhone = dto.PrimaryContactPhone,
+                    CompanyWebsite = dto.CompanyWebsite,
+                    CompanySocials = dto.CompanySocials,
+                    ShortDescription = dto.ShortDescription,
+                    FullDescription = dto.FullDescription,
+                    Genre = dto.Genre,
+                    PlatformType = dto.PlatformType,
+                    DistributionMethod = dto.DistributionMethod,
+                    GameUrl = dto.GameUrl,
+                    BuildStatus = dto.BuildStatus,
+                    PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus,
+                    ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus,
+                    RequiresLauncher = dto.RequiresLauncher,
+                    AgeRating = dto.AgeRating,
+                    HasDistributionRights = dto.HasDistributionRights,
+                    HasSslTls = dto.HasSslTls,
+                    HasNoTestEndpoints = dto.HasNoTestEndpoints,
+                    HasDigicert = dto.HasDigicert,
+                    TrailerUrl = dto.TrailerUrl,
+                    ShowroomInterest = dto.ShowroomInterest,
+                    WantsSurrealEstate = dto.WantsSurrealEstate,
                     IsPublic = dto.IsPublic,
                     UserId = "mock-user-id",
                     CreatedAt = DateTime.UtcNow,
@@ -134,13 +151,31 @@ namespace ShowroomBackend.Controllers
 
                 // Update only provided fields
                 if (dto.Name != null) project.Name = dto.Name;
-                if (dto.Description != null) project.Description = dto.Description;
-                if (dto.DeveloperName != null) project.DeveloperName = dto.DeveloperName;
-                if (dto.DeveloperEmail != null) project.DeveloperEmail = dto.DeveloperEmail;
-                if (dto.DeveloperWebsite != null) project.DeveloperWebsite = dto.DeveloperWebsite;
-                if (dto.Version != null) project.Version = dto.Version;
-                if (dto.UnityVersion != null) project.UnityVersion = dto.UnityVersion;
-                if (dto.UnrealVersion != null) project.UnrealVersion = dto.UnrealVersion;
+                if (dto.Slug != null) project.Slug = dto.Slug;
+                if (dto.CompanyName != null) project.CompanyName = dto.CompanyName;
+                if (dto.PrimaryContactName != null) project.PrimaryContactName = dto.PrimaryContactName;
+                if (dto.PrimaryContactEmail != null) project.PrimaryContactEmail = dto.PrimaryContactEmail;
+                if (dto.PrimaryContactPhone != null) project.PrimaryContactPhone = dto.PrimaryContactPhone;
+                if (dto.CompanyWebsite != null) project.CompanyWebsite = dto.CompanyWebsite;
+                if (dto.CompanySocials != null) project.CompanySocials = dto.CompanySocials;
+                if (dto.ShortDescription != null) project.ShortDescription = dto.ShortDescription;
+                if (dto.FullDescription != null) project.FullDescription = dto.FullDescription;
+                if (dto.Genre != null) project.Genre = dto.Genre;
+                if (dto.PlatformType != null) project.PlatformType = dto.PlatformType;
+                if (dto.DistributionMethod != null) project.DistributionMethod = dto.DistributionMethod;
+                if (dto.GameUrl != null) project.GameUrl = dto.GameUrl;
+                if (dto.BuildStatus != null) project.BuildStatus = dto.BuildStatus;
+                if (dto.PassSsoIntegrationStatus != null) project.PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus;
+                if (dto.ReadyverseSdkIntegrationStatus != null) project.ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus;
+                if (dto.RequiresLauncher.HasValue) project.RequiresLauncher = dto.RequiresLauncher.Value;
+                if (dto.AgeRating != null) project.AgeRating = dto.AgeRating;
+                if (dto.HasDistributionRights.HasValue) project.HasDistributionRights = dto.HasDistributionRights.Value;
+                if (dto.HasSslTls.HasValue) project.HasSslTls = dto.HasSslTls.Value;
+                if (dto.HasNoTestEndpoints.HasValue) project.HasNoTestEndpoints = dto.HasNoTestEndpoints.Value;
+                if (dto.HasDigicert.HasValue) project.HasDigicert = dto.HasDigicert.Value;
+                if (dto.TrailerUrl != null) project.TrailerUrl = dto.TrailerUrl;
+                if (dto.ShowroomInterest != null) project.ShowroomInterest = dto.ShowroomInterest;
+                if (dto.WantsSurrealEstate.HasValue) project.WantsSurrealEstate = dto.WantsSurrealEstate.Value;
                 if (dto.IsPublic.HasValue) project.IsPublic = dto.IsPublic.Value;
 
                 // Regenerate slug if name changed
