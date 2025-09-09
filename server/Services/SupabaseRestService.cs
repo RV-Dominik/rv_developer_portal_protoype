@@ -155,7 +155,10 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var json = JsonSerializer.Serialize(project);
+                var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var request = new HttpRequestMessage(HttpMethod.Post, "projects")
@@ -175,8 +178,13 @@ namespace ShowroomBackend.Services
                     });
                     return projects?.FirstOrDefault();
                 }
-                
-                return null;
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to create project: {StatusCode} - {Content}", 
+                        response.StatusCode, errorContent);
+                    throw new Exception($"Failed to create project: {response.StatusCode} - {errorContent}");
+                }
             }
             catch (Exception ex)
             {

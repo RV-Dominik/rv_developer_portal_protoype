@@ -109,16 +109,16 @@ namespace ShowroomBackend.Controllers
                 if (!string.IsNullOrEmpty(dto.BuildStatus)) project.BuildStatus = dto.BuildStatus;
                 if (!string.IsNullOrEmpty(dto.PassSsoIntegrationStatus)) project.PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus;
                 if (!string.IsNullOrEmpty(dto.ReadyverseSdkIntegrationStatus)) project.ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus;
-                project.RequiresLauncher = dto.RequiresLauncher;
+                if (dto.RequiresLauncher) project.RequiresLauncher = dto.RequiresLauncher;
                 if (!string.IsNullOrEmpty(dto.AgeRating)) project.AgeRating = dto.AgeRating;
-                project.HasDistributionRights = dto.HasDistributionRights;
-                project.HasSslTls = dto.HasSslTls;
-                project.HasNoTestEndpoints = dto.HasNoTestEndpoints;
-                project.HasDigicert = dto.HasDigicert;
+                if (dto.HasDistributionRights) project.HasDistributionRights = dto.HasDistributionRights;
+                if (dto.HasSslTls) project.HasSslTls = dto.HasSslTls;
+                if (dto.HasNoTestEndpoints) project.HasNoTestEndpoints = dto.HasNoTestEndpoints;
+                if (dto.HasDigicert) project.HasDigicert = dto.HasDigicert;
                 if (!string.IsNullOrEmpty(dto.TrailerUrl)) project.TrailerUrl = dto.TrailerUrl;
                 if (!string.IsNullOrEmpty(dto.ShowroomInterest)) project.ShowroomInterest = dto.ShowroomInterest;
-                project.WantsSurrealEstate = dto.WantsSurrealEstate;
-                project.IsPublic = dto.IsPublic;
+                if (dto.WantsSurrealEstate) project.WantsSurrealEstate = dto.WantsSurrealEstate;
+                if (dto.IsPublic) project.IsPublic = dto.IsPublic;
 
                 var createdProject = await _supabaseService.CreateProjectAsync(project);
                 if (createdProject == null)
@@ -130,8 +130,8 @@ namespace ShowroomBackend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating project");
-                return StatusCode(500, new { error = "Failed to create project" });
+                _logger.LogError(ex, "Error creating project: {Message}", ex.Message);
+                return StatusCode(500, new { error = "Failed to create project", details = ex.Message });
             }
         }
 
