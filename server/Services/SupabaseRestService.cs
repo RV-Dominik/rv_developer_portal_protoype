@@ -155,13 +155,16 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-                });
+                var json = JsonSerializer.Serialize(project);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("projects", content);
+                var request = new HttpRequestMessage(HttpMethod.Post, "projects")
+                {
+                    Content = content
+                };
+                request.Headers.Add("Prefer", "return=representation");
+
+                var response = await _httpClient.SendAsync(request);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -170,7 +173,6 @@ namespace ShowroomBackend.Services
                     {
                         PropertyNameCaseInsensitive = true
                     });
-                    
                     return projects?.FirstOrDefault();
                 }
                 
@@ -379,6 +381,133 @@ namespace ShowroomBackend.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get signed URL for {FileKey}", fileKey);
+                throw;
+            }
+        }
+
+        public async Task<Organization?> GetUserOrganizationAsync(string userId)
+        {
+            try
+            {
+                var url = $"user_organizations?user_id=eq.{userId}&select=*,organizations(*)";
+                var response = await _httpClient.GetAsync(url);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var userOrgs = JsonSerializer.Deserialize<JsonElement[]>(content);
+                    
+                    if (userOrgs?.Length > 0)
+                    {
+                        var userOrg = userOrgs[0];
+                        if (userOrg.TryGetProperty("organizations", out var orgData))
+                        {
+                            return JsonSerializer.Deserialize<Organization>(orgData.GetRawText());
+                        }
+                    }
+                }
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get user organization for {UserId}", userId);
+                return null;
+            }
+        }
+
+        public async Task<Organization?> CreateOrUpdateUserOrganizationAsync(string userId, Organization organization)
+        {
+            try
+            {
+                // First, check if user already has an organization
+                var existingOrg = await GetUserOrganizationAsync(userId);
+                
+                if (existingOrg != null)
+                {
+                    // Update existing organization
+                    organization.Id = existingOrg.Id;
+                    organization.CreatedAt = existingOrg.CreatedAt;
+                    organization.UpdatedAt = DateTime.UtcNow;
+                    
+                    var updateUrl = $"organizations?id=eq.{organization.Id}";
+                    var json = JsonSerializer.Serialize(organization);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    
+                    var response = await _httpClient.PatchAsync(updateUrl, content);
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return organization;
+                    }
+                }
+                else
+                {
+                    // Create new organization
+                    organization.Id = Guid.NewGuid();
+                    organization.CreatedAt = DateTime.UtcNow;
+                    organization.UpdatedAt = DateTime.UtcNow;
+                    
+                    var createUrl = "organizations";
+                    var json = JsonSerializer.Serialize(organization);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    
+                    var response = await _httpClient.PostAsync(createUrl, content);
+                    
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Create user_organizations relationship
+                        var userOrg = new
+                        {
+                            user_id = userId,
+                            organization_id = organization.Id,
+                            role = "owner",
+                            created_at = DateTime.UtcNow
+                        };
+                        
+                        var userOrgJson = JsonSerializer.Serialize(userOrg);
+                        var userOrgContent = new StringContent(userOrgJson, Encoding.UTF8, "application/json");
+                        
+                        var userOrgResponse = await _httpClient.PostAsync("user_organizations", userOrgContent);
+                        
+                        if (userOrgResponse.IsSuccessStatusCode)
+                        {
+                            return organization;
+                        }
+                    }
+                }
+                
+                throw new Exception("Failed to create or update organization");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create/update user organization for {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<Organization?> UpdateOrganizationAsync(Organization organization)
+        {
+            try
+            {
+                organization.UpdatedAt = DateTime.UtcNow;
+                
+                var url = $"organizations?id=eq.{organization.Id}";
+                var json = JsonSerializer.Serialize(organization);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                
+                var response = await _httpClient.PatchAsync(url, content);
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    return organization;
+                }
+                
+                throw new Exception($"Failed to update organization: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update organization {OrganizationId}", organization.Id);
                 throw;
             }
         }

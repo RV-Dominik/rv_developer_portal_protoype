@@ -32,7 +32,7 @@ Make sure your Supabase database has these tables:
 
 ```sql
 -- Projects table (Readyverse Partner Intake Form)
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE projects (
 );
 
 -- Assets table (Readyverse Partner Assets)
-CREATE TABLE assets (
+CREATE TABLE IF NOT EXISTS assets (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     project_id UUID REFERENCES projects(id) ON DELETE CASCADE,
     file_key TEXT NOT NULL,
@@ -128,6 +128,33 @@ CREATE TABLE assets (
     width INTEGER, -- For images/videos
     height INTEGER, -- For images/videos
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Organizations table
+CREATE TABLE IF NOT EXISTS organizations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name TEXT NOT NULL,
+    website TEXT,
+    primary_contact_name TEXT,
+    primary_contact_email TEXT,
+    primary_contact_phone TEXT,
+    description TEXT,
+    industry TEXT,
+    company_size TEXT,
+    country TEXT,
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User-Organization relationship table
+CREATE TABLE IF NOT EXISTS user_organizations (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
+    role TEXT DEFAULT 'owner', -- owner, admin, member
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, organization_id)
 );
 
 -- Storage bucket (only create if it doesn't exist)
@@ -144,58 +171,98 @@ Enable RLS and set policies:
 -- Enable RLS
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_organizations ENABLE ROW LEVEL SECURITY;
 
 -- Projects policies
-CREATE POLICY "Users can view their own projects" ON projects
+CREATE POLICY IF NOT EXISTS "Users can view their own projects" ON projects
     FOR SELECT USING (auth.uid()::text = user_id);
 
-CREATE POLICY "Users can insert their own projects" ON projects
+CREATE POLICY IF NOT EXISTS "Users can insert their own projects" ON projects
     FOR INSERT WITH CHECK (auth.uid()::text = user_id);
 
-CREATE POLICY "Users can update their own projects" ON projects
+CREATE POLICY IF NOT EXISTS "Users can update their own projects" ON projects
     FOR UPDATE USING (auth.uid()::text = user_id);
 
-CREATE POLICY "Users can delete their own projects" ON projects
+CREATE POLICY IF NOT EXISTS "Users can delete their own projects" ON projects
     FOR DELETE USING (auth.uid()::text = user_id);
 
-CREATE POLICY "Anyone can view public projects" ON projects
+CREATE POLICY IF NOT EXISTS "Anyone can view public projects" ON projects
     FOR SELECT USING (is_public = true);
 
 -- Assets policies
-CREATE POLICY "Users can view assets of their projects" ON assets
+CREATE POLICY IF NOT EXISTS "Users can view assets of their projects" ON assets
     FOR SELECT USING (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY "Users can insert assets to their projects" ON assets
+CREATE POLICY IF NOT EXISTS "Users can insert assets to their projects" ON assets
     FOR INSERT WITH CHECK (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY "Users can update assets of their projects" ON assets
+CREATE POLICY IF NOT EXISTS "Users can update assets of their projects" ON assets
     FOR UPDATE USING (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY "Users can delete assets of their projects" ON assets
+CREATE POLICY IF NOT EXISTS "Users can delete assets of their projects" ON assets
     FOR DELETE USING (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY "Anyone can view assets of public projects" ON assets
+CREATE POLICY IF NOT EXISTS "Anyone can view assets of public projects" ON assets
     FOR SELECT USING (
         project_id IN (
             SELECT id FROM projects WHERE is_public = true
         )
     );
+
+-- Organizations policies
+CREATE POLICY IF NOT EXISTS "Users can view their organizations" ON organizations
+    FOR SELECT USING (
+        id IN (
+            SELECT organization_id FROM user_organizations WHERE user_id = auth.uid()::text
+        )
+    );
+
+CREATE POLICY IF NOT EXISTS "Users can insert organizations" ON organizations
+    FOR INSERT WITH CHECK (true); -- Will be linked via user_organizations
+
+CREATE POLICY IF NOT EXISTS "Users can update their organizations" ON organizations
+    FOR UPDATE USING (
+        id IN (
+            SELECT organization_id FROM user_organizations WHERE user_id = auth.uid()::text
+        )
+    );
+
+CREATE POLICY IF NOT EXISTS "Users can delete their organizations" ON organizations
+    FOR DELETE USING (
+        id IN (
+            SELECT organization_id FROM user_organizations WHERE user_id = auth.uid()::text
+        )
+    );
+
+-- User-Organizations policies
+CREATE POLICY IF NOT EXISTS "Users can view their user_organizations" ON user_organizations
+    FOR SELECT USING (user_id = auth.uid()::text);
+
+CREATE POLICY IF NOT EXISTS "Users can insert their user_organizations" ON user_organizations
+    FOR INSERT WITH CHECK (user_id = auth.uid()::text);
+
+CREATE POLICY IF NOT EXISTS "Users can update their user_organizations" ON user_organizations
+    FOR UPDATE USING (user_id = auth.uid()::text);
+
+CREATE POLICY IF NOT EXISTS "Users can delete their user_organizations" ON user_organizations
+    FOR DELETE USING (user_id = auth.uid()::text);
 ```
 
 ## 🔧 **Current Status**

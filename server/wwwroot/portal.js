@@ -207,20 +207,12 @@ class ShowroomPortal {
                             <label class="form-label" for="project-name">Project Name *</label>
                             <input type="text" id="project-name" class="form-input" placeholder="Enter project name" required>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="project-description">Short Description</label>
-                            <textarea id="project-description" class="form-input" rows="3" placeholder="Describe your project"></textarea>
-                        </div>
+                        
                         <div class="form-group">
                             <label class="form-label" for="company-name">Company Name</label>
                             <input type="text" id="company-name" class="form-input" placeholder="Company Inc.">
                         </div>
-                        <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="project-public" style="margin: 0;">
-                                <span class="form-label" style="margin: 0;">Make this project public</span>
-                            </label>
-                        </div>
+                        
                         <div class="flex gap-20">
                             <button type="submit" class="btn btn-primary">Create Project</button>
                             <button type="button" class="btn btn-secondary" onclick="portal.showProjectsList()">Cancel</button>
@@ -236,9 +228,7 @@ class ShowroomPortal {
     async submitCreateProject(e) {
         e.preventDefault();
         const name = document.getElementById('project-name').value.trim();
-        const shortDescription = document.getElementById('project-description').value.trim();
         const companyName = document.getElementById('company-name').value.trim();
-        const isPublic = document.getElementById('project-public').checked;
         if (!name) return;
 
         const button = e.target.querySelector('button[type="submit"]');
@@ -250,7 +240,7 @@ class ShowroomPortal {
             const resp = await fetch(`${this.apiBaseUrl}/api/projects`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, shortDescription, companyName, isPublic })
+                body: JSON.stringify({ name, companyName })
             });
             if (!resp.ok) {
                 const err = await resp.json().catch(() => ({}));
@@ -291,16 +281,7 @@ class ShowroomPortal {
                             <label class="form-label" for="ob-company">Company Name</label>
                             <input id="ob-company" class="form-input" value="${project.companyName||''}" placeholder="Company Inc.">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="ob-short">Short Description</label>
-                            <textarea id="ob-short" class="form-input" rows="3" placeholder="A short, compelling summary">${project.shortDescription||''}</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label style="display:flex;align-items:center;gap:.5rem;">
-                                <input type="checkbox" id="ob-public" ${project.isPublic? 'checked':''}>
-                                <span class="form-label" style="margin:0;">Make project public</span>
-                            </label>
-                        </div>
+                        
                         <div class="flex gap-20">
                             <button type="submit" class="btn btn-primary">Save & Continue</button>
                             <button type="button" class="btn btn-secondary" id="ob-exit">Exit</button>
@@ -318,19 +299,13 @@ class ShowroomPortal {
 
         const form = document.getElementById('onboarding-basics');
         const exit = document.getElementById('ob-exit');
-        const shortEl = document.getElementById('ob-short');
-        const subEl = document.getElementById('pv-sub');
-        shortEl.addEventListener('input', () => {
-            subEl.textContent = shortEl.value || 'Your short description will appear here';
-        });
+        
         exit.addEventListener('click', () => this.showProjectsList());
         form.addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const payload = {
                 step: 'assets',
-                companyName: document.getElementById('ob-company').value.trim() || undefined,
-                shortDescription: document.getElementById('ob-short').value.trim() || undefined,
-                isPublic: document.getElementById('ob-public').checked
+                companyName: document.getElementById('ob-company').value.trim() || undefined
             };
             const btn = form.querySelector('button[type="submit"]');
             const orig = btn.textContent;
@@ -425,7 +400,7 @@ class ShowroomPortal {
         if (messageEl) messageEl.textContent = '';
     }
 
-    showDashboard() {
+    async showDashboard() {
         const heroSection = document.getElementById('hero-section');
         const authSection = document.getElementById('auth-section');
         const dashboardSection = document.getElementById('dashboard-section');
@@ -440,7 +415,173 @@ class ShowroomPortal {
         // Show logout button when authenticated
         if (logoutButton) logoutButton.style.display = 'inline-block';
         
-        this.showProjectsList();
+        // Check if user has an organization set up
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/api/org/me`, {
+                headers: {
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                }
+            });
+            
+            if (response.status === 404) {
+                // No organization found, show setup form
+                this.showOrganizationSetup();
+                return;
+            } else if (!response.ok) {
+                throw new Error('Failed to check organization status');
+            }
+            
+            // Organization exists, show normal dashboard
+            this.showProjectsList();
+        } catch (error) {
+            console.error('Error checking organization:', error);
+            this.showMessage('Error checking organization status', 'error');
+        }
+    }
+
+    getAuthToken() {
+        // Get token from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'auth_token') {
+                return decodeURIComponent(value);
+            }
+        }
+        return null;
+    }
+
+    showOrganizationSetup() {
+        const dashboardSection = document.getElementById('dashboard-section');
+        if (!dashboardSection) return;
+        
+        dashboardSection.innerHTML = `
+            <div class="section-header">
+                <h2 class="section-title">Set up your Organization</h2>
+                <p class="section-subtitle">Tell us about your company to get started</p>
+            </div>
+            <div class="auth-card" style="max-width: 600px; margin: 0 auto;">
+                <form id="organization-form" class="auth-form">
+                    <div class="form-group">
+                        <label class="form-label" for="org-name">Company Name *</label>
+                        <input type="text" id="org-name" class="form-input" placeholder="Your Company Inc." required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-website">Website</label>
+                        <input type="url" id="org-website" class="form-input" placeholder="https://yourcompany.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-contact-name">Primary Contact Name</label>
+                        <input type="text" id="org-contact-name" class="form-input" placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-contact-email">Primary Contact Email</label>
+                        <input type="email" id="org-contact-email" class="form-input" placeholder="john@yourcompany.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-contact-phone">Primary Contact Phone</label>
+                        <input type="tel" id="org-contact-phone" class="form-input" placeholder="+1 (555) 123-4567">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-description">Company Description</label>
+                        <textarea id="org-description" class="form-input" rows="3" placeholder="Tell us about your company..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-industry">Industry</label>
+                        <select id="org-industry" class="form-input">
+                            <option value="">Select Industry</option>
+                            <option value="gaming">Gaming</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="technology">Technology</option>
+                            <option value="media">Media</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-size">Company Size</label>
+                        <select id="org-size" class="form-input">
+                            <option value="">Select Size</option>
+                            <option value="1-10">1-10 employees</option>
+                            <option value="11-50">11-50 employees</option>
+                            <option value="51-200">51-200 employees</option>
+                            <option value="201-1000">201-1000 employees</option>
+                            <option value="1000+">1000+ employees</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="org-country">Country</label>
+                        <input type="text" id="org-country" class="form-input" placeholder="United States">
+                    </div>
+                    
+                    <div class="flex gap-20">
+                        <button type="submit" class="btn btn-primary">Save Organization</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        const form = document.getElementById('organization-form');
+        form.addEventListener('submit', this.submitOrganizationSetup.bind(this));
+    }
+
+    async submitOrganizationSetup(e) {
+        e.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('org-name').value.trim(),
+            website: document.getElementById('org-website').value.trim(),
+            primaryContactName: document.getElementById('org-contact-name').value.trim(),
+            primaryContactEmail: document.getElementById('org-contact-email').value.trim(),
+            primaryContactPhone: document.getElementById('org-contact-phone').value.trim(),
+            description: document.getElementById('org-description').value.trim(),
+            industry: document.getElementById('org-industry').value,
+            companySize: document.getElementById('org-size').value,
+            country: document.getElementById('org-country').value.trim()
+        };
+        
+        if (!formData.name) {
+            this.showMessage('Company name is required', 'error');
+            return;
+        }
+        
+        const button = e.target.querySelector('button[type="submit"]');
+        const original = button.textContent;
+        button.innerHTML = '<span class="loading"></span> Saving...';
+        button.disabled = true;
+        
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/api/org`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                this.showMessage('Organization saved successfully!', 'success');
+                // Show the normal dashboard now
+                this.showProjectsList();
+            } else {
+                const error = await response.json();
+                this.showMessage(error.error || 'Failed to save organization', 'error');
+            }
+        } catch (error) {
+            console.error('Organization setup error:', error);
+            this.showMessage('Network error. Please try again.', 'error');
+        } finally {
+            button.textContent = original;
+            button.disabled = false;
+        }
     }
 
     showMessage(message, type = 'info', element = null) {

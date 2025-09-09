@@ -18,5 +18,8 @@ namespace ShowroomBackend.Services
         Task<bool> DeleteAssetAsync(Guid id);
         Task<string> UploadFileAsync(Stream fileStream, string fileName, string bucketName, string folder = "");
         Task<string> GetSignedUrlAsync(string bucketName, string fileKey, int expiresIn = 3600);
+        Task<Organization?> GetUserOrganizationAsync(string userId);
+        Task<Organization?> CreateOrUpdateUserOrganizationAsync(string userId, Organization organization);
+        Task<Organization?> UpdateOrganizationAsync(Organization organization);
     }
 }

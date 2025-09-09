@@ -271,5 +271,35 @@ namespace ShowroomBackend.Services
             
             return $"https://mock-bucket.supabase.co/storage/v1/object/sign/{bucketName}/{fileKey}?expiresIn={expiresIn}";
         }
+
+        public async Task<Organization?> GetUserOrganizationAsync(string userId)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting user organization for {UserId}", userId);
+            
+            // Return null to simulate no organization set up yet
+            return null;
+        }
+
+        public async Task<Organization?> CreateOrUpdateUserOrganizationAsync(string userId, Organization organization)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Creating/updating user organization for {UserId}", userId);
+            
+            organization.Id = Guid.NewGuid();
+            organization.CreatedAt = DateTime.UtcNow;
+            organization.UpdatedAt = DateTime.UtcNow;
+            
+            return organization;
+        }
+
+        public async Task<Organization?> UpdateOrganizationAsync(Organization organization)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Updating organization {OrganizationId}", organization.Id);
+            
+            organization.UpdatedAt = DateTime.UtcNow;
+            return organization;
+        }
     }
 }
