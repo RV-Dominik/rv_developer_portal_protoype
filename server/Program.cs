@@ -50,9 +50,9 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 // Serve the main portal page
-app.MapGet("/", () => Results.Redirect("/web"));
+app.MapGet("/", () => Results.Redirect("/index.html"));
 
 // Serve the web portal
-app.MapFallbackToFile("/web/index.html");
+app.MapFallbackToFile("/index.html");
 
 app.Run();

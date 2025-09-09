@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Readyverse Developer Portal</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">Readyverse Portal</div>
+            <nav class="nav">
+                <a href="#" class="nav-link">Projects</a>
+                <a href="#" class="nav-link">Assets</a>
+                <a href="#" class="nav-link">Settings</a>
+                <button id="logout-button" class="btn btn-secondary">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section id="hero-section" class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Readyverse</h1>
+                <h2 class="hero-subtitle">Developer Portal</h2>
+                <p class="text-body">Build immersive experiences in the metaverse. Create, customize, and deploy your projects across the Readyverse ecosystem.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary">Get Started</button>
+                    <button class="btn btn-secondary">Learn More</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth Section -->
+        <section id="auth-section" class="auth-section hidden">
+            <div class="container">
+                <div class="auth-card">
+                    <div class="text-center mb-4">
+                        <h2 class="text-h2 mb-2">Welcome to Readyverse</h2>
+                        <p class="text-body">Sign in with your email to access the developer portal</p>
+                    </div>
+                    <form id="magic-link-form" class="auth-form">
+                        <div class="form-group">
+                            <label class="form-label" for="email-input">Email Address</label>
+                            <input type="email" id="email-input" class="form-input" placeholder="Enter your email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Magic Link</button>
+                    </form>
+                    <p id="auth-message" class="message"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="dashboard-section hidden">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">Your Projects</h2>
+                    <p class="section-subtitle">Manage your Readyverse projects and experiences</p>
+                </div>
+                <div class="text-center mb-4">
+                    <button id="create-project-button" class="btn btn-primary">Create New Project</button>
+                </div>
+                <div id="projects-list" class="projects-grid">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Detail Section -->
+        <section id="project-detail-section" class="project-detail-section hidden">
+            <div class="container">
+                <div class="project-detail-header">
+                    <button id="back-to-projects" class="btn btn-secondary">← Back to Projects</button>
+                </div>
+                <div class="project-detail-content">
+                    <div class="project-detail-main">
+                        <h2 id="project-detail-name" class="text-h2 mb-4"></h2>
+                        <p id="project-detail-description" class="text-body mb-4"></p>
+                        <!-- More project details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">Readyverse Portal</div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">Documentation</a>
+                    <a href="#" class="footer-link">Support</a>
+                    <a href="#" class="footer-link">API</a>
+                    <a href="#" class="footer-link">Community</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Readyverse Inc. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/portal.js"></script>
+</body>
+</html>
