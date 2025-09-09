@@ -27,6 +27,11 @@ class ShowroomPortal {
         if (createProjectButton) {
             createProjectButton.addEventListener('click', this.showCreateProjectForm.bind(this));
         }
+
+        const getStartedButton = document.getElementById('get-started-btn');
+        if (getStartedButton) {
+            getStartedButton.addEventListener('click', this.showAuthSection.bind(this));
+        }
     }
 
     async checkAuthStatus() {
@@ -159,20 +164,24 @@ class ShowroomPortal {
     }
 
     showAuthSection() {
+        const heroSection = document.getElementById('hero-section');
         const authSection = document.getElementById('auth-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const projectDetailSection = document.getElementById('project-detail-section');
         
+        if (heroSection) heroSection.classList.add('hidden');
         if (authSection) authSection.classList.remove('hidden');
         if (dashboardSection) dashboardSection.classList.add('hidden');
         if (projectDetailSection) projectDetailSection.classList.add('hidden');
     }
 
     showDashboard() {
+        const heroSection = document.getElementById('hero-section');
         const authSection = document.getElementById('auth-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const projectDetailSection = document.getElementById('project-detail-section');
         
+        if (heroSection) heroSection.classList.add('hidden');
         if (authSection) authSection.classList.add('hidden');
         if (dashboardSection) dashboardSection.classList.remove('hidden');
         if (projectDetailSection) projectDetailSection.classList.add('hidden');
