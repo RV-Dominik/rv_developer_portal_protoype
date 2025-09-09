@@ -1353,3 +1353,164 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 1rem;
   }
 }
+
+/* ===== PROJECT CARDS STYLES ===== */
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.project-card {
+  background: var(--card-dark);
+  border: 1px solid var(--rv-blue-20);
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--rv-blue), var(--rv-green));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.project-card:hover {
+  border-color: var(--rv-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(65, 175, 255, 0.15);
+}
+
+.project-card:hover::before {
+  opacity: 1;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.project-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--rv-white);
+  margin: 0;
+  font-family: "Plaak 45 B Foch 205 Tf", sans-serif;
+}
+
+.project-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.project-status.basics {
+  background: var(--rv-blue-20);
+  color: var(--rv-blue);
+}
+
+.project-status.assets {
+  background: rgba(163, 255, 233, 0.2);
+  color: var(--rv-green);
+}
+
+.project-status.integration {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.project-status.compliance {
+  background: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+}
+
+.project-status.review {
+  background: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
+}
+
+.project-status.completed {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.project-content {
+  margin-bottom: 1.5rem;
+}
+
+.project-description {
+  color: var(--rv-grey-1);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.project-genre,
+.project-track {
+  padding: 0.25rem 0.5rem;
+  background: var(--card-light);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--rv-grey-1);
+  border: 1px solid var(--rv-blue-20);
+}
+
+.project-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+}
+
+/* Responsive project cards */
+@media (max-width: 768px) {
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .project-card {
+    padding: 1rem;
+  }
+  
+  .project-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .project-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

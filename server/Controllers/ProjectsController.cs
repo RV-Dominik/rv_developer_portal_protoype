@@ -72,41 +72,53 @@ namespace ShowroomBackend.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
+                // Get user's organization to populate company name
+                var organization = await _supabaseService.GetUserOrganizationAsync(userId);
+                if (organization == null)
+                {
+                    return BadRequest(new { error = "No organization found. Please set up your organization first." });
+                }
+
                 var project = new Project
                 {
                     Id = Guid.NewGuid(),
                     Name = dto.Name,
                     Slug = GenerateSlug(dto.Name),
                     OnboardingStep = "basics",
-                    CompanyName = dto.CompanyName,
-                    PrimaryContactName = dto.PrimaryContactName,
-                    PrimaryContactEmail = dto.PrimaryContactEmail,
-                    PrimaryContactPhone = dto.PrimaryContactPhone,
-                    CompanyWebsite = dto.CompanyWebsite,
-                    CompanySocials = dto.CompanySocials,
-                    ShortDescription = dto.ShortDescription,
-                    FullDescription = dto.FullDescription,
-                    Genre = dto.Genre,
-                    PlatformType = dto.PlatformType,
-                    DistributionMethod = dto.DistributionMethod,
-                    GameUrl = dto.GameUrl,
-                    BuildStatus = dto.BuildStatus,
-                    PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus,
-                    ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus,
-                    RequiresLauncher = dto.RequiresLauncher,
-                    AgeRating = dto.AgeRating,
-                    HasDistributionRights = dto.HasDistributionRights,
-                    HasSslTls = dto.HasSslTls,
-                    HasNoTestEndpoints = dto.HasNoTestEndpoints,
-                    HasDigicert = dto.HasDigicert,
-                    TrailerUrl = dto.TrailerUrl,
-                    ShowroomInterest = dto.ShowroomInterest,
-                    WantsSurrealEstate = dto.WantsSurrealEstate,
-                    IsPublic = dto.IsPublic,
                     UserId = userId,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
+                    // Set company name from organization
+                    CompanyName = organization.Name
                 };
+
+                // Only set properties that are provided in the DTO
+                if (!string.IsNullOrEmpty(dto.CompanyName)) project.CompanyName = dto.CompanyName;
+                if (!string.IsNullOrEmpty(dto.PrimaryContactName)) project.PrimaryContactName = dto.PrimaryContactName;
+                if (!string.IsNullOrEmpty(dto.PrimaryContactEmail)) project.PrimaryContactEmail = dto.PrimaryContactEmail;
+                if (!string.IsNullOrEmpty(dto.PrimaryContactPhone)) project.PrimaryContactPhone = dto.PrimaryContactPhone;
+                if (!string.IsNullOrEmpty(dto.CompanyWebsite)) project.CompanyWebsite = dto.CompanyWebsite;
+                if (!string.IsNullOrEmpty(dto.CompanySocials)) project.CompanySocials = dto.CompanySocials;
+                if (!string.IsNullOrEmpty(dto.ShortDescription)) project.ShortDescription = dto.ShortDescription;
+                if (!string.IsNullOrEmpty(dto.FullDescription)) project.FullDescription = dto.FullDescription;
+                if (!string.IsNullOrEmpty(dto.Genre)) project.Genre = dto.Genre;
+                if (!string.IsNullOrEmpty(dto.PublishingTrack)) project.PublishingTrack = dto.PublishingTrack;
+                if (!string.IsNullOrEmpty(dto.PlatformType)) project.PlatformType = dto.PlatformType;
+                if (!string.IsNullOrEmpty(dto.DistributionMethod)) project.DistributionMethod = dto.DistributionMethod;
+                if (!string.IsNullOrEmpty(dto.GameUrl)) project.GameUrl = dto.GameUrl;
+                if (!string.IsNullOrEmpty(dto.BuildStatus)) project.BuildStatus = dto.BuildStatus;
+                if (!string.IsNullOrEmpty(dto.PassSsoIntegrationStatus)) project.PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus;
+                if (!string.IsNullOrEmpty(dto.ReadyverseSdkIntegrationStatus)) project.ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus;
+                project.RequiresLauncher = dto.RequiresLauncher;
+                if (!string.IsNullOrEmpty(dto.AgeRating)) project.AgeRating = dto.AgeRating;
+                project.HasDistributionRights = dto.HasDistributionRights;
+                project.HasSslTls = dto.HasSslTls;
+                project.HasNoTestEndpoints = dto.HasNoTestEndpoints;
+                project.HasDigicert = dto.HasDigicert;
+                if (!string.IsNullOrEmpty(dto.TrailerUrl)) project.TrailerUrl = dto.TrailerUrl;
+                if (!string.IsNullOrEmpty(dto.ShowroomInterest)) project.ShowroomInterest = dto.ShowroomInterest;
+                project.WantsSurrealEstate = dto.WantsSurrealEstate;
+                project.IsPublic = dto.IsPublic;
 
                 var createdProject = await _supabaseService.CreateProjectAsync(project);
                 if (createdProject == null)

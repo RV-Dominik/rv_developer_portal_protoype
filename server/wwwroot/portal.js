@@ -111,9 +111,9 @@ class ShowroomPortal {
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.user) {
-                    this.currentUser = data.user;
-                    this.showDashboard();
-                } else {
+                this.currentUser = data.user;
+                this.showDashboard();
+            } else {
                     // Don't show auth section automatically - keep landing page visible
                     this.showLandingPage();
                 }
@@ -208,11 +208,6 @@ class ShowroomPortal {
                             <input type="text" id="project-name" class="form-input" placeholder="Enter project name" required>
                         </div>
                         
-                        <div class="form-group">
-                            <label class="form-label" for="company-name">Company Name</label>
-                            <input type="text" id="company-name" class="form-input" placeholder="Company Inc.">
-                        </div>
-                        
                         <div class="flex gap-20">
                             <button type="submit" class="btn btn-primary">Create Project</button>
                             <button type="button" class="btn btn-secondary" onclick="portal.showProjectsList()">Cancel</button>
@@ -228,7 +223,6 @@ class ShowroomPortal {
     async submitCreateProject(e) {
         e.preventDefault();
         const name = document.getElementById('project-name').value.trim();
-        const companyName = document.getElementById('company-name').value.trim();
         if (!name) return;
 
         const button = e.target.querySelector('button[type="submit"]');
@@ -239,12 +233,22 @@ class ShowroomPortal {
         try {
             const resp = await fetch(`${this.apiBaseUrl}/api/projects`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, companyName })
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                },
+                body: JSON.stringify({ 
+                    name: name
+                })
             });
             if (!resp.ok) {
                 const err = await resp.json().catch(() => ({}));
-                this.showMessage(err.error || 'Failed to create project', 'error');
+                if (resp.status === 400 && err.error?.includes('organization')) {
+                    this.showMessage('Please set up your organization first before creating projects.', 'error');
+                    this.showOrganizationSetup();
+                } else {
+                    this.showMessage(err.error || 'Failed to create project', 'error');
+                }
                 return;
             }
             const project = await resp.json();
@@ -802,7 +806,7 @@ class ShowroomPortal {
         });
     }
 
-    showProjectsList() {
+    async showProjectsList() {
         const dashboardSection = document.getElementById('dashboard-section');
         if (dashboardSection) {
             dashboardSection.innerHTML = `
@@ -817,15 +821,86 @@ class ShowroomPortal {
                 </div>
                 <div id="projects-list" class="projects-grid">
                     <div class="text-center">
+                        <p class="text-body mb-4">Loading projects...</p>
+                    </div>
+                </div>
+            `;
+            this.bindEvents();
+            
+            // Load projects from API
+            await this.loadProjects();
+        }
+    }
+
+    async loadProjects() {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/api/projects`, {
+                headers: {
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                }
+            });
+            
+            if (response.ok) {
+                const projects = await response.json();
+                this.displayProjects(projects);
+            } else {
+                console.error('Failed to load projects:', response.status);
+                this.displayProjects([]);
+            }
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            this.displayProjects([]);
+        }
+    }
+
+    displayProjects(projects) {
+        const projectsList = document.getElementById('projects-list');
+        if (!projectsList) return;
+        
+        if (projects.length === 0) {
+            projectsList.innerHTML = `
+                    <div class="text-center">
                         <p class="text-body mb-4">No projects yet. Create your first project to get started!</p>
                         <button class="btn btn-primary" onclick="portal.showCreateProjectForm()">
                             Create Project
                         </button>
                     </div>
-                </div>
             `;
-            this.bindEvents();
+            return;
         }
+        
+        projectsList.innerHTML = projects.map(project => `
+            <div class="project-card" onclick="portal.showProjectDetail('${project.id}')">
+                <div class="project-header">
+                    <h3 class="project-title">${project.name}</h3>
+                    <span class="project-status ${project.onboardingStep || 'basics'}">${this.getStatusText(project.onboardingStep)}</span>
+                </div>
+                <div class="project-content">
+                    <p class="project-description">${project.shortDescription || 'No description provided'}</p>
+                    <div class="project-meta">
+                        <span class="project-genre">${project.genre || 'No genre'}</span>
+                        <span class="project-track">${project.publishingTrack || 'No track'}</span>
+                    </div>
+                </div>
+                <div class="project-actions">
+                    <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); portal.startOnboarding(${JSON.stringify(project).replace(/"/g, '&quot;')})">
+                        Continue Setup
+                        </button>
+                    </div>
+                </div>
+        `).join('');
+    }
+
+    getStatusText(step) {
+        const statusMap = {
+            'basics': 'Basics',
+            'assets': 'Assets',
+            'integration': 'Integration',
+            'compliance': 'Compliance',
+            'review': 'Review',
+            'completed': 'Completed'
+        };
+        return statusMap[step] || 'Not Started';
     }
 
     showLandingPage() {
@@ -1038,7 +1113,7 @@ class ShowroomPortal {
             if (response.ok) {
                 this.showMessage('Organization saved successfully!', 'success');
                 // Show the normal dashboard now
-                this.showProjectsList();
+        this.showProjectsList();
             } else {
                 const error = await response.json();
                 this.showMessage(error.error || 'Failed to save organization', 'error');
