@@ -41,11 +41,33 @@ namespace ShowroomBackend.Controllers
                 // Apply partial updates depending on step
                 if (!string.IsNullOrEmpty(dto.CompanyName)) project.CompanyName = dto.CompanyName;
                 if (!string.IsNullOrEmpty(dto.ShortDescription)) project.ShortDescription = dto.ShortDescription;
+                if (!string.IsNullOrEmpty(dto.FullDescription)) project.FullDescription = dto.FullDescription;
+                if (!string.IsNullOrEmpty(dto.Genre)) project.Genre = dto.Genre;
+                if (!string.IsNullOrEmpty(dto.PublishingTrack)) project.PublishingTrack = dto.PublishingTrack;
+                if (!string.IsNullOrEmpty(dto.BuildStatus)) project.BuildStatus = dto.BuildStatus;
+                if (!string.IsNullOrEmpty(dto.TargetPlatforms)) project.TargetPlatforms = dto.TargetPlatforms;
                 if (dto.IsPublic.HasValue) project.IsPublic = dto.IsPublic.Value;
+
+                // Integration fields
+                if (!string.IsNullOrEmpty(dto.PassSsoIntegrationStatus)) project.PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus;
+                if (!string.IsNullOrEmpty(dto.ReadyverseSdkIntegrationStatus)) project.ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus;
+                if (!string.IsNullOrEmpty(dto.GameUrl)) project.GameUrl = dto.GameUrl;
+
+                // Compliance fields
+                if (!string.IsNullOrEmpty(dto.RatingBoard)) project.RatingBoard = dto.RatingBoard;
+                if (dto.LegalRequirementsCompleted.HasValue) project.LegalRequirementsCompleted = dto.LegalRequirementsCompleted.Value;
+                if (dto.PrivacyPolicyProvided.HasValue) project.PrivacyPolicyProvided = dto.PrivacyPolicyProvided.Value;
+                if (dto.TermsAccepted.HasValue) project.TermsAccepted = dto.TermsAccepted.Value;
+                if (dto.ContentGuidelinesAccepted.HasValue) project.ContentGuidelinesAccepted = dto.ContentGuidelinesAccepted.Value;
+                if (dto.DistributionRightsConfirmed.HasValue) project.DistributionRightsConfirmed = dto.DistributionRightsConfirmed.Value;
+                if (!string.IsNullOrEmpty(dto.SupportEmail)) project.SupportEmail = dto.SupportEmail;
 
                 // Advance step
                 project.OnboardingStep = dto.Step;
-                if (dto.Step == "done") project.OnboardingCompletedAt = DateTime.UtcNow;
+                if (dto.Step == "done" || dto.Step == "completed") 
+                {
+                    project.OnboardingCompletedAt = DateTime.UtcNow;
+                }
 
                 var updated = await _supabaseService.UpdateProjectAsync(id, project);
                 if (updated == null) return StatusCode(500, new { error = "Failed to save step" });

@@ -989,8 +989,8 @@ class ShowroomPortal {
     }
 
     async saveOnboardingStep(data) {
-        const response = await fetch(`${this.apiBaseUrl}/api/projects/${this.currentOnboardingProject.id}`, {
-            method: 'PUT',
+        const response = await fetch(`${this.apiBaseUrl}/api/projects/${this.currentOnboardingProject.id}/onboarding/step`, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.getAuthToken()}`
