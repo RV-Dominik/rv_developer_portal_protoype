@@ -52,11 +52,20 @@ namespace ShowroomBackend.Models
         public string? GameUrl { get; set; }
         [JsonPropertyName("build_status")]
         public string? BuildStatus { get; set; } // In Development, Beta, Production-Ready
+        [JsonPropertyName("target_platforms")]
+        public string? TargetPlatforms { get; set; } // JSON array of platforms: PC, Mac, Linux, Web
         
         // Technical Integration
+        [JsonPropertyName("pass_sso_integration_status")]
         public string? PassSsoIntegrationStatus { get; set; } // Not Started, In Progress, Complete
+        [JsonPropertyName("readyverse_sdk_integration_status")]
         public string? ReadyverseSdkIntegrationStatus { get; set; } // Not Started, In Progress, Complete
+        [JsonPropertyName("requires_launcher")]
         public bool RequiresLauncher { get; set; } = false;
+        [JsonPropertyName("https_enabled")]
+        public bool HttpsEnabled { get; set; } = false;
+        [JsonPropertyName("build_format")]
+        public string? BuildFormat { get; set; } // Unreal Engine, Unity, Custom Engine, WebGL, Native
         
         // Publishing Track Requirements
         // Platform Games Requirements
@@ -71,13 +80,27 @@ namespace ShowroomBackend.Models
         
         // Readyverse Hosted Requirements
         public bool HasDistributionRights { get; set; } = false;
-        public string? BuildFormat { get; set; } // Unreal/Unity build, .exe installer, WebGL bundle
         public bool MeetsPerformanceGuidelines { get; set; } = false;
         public bool HasInstallInstructions { get; set; } = false;
         public bool HasPatchCommitment { get; set; } = false;
         
         // Compliance & Security
-        public string? AgeRating { get; set; } // ESRB, PEGI, etc.
+        [JsonPropertyName("age_rating")]
+        public string? AgeRating { get; set; } // E, E10+, T, M, AO
+        [JsonPropertyName("rating_board")]
+        public string? RatingBoard { get; set; } // ESRB, PEGI, CERO, ACB, Other
+        [JsonPropertyName("legal_requirements_completed")]
+        public bool LegalRequirementsCompleted { get; set; } = false;
+        [JsonPropertyName("privacy_policy_provided")]
+        public bool PrivacyPolicyProvided { get; set; } = false;
+        [JsonPropertyName("terms_accepted")]
+        public bool TermsAccepted { get; set; } = false;
+        [JsonPropertyName("content_guidelines_accepted")]
+        public bool ContentGuidelinesAccepted { get; set; } = false;
+        [JsonPropertyName("distribution_rights_confirmed")]
+        public bool DistributionRightsConfirmed { get; set; } = false;
+        [JsonPropertyName("support_email")]
+        public string? SupportEmail { get; set; }
         public bool HasSslTls { get; set; } = false;
         public bool HasNoTestEndpoints { get; set; } = false;
         public bool HasDigicert { get; set; } = false;

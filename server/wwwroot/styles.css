@@ -1173,6 +1173,157 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 12px;
 }
 
+/* Form hints */
+.form-hint {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Checkbox groups */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-group .checkbox-label {
+  margin-bottom: 0;
+}
+
+/* Info boxes */
+.integration-info,
+.compliance-info {
+  margin-bottom: 1.5rem;
+}
+
+.info-box {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  border: 1px solid #4b5563;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.info-box h4 {
+  color: #f9fafb;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.info-box p {
+  color: #d1d5db;
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.info-box .btn {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}
+
+/* Review section styles */
+.review-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.review-header h3 {
+  color: #f9fafb;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.review-header p {
+  color: #9ca3af;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.review-section {
+  margin-bottom: 2rem;
+}
+
+.review-section h4 {
+  color: #f9fafb;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #374151;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.review-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+}
+
+.review-item strong {
+  color: #d1d5db;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.review-item span {
+  color: #f9fafb;
+  font-size: 0.875rem;
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.not-started {
+  background-color: #374151;
+  color: #9ca3af;
+}
+
+.status-badge.in-progress {
+  background-color: #f59e0b;
+  color: #1f2937;
+}
+
+.status-badge.complete {
+  background-color: #10b981;
+  color: #1f2937;
+}
+
+/* Review actions */
+.review-actions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #374151;
+}
+
+.review-actions .checkbox-label {
+  font-size: 0.875rem;
+  color: #d1d5db;
+}
+
 /* Review Section */
 .review-section {
   margin-bottom: 1.5rem;

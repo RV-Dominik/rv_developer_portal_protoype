@@ -365,11 +365,11 @@ class ShowroomPortal {
 
     getStepDescription(step) {
         const descriptions = {
-            'basics': 'Tell us about your game and company details',
-            'assets': 'Upload logos, screenshots, and other game assets',
-            'integration': 'Configure Pass SSO and Readyverse SDK integration',
-            'compliance': 'Complete age rating and legal requirements',
-            'review': 'Review all information before submitting for approval'
+            'basics': 'Provide essential game information and select your publishing track',
+            'assets': 'Upload required game assets (logo, cover art, screenshots)',
+            'integration': 'Configure Pass SSO authentication and Readyverse SDK integration',
+            'compliance': 'Complete age rating, legal requirements, and terms acceptance',
+            'review': 'Review all information and submit for Readyverse team approval'
         };
         return descriptions[step] || '';
     }
@@ -380,12 +380,14 @@ class ShowroomPortal {
                 return `
                     <div class="form-group">
                         <label class="form-label" for="ob-short-description">Short Description *</label>
-                        <textarea id="ob-short-description" class="form-input" rows="3" placeholder="A brief description of your game..." required>${project.shortDescription || ''}</textarea>
+                        <textarea id="ob-short-description" class="form-input" rows="3" placeholder="A brief description of your game (2-3 sentences)..." required maxlength="500">${project.shortDescription || ''}</textarea>
+                        <div class="form-hint">Brief description that will appear in the Readyverse launcher</div>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="ob-full-description">Full Description</label>
-                        <textarea id="ob-full-description" class="form-input" rows="4" placeholder="Detailed description of your game, features, and gameplay...">${project.fullDescription || ''}</textarea>
+                        <textarea id="ob-full-description" class="form-input" rows="4" placeholder="Detailed description of your game, features, and gameplay..." maxlength="2000">${project.fullDescription || ''}</textarea>
+                        <div class="form-hint">Optional detailed description for internal review</div>
                     </div>
                     
                     <div class="form-group">
@@ -398,6 +400,10 @@ class ShowroomPortal {
                             <option value="Simulation" ${project.genre === 'Simulation' ? 'selected' : ''}>Simulation</option>
                             <option value="Puzzle" ${project.genre === 'Puzzle' ? 'selected' : ''}>Puzzle</option>
                             <option value="Adventure" ${project.genre === 'Adventure' ? 'selected' : ''}>Adventure</option>
+                            <option value="Sports" ${project.genre === 'Sports' ? 'selected' : ''}>Sports</option>
+                            <option value="Racing" ${project.genre === 'Racing' ? 'selected' : ''}>Racing</option>
+                            <option value="Fighting" ${project.genre === 'Fighting' ? 'selected' : ''}>Fighting</option>
+                            <option value="Horror" ${project.genre === 'Horror' ? 'selected' : ''}>Horror</option>
                             <option value="Other" ${project.genre === 'Other' ? 'selected' : ''}>Other</option>
                         </select>
                     </div>
@@ -407,19 +413,47 @@ class ShowroomPortal {
                         <select id="ob-publishing-track" class="form-input" required>
                             <option value="">Select Publishing Track</option>
                             <option value="Platform Games" ${project.publishingTrack === 'Platform Games' ? 'selected' : ''}>Platform Games (Epic/Steam)</option>
-                            <option value="Self Hosted" ${project.publishingTrack === 'Self Hosted' ? 'selected' : ''}>Self Hosted</option>
+                            <option value="Self Hosted" ${project.publishingTrack === 'Self Hosted' ? 'selected' : ''}>Self Hosted or Web Based</option>
                             <option value="Readyverse Hosted" ${project.publishingTrack === 'Readyverse Hosted' ? 'selected' : ''}>Readyverse Hosted</option>
                         </select>
+                        <div class="form-hint">Choose how your game will be distributed through Readyverse</div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="ob-build-status">Build Status</label>
-                        <select id="ob-build-status" class="form-input">
+                        <label class="form-label" for="ob-build-status">Build Status *</label>
+                        <select id="ob-build-status" class="form-input" required>
                             <option value="">Select Status</option>
                             <option value="In Development" ${project.buildStatus === 'In Development' ? 'selected' : ''}>In Development</option>
                             <option value="Beta" ${project.buildStatus === 'Beta' ? 'selected' : ''}>Beta</option>
                             <option value="Production-Ready" ${project.buildStatus === 'Production-Ready' ? 'selected' : ''}>Production-Ready</option>
                         </select>
+                        <div class="form-hint">Current state of your game build</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-target-platforms">Target Platforms</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ob-platform-pc" ${project.targetPlatforms?.includes('PC') ? 'checked' : ''}>
+                                <span class="checkmark"></span>
+                                PC (Windows)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ob-platform-mac" ${project.targetPlatforms?.includes('Mac') ? 'checked' : ''}>
+                                <span class="checkmark"></span>
+                                Mac
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ob-platform-linux" ${project.targetPlatforms?.includes('Linux') ? 'checked' : ''}>
+                                <span class="checkmark"></span>
+                                Linux
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="ob-platform-web" ${project.targetPlatforms?.includes('Web') ? 'checked' : ''}>
+                                <span class="checkmark"></span>
+                                Web Browser
+                            </label>
+                        </div>
                     </div>
                 `;
                 
@@ -431,10 +465,11 @@ class ShowroomPortal {
                             <div class="upload-placeholder">
                                 <div class="upload-icon">📷</div>
                                 <div class="upload-text">Click to upload game logo</div>
-                                <div class="upload-hint">PNG, JPG up to 2MB</div>
+                                <div class="upload-hint">PNG, JPG up to 2MB • Recommended: 512x512px</div>
                             </div>
-                            <input type="file" id="ob-logo" accept="image/*" style="display: none;">
+                            <input type="file" id="ob-logo" accept="image/png,image/jpeg,image/jpg" style="display: none;">
                         </div>
+                        <div class="form-hint">Square logo that will appear in the Readyverse launcher</div>
                     </div>
                     
                     <div class="form-group">
@@ -443,27 +478,50 @@ class ShowroomPortal {
                             <div class="upload-placeholder">
                                 <div class="upload-icon">🖼️</div>
                                 <div class="upload-text">Click to upload cover art</div>
-                                <div class="upload-hint">PNG, JPG up to 5MB</div>
+                                <div class="upload-hint">PNG, JPG up to 5MB • Recommended: 1920x1080px</div>
                             </div>
-                            <input type="file" id="ob-cover" accept="image/*" style="display: none;">
+                            <input type="file" id="ob-cover" accept="image/png,image/jpeg,image/jpg" style="display: none;">
                         </div>
+                        <div class="form-hint">Main promotional image for your game</div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Screenshots</label>
+                        <label class="form-label">Screenshots *</label>
                         <div class="file-upload-area" id="screenshots-upload">
                             <div class="upload-placeholder">
                                 <div class="upload-icon">📸</div>
                                 <div class="upload-text">Click to upload screenshots</div>
-                                <div class="upload-hint">PNG, JPG up to 2MB each (max 5 images)</div>
+                                <div class="upload-hint">PNG, JPG up to 2MB each • Min 3, Max 10 images</div>
                             </div>
-                            <input type="file" id="ob-screenshots" accept="image/*" multiple style="display: none;">
+                            <input type="file" id="ob-screenshots" accept="image/png,image/jpeg,image/jpg" multiple style="display: none;">
                         </div>
+                        <div class="form-hint">Showcase your game with 3-10 screenshots</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trailer Video (Optional)</label>
+                        <div class="file-upload-area" id="trailer-upload">
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">🎬</div>
+                                <div class="upload-text">Click to upload trailer</div>
+                                <div class="upload-hint">MP4 up to 50MB • Max 2 minutes</div>
+                            </div>
+                            <input type="file" id="ob-trailer" accept="video/mp4" style="display: none;">
+                        </div>
+                        <div class="form-hint">Optional gameplay trailer or promotional video</div>
                     </div>
                 `;
                 
             case 'integration':
                 return `
+                    <div class="integration-info">
+                        <div class="info-box">
+                            <h4>🔐 Pass SSO Integration</h4>
+                            <p>Implement OAuth + login APIs for user authentication. Users must be able to sign in with their Readyverse Pass account.</p>
+                            <a href="https://www.futureverse.com/futurepass" target="_blank" class="btn btn-outline btn-sm">View Pass SSO Docs</a>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label class="form-label">Pass SSO Integration Status *</label>
                         <select id="ob-pass-sso" class="form-input" required>
@@ -472,6 +530,7 @@ class ShowroomPortal {
                             <option value="In Progress" ${project.passSsoIntegrationStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
                             <option value="Complete" ${project.passSsoIntegrationStatus === 'Complete' ? 'selected' : ''}>Complete</option>
                         </select>
+                        <div class="form-hint">Required for all publishing tracks</div>
                     </div>
                     
                     <div class="form-group">
@@ -482,11 +541,26 @@ class ShowroomPortal {
                             <option value="In Progress" ${project.readyverseSdkIntegrationStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
                             <option value="Complete" ${project.readyverseSdkIntegrationStatus === 'Complete' ? 'selected' : ''}>Complete</option>
                         </select>
+                        <div class="form-hint">Required for collectable lookup, event tracking, and updates</div>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="ob-game-url">Game URL</label>
                         <input type="url" id="ob-game-url" class="form-input" placeholder="https://yourgame.com" value="${project.gameUrl || ''}">
+                        <div class="form-hint">Public URL where your game is accessible (required for Self Hosted track)</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-build-format">Build Format</label>
+                        <select id="ob-build-format" class="form-input">
+                            <option value="">Select Format</option>
+                            <option value="Unreal Engine" ${project.buildFormat === 'Unreal Engine' ? 'selected' : ''}>Unreal Engine</option>
+                            <option value="Unity" ${project.buildFormat === 'Unity' ? 'selected' : ''}>Unity</option>
+                            <option value="Custom Engine" ${project.buildFormat === 'Custom Engine' ? 'selected' : ''}>Custom Engine</option>
+                            <option value="WebGL" ${project.buildFormat === 'WebGL' ? 'selected' : ''}>WebGL</option>
+                            <option value="Native" ${project.buildFormat === 'Native' ? 'selected' : ''}>Native (C++/C#)</option>
+                        </select>
+                        <div class="form-hint">Primary engine/framework used for your game</div>
                     </div>
                     
                     <div class="form-group">
@@ -495,11 +569,28 @@ class ShowroomPortal {
                             <span class="checkmark"></span>
                             Requires Readyverse Launcher to run
                         </label>
+                        <div class="form-hint">Check if your game needs the Readyverse Launcher to be running</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-https-enabled" ${project.httpsEnabled ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            HTTPS/TLS enabled (required for Self Hosted)
+                        </label>
+                        <div class="form-hint">Required for Self Hosted and Web Based games</div>
                     </div>
                 `;
                 
             case 'compliance':
                 return `
+                    <div class="compliance-info">
+                        <div class="info-box">
+                            <h4>⚖️ Legal & Compliance Requirements</h4>
+                            <p>Complete all required legal documentation and age rating certification before submission.</p>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label class="form-label">Age Rating *</label>
                         <select id="ob-age-rating" class="form-input" required>
@@ -510,6 +601,19 @@ class ShowroomPortal {
                             <option value="M" ${project.ageRating === 'M' ? 'selected' : ''}>M - Mature</option>
                             <option value="AO" ${project.ageRating === 'AO' ? 'selected' : ''}>AO - Adults Only</option>
                         </select>
+                        <div class="form-hint">Official age rating from ESRB, PEGI, or equivalent rating board</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-rating-board">Rating Board</label>
+                        <select id="ob-rating-board" class="form-input">
+                            <option value="">Select Rating Board</option>
+                            <option value="ESRB" ${project.ratingBoard === 'ESRB' ? 'selected' : ''}>ESRB (North America)</option>
+                            <option value="PEGI" ${project.ratingBoard === 'PEGI' ? 'selected' : ''}>PEGI (Europe)</option>
+                            <option value="CERO" ${project.ratingBoard === 'CERO' ? 'selected' : ''}>CERO (Japan)</option>
+                            <option value="ACB" ${project.ratingBoard === 'ACB' ? 'selected' : ''}>ACB (Australia)</option>
+                            <option value="Other" ${project.ratingBoard === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -518,14 +622,16 @@ class ShowroomPortal {
                             <span class="checkmark"></span>
                             Legal requirements completed
                         </label>
+                        <div class="form-hint">All necessary legal clearances and documentation obtained</div>
                     </div>
                     
                     <div class="form-group">
                         <label class="checkbox-label">
                             <input type="checkbox" id="ob-privacy-policy" ${project.privacyPolicyProvided ? 'checked' : ''}>
                             <span class="checkmark"></span>
-                            Privacy policy provided
+                            Privacy policy provided and accessible
                         </label>
+                        <div class="form-hint">Required for all games that collect user data</div>
                     </div>
                     
                     <div class="form-group">
@@ -534,41 +640,136 @@ class ShowroomPortal {
                             <span class="checkmark"></span>
                             Terms of service accepted
                         </label>
+                        <div class="form-hint">Readyverse terms and conditions accepted</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-content-guidelines" ${project.contentGuidelinesAccepted ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            Content guidelines compliance confirmed
+                        </label>
+                        <div class="form-hint">Game content meets Readyverse community standards</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="ob-distribution-rights" ${project.distributionRightsConfirmed ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                            Distribution rights confirmed
+                        </label>
+                        <div class="form-hint">You have the right to distribute this game through Readyverse</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="ob-support-email">Support Contact Email</label>
+                        <input type="email" id="ob-support-email" class="form-input" placeholder="support@yourcompany.com" value="${project.supportEmail || ''}">
+                        <div class="form-hint">Email address for user support and technical issues</div>
                     </div>
                 `;
                 
             case 'review':
                 return `
+                    <div class="review-header">
+                        <h3>📋 Review & Submit</h3>
+                        <p>Please review all information before submitting for Readyverse team approval.</p>
+                    </div>
+                    
                     <div class="review-section">
-                        <h4>Project Information</h4>
-                        <div class="review-item">
-                            <strong>Name:</strong> <span id="review-name">${project.name}</span>
-                        </div>
-                        <div class="review-item">
-                            <strong>Description:</strong> <span id="review-description">${project.shortDescription || 'Not provided'}</span>
-                        </div>
-                        <div class="review-item">
-                            <strong>Genre:</strong> <span id="review-genre">${project.genre || 'Not selected'}</span>
-                        </div>
-                        <div class="review-item">
-                            <strong>Publishing Track:</strong> <span id="review-track">${project.publishingTrack || 'Not selected'}</span>
+                        <h4>🎮 Project Information</h4>
+                        <div class="review-grid">
+                            <div class="review-item">
+                                <strong>Project Name:</strong> <span id="review-name">${project.name}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Description:</strong> <span id="review-description">${project.shortDescription || 'Not provided'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Genre:</strong> <span id="review-genre">${project.genre || 'Not selected'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Publishing Track:</strong> <span id="review-track">${project.publishingTrack || 'Not selected'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Build Status:</strong> <span id="review-build-status">${project.buildStatus || 'Not selected'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Target Platforms:</strong> <span id="review-platforms">${project.targetPlatforms ? JSON.parse(project.targetPlatforms).join(', ') : 'Not selected'}</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="review-section">
-                        <h4>Integration Status</h4>
-                        <div class="review-item">
-                            <strong>Pass SSO:</strong> <span id="review-pass-sso">${project.passSsoIntegrationStatus || 'Not started'}</span>
-                        </div>
-                        <div class="review-item">
-                            <strong>Readyverse SDK:</strong> <span id="review-sdk">${project.readyverseSdkIntegrationStatus || 'Not started'}</span>
+                        <h4>🔧 Technical Integration</h4>
+                        <div class="review-grid">
+                            <div class="review-item">
+                                <strong>Pass SSO:</strong> <span id="review-pass-sso" class="status-badge ${project.passSsoIntegrationStatus?.toLowerCase().replace(' ', '-') || 'not-started'}">${project.passSsoIntegrationStatus || 'Not started'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Readyverse SDK:</strong> <span id="review-sdk" class="status-badge ${project.readyverseSdkIntegrationStatus?.toLowerCase().replace(' ', '-') || 'not-started'}">${project.readyverseSdkIntegrationStatus || 'Not started'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Game URL:</strong> <span id="review-game-url">${project.gameUrl || 'Not provided'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Build Format:</strong> <span id="review-build-format">${project.buildFormat || 'Not selected'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Requires Launcher:</strong> <span id="review-launcher">${project.requiresLauncher ? 'Yes' : 'No'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>HTTPS Enabled:</strong> <span id="review-https">${project.httpsEnabled ? 'Yes' : 'No'}</span>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="review-section">
-                        <h4>Compliance</h4>
-                        <div class="review-item">
-                            <strong>Age Rating:</strong> <span id="review-age-rating">${project.ageRating || 'Not selected'}</span>
+                        <h4>⚖️ Compliance & Legal</h4>
+                        <div class="review-grid">
+                            <div class="review-item">
+                                <strong>Age Rating:</strong> <span id="review-age-rating">${project.ageRating || 'Not selected'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Rating Board:</strong> <span id="review-rating-board">${project.ratingBoard || 'Not selected'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Legal Requirements:</strong> <span id="review-legal" class="status-badge ${project.legalRequirementsCompleted ? 'complete' : 'not-started'}">${project.legalRequirementsCompleted ? 'Completed' : 'Not completed'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Privacy Policy:</strong> <span id="review-privacy" class="status-badge ${project.privacyPolicyProvided ? 'complete' : 'not-started'}">${project.privacyPolicyProvided ? 'Provided' : 'Not provided'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Terms Accepted:</strong> <span id="review-terms" class="status-badge ${project.termsAccepted ? 'complete' : 'not-started'}">${project.termsAccepted ? 'Accepted' : 'Not accepted'}</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Support Email:</strong> <span id="review-support-email">${project.supportEmail || 'Not provided'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="review-section">
+                        <h4>📁 Assets</h4>
+                        <div class="review-grid">
+                            <div class="review-item">
+                                <strong>Game Logo:</strong> <span id="review-logo" class="status-badge not-started">Not uploaded</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Cover Art:</strong> <span id="review-cover" class="status-badge not-started">Not uploaded</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Screenshots:</strong> <span id="review-screenshots" class="status-badge not-started">Not uploaded</span>
+                            </div>
+                            <div class="review-item">
+                                <strong>Trailer Video:</strong> <span id="review-trailer" class="status-badge not-started">Not uploaded</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="review-actions">
+                        <div class="checkbox-label">
+                            <input type="checkbox" id="review-confirmation" required>
+                            <span class="checkmark"></span>
+                            I confirm that all information is accurate and I have the right to distribute this game through Readyverse
                         </div>
                     </div>
                 `;
@@ -728,21 +929,46 @@ class ShowroomPortal {
                 data.genre = document.getElementById('ob-genre')?.value;
                 data.publishingTrack = document.getElementById('ob-publishing-track')?.value;
                 data.buildStatus = document.getElementById('ob-build-status')?.value;
+                
+                // Collect target platforms as JSON string
+                const platforms = [];
+                if (document.getElementById('ob-platform-pc')?.checked) platforms.push('PC');
+                if (document.getElementById('ob-platform-mac')?.checked) platforms.push('Mac');
+                if (document.getElementById('ob-platform-linux')?.checked) platforms.push('Linux');
+                if (document.getElementById('ob-platform-web')?.checked) platforms.push('Web');
+                data.targetPlatforms = JSON.stringify(platforms);
                 break;
+                
             case 'assets':
                 // File uploads would be handled separately
+                // For now, just track that assets step was completed
+                data.assetsCompleted = true;
                 break;
+                
             case 'integration':
                 data.passSsoIntegrationStatus = document.getElementById('ob-pass-sso')?.value;
                 data.readyverseSdkIntegrationStatus = document.getElementById('ob-sdk-integration')?.value;
                 data.gameUrl = document.getElementById('ob-game-url')?.value.trim();
+                data.buildFormat = document.getElementById('ob-build-format')?.value;
                 data.requiresLauncher = document.getElementById('ob-requires-launcher')?.checked;
+                data.httpsEnabled = document.getElementById('ob-https-enabled')?.checked;
                 break;
+                
             case 'compliance':
                 data.ageRating = document.getElementById('ob-age-rating')?.value;
+                data.ratingBoard = document.getElementById('ob-rating-board')?.value;
                 data.legalRequirementsCompleted = document.getElementById('ob-legal-completed')?.checked;
                 data.privacyPolicyProvided = document.getElementById('ob-privacy-policy')?.checked;
                 data.termsAccepted = document.getElementById('ob-terms-accepted')?.checked;
+                data.contentGuidelinesAccepted = document.getElementById('ob-content-guidelines')?.checked;
+                data.distributionRightsConfirmed = document.getElementById('ob-distribution-rights')?.checked;
+                data.supportEmail = document.getElementById('ob-support-email')?.value.trim();
+                break;
+                
+            case 'review':
+                // Review step - confirm all data is accurate
+                data.reviewCompleted = true;
+                data.finalConfirmation = document.getElementById('review-confirmation')?.checked;
                 break;
         }
         
