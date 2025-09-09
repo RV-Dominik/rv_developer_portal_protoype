@@ -89,6 +89,10 @@ namespace ShowroomBackend.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         
+        // Onboarding progress
+        public string? OnboardingStep { get; set; } // basics, assets, integration, compliance, review, done
+        public DateTime? OnboardingCompletedAt { get; set; }
+        
         public List<Asset> Assets { get; set; } = new();
     }
 }

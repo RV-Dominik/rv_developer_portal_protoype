@@ -109,7 +109,10 @@ CREATE TABLE projects (
     is_public BOOLEAN DEFAULT false,
     user_id TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- Onboarding
+    onboarding_step TEXT NULL,
+    onboarding_completed_at TIMESTAMP WITH TIME ZONE NULL
 );
 
 -- Assets table (Readyverse Partner Assets)

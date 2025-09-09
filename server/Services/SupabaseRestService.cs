@@ -27,7 +27,8 @@ namespace ShowroomBackend.Services
             // Configure HttpClient for Supabase
             _httpClient.BaseAddress = new Uri($"{_supabaseUrl}/rest/v1/");
             _httpClient.DefaultRequestHeaders.Add("apikey", _supabaseAnonKey);
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_supabaseAnonKey}");
+            // Use service role key for database operations (server-side only)
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_supabaseServiceKey}");
         }
 
         public async Task<object?> GetSessionAsync()

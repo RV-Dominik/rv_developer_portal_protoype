@@ -1,13 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using ShowroomBackend.Services;
 using ShowroomBackend.Models;
 using ShowroomBackend.Models.DTOs;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Routing;
 
 namespace ShowroomBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProjectsController : ControllerBase
     {
         private readonly ISupabaseService _supabaseService;
@@ -20,6 +24,42 @@ namespace ShowroomBackend.Controllers
         }
 
         /// <summary>
+        /// Save onboarding step data and update project progress
+        /// </summary>
+        [HttpPost("{id}/onboarding/step")]
+        public async Task<IActionResult> SaveOnboardingStep(Guid id, [FromBody] ProjectOnboardingStepDto dto)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+
+                var project = await _supabaseService.GetProjectByIdAsync(id);
+                if (project == null) return NotFound(new { error = "Project not found" });
+                if (project.UserId != userId) return Forbid();
+
+                // Apply partial updates depending on step
+                if (!string.IsNullOrEmpty(dto.CompanyName)) project.CompanyName = dto.CompanyName;
+                if (!string.IsNullOrEmpty(dto.ShortDescription)) project.ShortDescription = dto.ShortDescription;
+                if (dto.IsPublic.HasValue) project.IsPublic = dto.IsPublic.Value;
+
+                // Advance step
+                project.OnboardingStep = dto.Step;
+                if (dto.Step == "done") project.OnboardingCompletedAt = DateTime.UtcNow;
+
+                var updated = await _supabaseService.UpdateProjectAsync(id, project);
+                if (updated == null) return StatusCode(500, new { error = "Failed to save step" });
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving onboarding step for project {Id}", id);
+                return StatusCode(500, new { error = "Failed to save onboarding step" });
+            }
+        }
+
+        /// <summary>
         /// Create a new project
         /// </summary>
         /// <param name="dto">Project creation data</param>
@@ -29,17 +69,15 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
                 var project = new Project
                 {
                     Id = Guid.NewGuid(),
                     Name = dto.Name,
                     Slug = GenerateSlug(dto.Name),
+                    OnboardingStep = "basics",
                     CompanyName = dto.CompanyName,
                     PrimaryContactName = dto.PrimaryContactName,
                     PrimaryContactEmail = dto.PrimaryContactEmail,
@@ -65,7 +103,7 @@ namespace ShowroomBackend.Controllers
                     ShowroomInterest = dto.ShowroomInterest,
                     WantsSurrealEstate = dto.WantsSurrealEstate,
                     IsPublic = dto.IsPublic,
-                    UserId = "mock-user-id",
+                    UserId = userId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -90,13 +128,10 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
-                var projects = await _supabaseService.GetUserProjectsAsync("mock-user-id");
+                var projects = await _supabaseService.GetUserProjectsAsync(userId);
                 return Ok(projects);
             }
             catch (Exception ex)
@@ -111,11 +146,8 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
                 var project = await _supabaseService.GetProjectByIdAsync(id);
                 if (project == null)
@@ -137,11 +169,8 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
-                if (session == null)
-                {
-                    return Unauthorized(new { error = "Not authenticated" });
-                }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
                 var project = await _supabaseService.GetProjectByIdAsync(id);
                 if (project == null)

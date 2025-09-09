@@ -203,12 +203,12 @@ class ShowroomPortal {
                             <input type="text" id="project-name" class="form-input" placeholder="Enter project name" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="project-description">Description</label>
-                            <textarea id="project-description" class="form-input" rows="4" placeholder="Describe your project"></textarea>
+                            <label class="form-label" for="project-description">Short Description</label>
+                            <textarea id="project-description" class="form-input" rows="3" placeholder="Describe your project"></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="project-version">Version</label>
-                            <input type="text" id="project-version" class="form-input" placeholder="1.0.0" value="1.0.0">
+                            <label class="form-label" for="company-name">Company Name</label>
+                            <input type="text" id="company-name" class="form-input" placeholder="Company Inc.">
                         </div>
                         <div class="form-group">
                             <label style="display: flex; align-items: center; gap: 0.5rem;">
@@ -223,7 +223,135 @@ class ShowroomPortal {
                     </form>
                 </div>
             `;
+            const form = document.getElementById('project-form');
+            form.addEventListener('submit', this.submitCreateProject.bind(this));
         }
+    }
+
+    async submitCreateProject(e) {
+        e.preventDefault();
+        const name = document.getElementById('project-name').value.trim();
+        const shortDescription = document.getElementById('project-description').value.trim();
+        const companyName = document.getElementById('company-name').value.trim();
+        const isPublic = document.getElementById('project-public').checked;
+        if (!name) return;
+
+        const button = e.target.querySelector('button[type="submit"]');
+        const original = button.textContent;
+        button.innerHTML = '<span class="loading"></span> Creating...';
+        button.disabled = true;
+
+        try {
+            const resp = await fetch(`${this.apiBaseUrl}/api/projects`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, shortDescription, companyName, isPublic })
+            });
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                this.showMessage(err.error || 'Failed to create project', 'error');
+                return;
+            }
+            const project = await resp.json();
+            this.startOnboarding(project);
+        } catch (err) {
+            console.error('Create project error', err);
+            this.showMessage('Network error. Please try again.', 'error');
+        } finally {
+            button.textContent = original;
+            button.disabled = false;
+        }
+    }
+
+    startOnboarding(project) {
+        const dashboardSection = document.getElementById('dashboard-section');
+        if (!dashboardSection) return;
+        const step = project.onboardingStep || 'basics';
+        dashboardSection.innerHTML = `
+            <div class="section-header">
+                <h2 class="section-title">Onboarding</h2>
+                <p class="section-subtitle">Let's get your project ready for the Readyverse</p>
+            </div>
+            <div class="wizard-grid">
+                <div class="wizard-card">
+                    <div class="wizard-stepper">
+                        <span class="wizard-step ${step==='basics'?'active':''}">Basics</span>
+                        <span class="wizard-step ${step==='assets'?'active':''}">Assets</span>
+                        <span class="wizard-step ${step==='integration'?'active':''}">Integration</span>
+                        <span class="wizard-step ${step==='compliance'?'active':''}">Compliance</span>
+                        <span class="wizard-step ${step==='review'?'active':''}">Review</span>
+                    </div>
+                    <form id="onboarding-basics" class="auth-form">
+                        <div class="form-group">
+                            <label class="form-label" for="ob-company">Company Name</label>
+                            <input id="ob-company" class="form-input" value="${project.companyName||''}" placeholder="Company Inc.">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="ob-short">Short Description</label>
+                            <textarea id="ob-short" class="form-input" rows="3" placeholder="A short, compelling summary">${project.shortDescription||''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:.5rem;">
+                                <input type="checkbox" id="ob-public" ${project.isPublic? 'checked':''}>
+                                <span class="form-label" style="margin:0;">Make project public</span>
+                            </label>
+                        </div>
+                        <div class="flex gap-20">
+                            <button type="submit" class="btn btn-primary">Save & Continue</button>
+                            <button type="button" class="btn btn-secondary" id="ob-exit">Exit</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="preview-pane">
+                    <div class="preview-overlay">
+                        <div class="preview-title" id="pv-title">${project.name}</div>
+                        <div class="preview-subtitle" id="pv-sub">${project.shortDescription||'Your short description will appear here'}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const form = document.getElementById('onboarding-basics');
+        const exit = document.getElementById('ob-exit');
+        const shortEl = document.getElementById('ob-short');
+        const subEl = document.getElementById('pv-sub');
+        shortEl.addEventListener('input', () => {
+            subEl.textContent = shortEl.value || 'Your short description will appear here';
+        });
+        exit.addEventListener('click', () => this.showProjectsList());
+        form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            const payload = {
+                step: 'assets',
+                companyName: document.getElementById('ob-company').value.trim() || undefined,
+                shortDescription: document.getElementById('ob-short').value.trim() || undefined,
+                isPublic: document.getElementById('ob-public').checked
+            };
+            const btn = form.querySelector('button[type="submit"]');
+            const orig = btn.textContent;
+            btn.innerHTML = '<span class="loading"></span> Saving...';
+            btn.disabled = true;
+            try {
+                const resp = await fetch(`${this.apiBaseUrl}/api/projects/${project.id}/onboarding/step`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    this.showMessage(err.error || 'Failed to save step', 'error');
+                    return;
+                }
+                this.showMessage('Saved. Next: Upload assets.', 'success');
+                this.showProjectsList();
+            } catch (e) {
+                console.error('Onboarding save error', e);
+                this.showMessage('Network error. Please try again.', 'error');
+            } finally {
+                btn.textContent = orig;
+                btn.disabled = false;
+            }
+        });
     }
 
     showProjectsList() {
