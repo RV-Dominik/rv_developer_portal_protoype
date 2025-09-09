@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  showroom-backend:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_BUCKET=${SUPABASE_BUCKET:-showrooms}
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-http://localhost:8080}
+      - ASSET_URL_TTL=${ASSET_URL_TTL:-3600}
+      - SESSION_COOKIE=${SESSION_COOKIE:-dev_portal_session}
+    env_file:
+      - .env

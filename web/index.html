@@ -3,135 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Showroom Developer Portal</title>
+    <title>Readyverse Developer Portal</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div id="app">
-        <!-- Login Screen -->
-        <div id="login-screen" class="screen">
-            <div class="login-container">
-                <div class="logo">
-                    <h1>Showroom Portal</h1>
-                    <p>Create and manage your game showrooms</p>
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0idXJsKCNwYWludDBfbGluZWFyXzBfMSkiLz4KPHBhdGggZD0iTTggMTJIMjRWMjBIOFYxMloiIGZpbGw9IndoaXRlIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMF8xIiB4MT0iMCIgeTE9IjAiIHgyPSIzMiIgeTI9IjMyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiM2MzY2RjEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOEE0RkZGIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+" alt="Readyverse" class="logo">
+                    <span class="brand-text">Readyverse</span>
                 </div>
-                
-                <form id="login-form" class="login-form">
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required placeholder="your@email.com">
+                <div class="nav-menu">
+                    <a href="#dashboard" class="nav-link active">Dashboard</a>
+                    <a href="#projects" class="nav-link">Projects</a>
+                    <a href="#assets" class="nav-link">Assets</a>
+                    <a href="#docs" class="nav-link">Docs</a>
+                </div>
+                <div class="nav-actions">
+                    <button id="loginBtn" class="btn btn-outline">Sign In</button>
+                    <button id="userMenu" class="user-menu" style="display: none;">
+                        <img src="https://via.placeholder.com/32x32/6366F1/FFFFFF?text=U" alt="User" class="user-avatar">
+                        <span class="user-name">Developer</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Hero Section -->
+            <section class="hero" id="dashboard">
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            Build the Future of
+                            <span class="gradient-text">Immersive Experiences</span>
+                        </h1>
+                        <p class="hero-description">
+                            Create, manage, and deploy your Unity and Unreal projects with our powerful developer portal. 
+                            Share your creations with the world through our immersive showroom platform.
+                        </p>
+                        <div class="hero-actions">
+                            <button id="createProjectBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Create New Project
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-play"></i>
+                                View Demo
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Send Magic Link</button>
-                </form>
-                
-                <div id="login-message" class="message"></div>
+                    <div class="hero-visual">
+                        <div class="showcase-card">
+                            <div class="showcase-header">
+                                <div class="showcase-dots">
+                                    <span class="dot red"></span>
+                                    <span class="dot yellow"></span>
+                                    <span class="dot green"></span>
+                                </div>
+                                <span class="showcase-title">Unity Showroom</span>
+                            </div>
+                            <div class="showcase-content">
+                                <div class="showcase-preview">
+                                    <div class="preview-placeholder">
+                                        <i class="fas fa-cube"></i>
+                                        <span>3D Preview</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section class="projects-section" id="projects">
+                <div class="section-container">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Projects</h2>
+                        <div class="section-actions">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Search projects..." id="projectSearch">
+                            </div>
+                            <button class="btn btn-primary" id="newProjectBtn">
+                                <i class="fas fa-plus"></i>
+                                New Project
+                            </button>
+                        </div>
+                    </div>
+                    <div class="projects-grid" id="projectsGrid">
+                        <!-- Projects will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="features-section">
+                <div class="section-container">
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                            <h3 class="feature-title">Unity Integration</h3>
+                            <p class="feature-description">
+                                Seamlessly integrate your Unity projects with our platform. 
+                                Upload builds, manage assets, and share with the community.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-gamepad"></i>
+                            </div>
+                            <h3 class="feature-title">Unreal Engine</h3>
+                            <p class="feature-description">
+                                Full support for Unreal Engine projects. 
+                                Deploy your creations and showcase them in our immersive environment.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-share-alt"></i>
+                            </div>
+                            <h3 class="feature-title">Easy Sharing</h3>
+                            <p class="feature-description">
+                                Share your projects with a simple link. 
+                                No complex setup required - just upload and share.
+                            </p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 class="feature-title">Analytics</h3>
+                            <p class="feature-description">
+                                Track views, engagement, and feedback on your projects. 
+                                Understand how users interact with your creations.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Project Modal -->
+        <div id="projectModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Create New Project</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="projectForm">
+                        <div class="form-group">
+                            <label for="projectName">Project Name</label>
+                            <input type="text" id="projectName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectDescription">Description</label>
+                            <textarea id="projectDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="developerName">Developer Name</label>
+                                <input type="text" id="developerName" name="developerName">
+                            </div>
+                            <div class="form-group">
+                                <label for="developerEmail">Email</label>
+                                <input type="email" id="developerEmail" name="developerEmail">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="unityVersion">Unity Version</label>
+                                <input type="text" id="unityVersion" name="unityVersion" placeholder="2022.3.x">
+                            </div>
+                            <div class="form-group">
+                                <label for="unrealVersion">Unreal Version</label>
+                                <input type="text" id="unrealVersion" name="unrealVersion" placeholder="5.3.x">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="isPublic" name="isPublic">
+                                <span class="checkmark"></span>
+                                Make this project public
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
+                    <button type="submit" form="projectForm" class="btn btn-primary">Create Project</button>
+                </div>
             </div>
         </div>
 
-        <!-- Dashboard Screen -->
-        <div id="dashboard-screen" class="screen hidden">
-            <header class="header">
-                <div class="header-content">
-                    <h1>My Projects</h1>
-                    <div class="header-actions">
-                        <button id="create-project-btn" class="btn btn-primary">+ New Project</button>
-                        <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Sign In to Readyverse</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="login-content">
+                        <div class="login-visual">
+                            <div class="login-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <h3>Welcome to the Future</h3>
+                            <p>Join thousands of developers building immersive experiences</p>
+                        </div>
+                        <div class="login-form">
+                            <form id="loginForm">
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    <i class="fas fa-envelope"></i>
+                                    Send Magic Link
+                                </button>
+                                <p class="login-note">
+                                    We'll send you a secure magic link to sign in instantly
+                                </p>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </header>
-
-            <main class="main">
-                <div id="projects-list" class="projects-grid">
-                    <!-- Projects will be loaded here -->
-                </div>
-            </main>
+            </div>
         </div>
 
-        <!-- Project Detail Screen -->
-        <div id="project-screen" class="screen hidden">
-            <header class="header">
-                <div class="header-content">
-                    <button id="back-to-dashboard" class="btn btn-secondary">← Back</button>
-                    <h1 id="project-title">Project Details</h1>
-                </div>
-            </header>
-
-            <main class="main">
-                <div class="project-detail">
-                    <div class="project-info">
-                        <div class="form-group">
-                            <label for="project-title-input">Project Title</label>
-                            <input type="text" id="project-title-input" placeholder="My Awesome Game">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="project-slug">URL Slug</label>
-                            <input type="text" id="project-slug" placeholder="my-awesome-game" readonly>
-                            <small>This will be your public URL: /manifest/my-awesome-game</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="short-desc">Short Description</label>
-                            <textarea id="short-desc" placeholder="Brief description of your game..."></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="long-desc">Long Description</label>
-                            <textarea id="long-desc" placeholder="Detailed description of your game..."></textarea>
-                        </div>
-                        
-                        <button id="save-project" class="btn btn-primary">Save Changes</button>
-                    </div>
-
-                    <div class="assets-section">
-                        <h3>Assets</h3>
-                        
-                        <div class="asset-upload">
-                            <h4>Logo</h4>
-                            <div class="upload-area" data-kind="logo">
-                                <input type="file" id="logo-upload" accept="image/*" hidden>
-                                <div class="upload-content">
-                                    <div id="logo-preview" class="asset-preview"></div>
-                                    <button type="button" class="upload-btn">Upload Logo</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="asset-upload">
-                            <h4>Header Image</h4>
-                            <div class="upload-area" data-kind="header">
-                                <input type="file" id="header-upload" accept="image/*" hidden>
-                                <div class="upload-content">
-                                    <div id="header-preview" class="asset-preview"></div>
-                                    <button type="button" class="upload-btn">Upload Header</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="asset-upload">
-                            <h4>Screenshots</h4>
-                            <div class="upload-area" data-kind="screenshot">
-                                <input type="file" id="screenshot-upload" accept="image/*" multiple hidden>
-                                <div class="upload-content">
-                                    <div id="screenshot-preview" class="asset-preview grid"></div>
-                                    <button type="button" class="upload-btn">Upload Screenshots</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="asset-upload">
-                            <h4>Trailer Video</h4>
-                            <div class="upload-area" data-kind="trailer">
-                                <input type="file" id="trailer-upload" accept="video/*" hidden>
-                                <div class="upload-content">
-                                    <div id="trailer-preview" class="asset-preview"></div>
-                                    <button type="button" class="upload-btn">Upload Trailer</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
         </div>
     </div>
 
