@@ -378,7 +378,13 @@ namespace ShowroomBackend.Services
                 var storageUrl = $"{_supabaseUrl}/storage/v1/object/{bucketName}/{fileKey}";
                 
                 using var content = new StreamContent(fileStream);
-                content.Headers.Add("Content-Type", "application/octet-stream");
+                
+                // Set proper content type based on file extension
+                var contentType = GetContentType(fileName);
+                content.Headers.Add("Content-Type", contentType);
+                
+                // Add authorization header
+                content.Headers.Add("Authorization", $"Bearer {_supabaseServiceKey}");
                 
                 var response = await _httpClient.PostAsync(storageUrl, content);
                 
@@ -387,13 +393,31 @@ namespace ShowroomBackend.Services
                     return fileKey;
                 }
                 
-                throw new Exception($"Failed to upload file: {response.StatusCode}");
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to upload file {FileName}: {StatusCode} - {Error}", 
+                    fileName, response.StatusCode, errorContent);
+                throw new Exception($"Failed to upload file: {response.StatusCode} - {errorContent}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to upload file {FileName}", fileName);
                 throw;
             }
+        }
+
+        private string GetContentType(string fileName)
+        {
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".mp4" => "video/mp4",
+                ".webm" => "video/webm",
+                ".pdf" => "application/pdf",
+                _ => "application/octet-stream"
+            };
         }
 
         public async Task<string> GetSignedUrlAsync(string bucketName, string fileKey, int expiresIn = 3600)

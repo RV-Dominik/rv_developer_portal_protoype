@@ -878,19 +878,75 @@ class ShowroomPortal {
         });
     }
 
-    handleFileUpload(event, areaId) {
+    async handleFileUpload(event, areaId) {
         const file = event.target.files[0];
         if (!file) return;
         
         const area = document.getElementById(areaId);
         const placeholder = area.querySelector('.upload-placeholder');
         
-        // Show file name
+        // Show uploading state
         placeholder.innerHTML = `
-            <div class="upload-icon">✓</div>
-            <div class="upload-text">${file.name}</div>
-            <div class="upload-hint">Click to change</div>
+            <div class="upload-icon">⏳</div>
+            <div class="upload-text">Uploading ${file.name}...</div>
+            <div class="upload-hint">Please wait</div>
         `;
+        
+        try {
+            // Upload file to server
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('kind', this.getFileKindFromAreaId(areaId));
+            
+            const response = await fetch(`${this.apiBaseUrl}/api/uploads/${this.currentOnboardingProject.id}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                const asset = await response.json();
+                
+                // Show success state
+                placeholder.innerHTML = `
+                    <div class="upload-icon">✓</div>
+                    <div class="upload-text">${file.name}</div>
+                    <div class="upload-hint">Click to change</div>
+                `;
+                
+                // Store the asset for later use
+                if (!this.uploadedAssets) this.uploadedAssets = [];
+                this.uploadedAssets.push(asset);
+                
+                this.showMessage('File uploaded successfully!', 'success');
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Upload failed');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            
+            // Show error state
+            placeholder.innerHTML = `
+                <div class="upload-icon">❌</div>
+                <div class="upload-text">Upload failed</div>
+                <div class="upload-hint">Click to try again</div>
+            `;
+            
+            this.showMessage('Failed to upload file: ' + error.message, 'error');
+        }
+    }
+
+    getFileKindFromAreaId(areaId) {
+        const kindMap = {
+            'logo-upload': 'logo',
+            'cover-upload': 'cover',
+            'screenshots-upload': 'screenshot',
+            'trailer-upload': 'trailer'
+        };
+        return kindMap[areaId] || 'screenshot';
     }
 
     async handleOnboardingSubmit(event) {
