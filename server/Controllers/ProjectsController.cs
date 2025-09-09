@@ -38,6 +38,10 @@ namespace ShowroomBackend.Controllers
                 if (project == null) return NotFound(new { error = "Project not found" });
                 if (project.UserId != userId) return Forbid();
 
+                // Debug logging
+                _logger.LogInformation("Saving onboarding step {Step} for project {ProjectId}. DTO: {Dto}", 
+                    dto.Step, id, System.Text.Json.JsonSerializer.Serialize(dto));
+
                 // Apply partial updates depending on step
                 if (!string.IsNullOrEmpty(dto.CompanyName)) project.CompanyName = dto.CompanyName;
                 if (!string.IsNullOrEmpty(dto.ShortDescription)) project.ShortDescription = dto.ShortDescription;
@@ -71,6 +75,10 @@ namespace ShowroomBackend.Controllers
 
                 var updated = await _supabaseService.UpdateProjectAsync(id, project);
                 if (updated == null) return StatusCode(500, new { error = "Failed to save step" });
+
+                // Debug logging
+                _logger.LogInformation("Project updated successfully. Updated project: {Project}", 
+                    System.Text.Json.JsonSerializer.Serialize(updated));
 
                 return Ok(updated);
             }
