@@ -10,10 +10,10 @@ namespace ShowroomBackend.Controllers
     [Route("api/[controller]")]
     public class ProjectsController : ControllerBase
     {
-        private readonly MockSupabaseService _supabaseService;
+        private readonly ISupabaseService _supabaseService;
         private readonly ILogger<ProjectsController> _logger;
 
-        public ProjectsController(MockSupabaseService supabaseService, ILogger<ProjectsController> logger)
+        public ProjectsController(ISupabaseService supabaseService, ILogger<ProjectsController> logger)
         {
             _supabaseService = supabaseService;
             _logger = logger;

@@ -23,3 +23,5 @@ services:
         value: 3600
       - key: SESSION_COOKIE
         value: dev_portal_session
+      - key: USE_MOCK_SUPABASE
+        value: "false"

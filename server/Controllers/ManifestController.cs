@@ -9,12 +9,12 @@ namespace ShowroomBackend.Controllers
     [Route("api/[controller]")]
     public class ManifestController : ControllerBase
     {
-        private readonly MockSupabaseService _supabaseService;
+        private readonly ISupabaseService _supabaseService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<ManifestController> _logger;
 
         public ManifestController(
-            MockSupabaseService supabaseService, 
+            ISupabaseService supabaseService, 
             IConfiguration configuration, 
             ILogger<ManifestController> logger)
         {

@@ -9,10 +9,10 @@ namespace ShowroomBackend.Controllers
     [Route("api/[controller]")]
     public class UploadsController : ControllerBase
     {
-        private readonly MockSupabaseService _supabaseService;
+        private readonly ISupabaseService _supabaseService;
         private readonly ILogger<UploadsController> _logger;
 
-        public UploadsController(MockSupabaseService supabaseService, ILogger<UploadsController> logger)
+        public UploadsController(ISupabaseService supabaseService, ILogger<UploadsController> logger)
         {
             _supabaseService = supabaseService;
             _logger = logger;

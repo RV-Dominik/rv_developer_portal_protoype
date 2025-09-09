@@ -2,7 +2,7 @@ using ShowroomBackend.Models;
 
 namespace ShowroomBackend.Services
 {
-    public class MockSupabaseService
+    public class MockSupabaseService : ISupabaseService
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<MockSupabaseService> _logger;

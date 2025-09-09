@@ -21,12 +21,31 @@ cp env.example .env
 
 Fill in your Supabase credentials:
 ```env
+# Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_BUCKET=showrooms
+
+# Application Configuration
 PUBLIC_BASE_URL=https://your-render-service.onrender.com
+ASSET_URL_TTL=3600
+SESSION_COOKIE=dev_portal_session
+
+# Service Selection
+# Set to "true" for mock service (development)
+# Set to "false" for real Supabase (production)
+USE_MOCK_SUPABASE=true
 ```
+
+### Service Selection
+
+The application automatically selects between mock and real Supabase services based on the `USE_MOCK_SUPABASE` environment variable:
+
+- **`USE_MOCK_SUPABASE=true`** - Uses MockSupabaseService (default, for development)
+- **`USE_MOCK_SUPABASE=false`** - Uses SupabaseRestService (for production with real Supabase)
+
+No code changes needed to switch between services!
 
 ### 2. Database Setup
 

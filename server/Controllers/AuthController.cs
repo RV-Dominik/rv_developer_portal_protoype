@@ -8,12 +8,12 @@ namespace ShowroomBackend.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly MockSupabaseService _supabaseService;
+        private readonly ISupabaseService _supabaseService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            MockSupabaseService supabaseService, 
+            ISupabaseService supabaseService, 
             IConfiguration configuration, 
             ILogger<AuthController> logger)
         {

@@ -38,7 +38,21 @@ builder.Services.AddCors(options =>
 
 // Add Supabase services
 builder.Services.AddScoped<MockSupabaseService>();
-// builder.Services.AddScoped<SupabaseService>(); // Commented out due to API compatibility issues
+builder.Services.AddHttpClient<SupabaseRestService>();
+builder.Services.AddScoped<SupabaseRestService>();
+
+// Register the interface based on environment variable
+var useMockService = builder.Configuration.GetValue<bool>("USE_MOCK_SUPABASE", true);
+if (useMockService)
+{
+    builder.Services.AddScoped<ISupabaseService, MockSupabaseService>();
+    Console.WriteLine("Using MockSupabaseService for development");
+}
+else
+{
+    builder.Services.AddScoped<ISupabaseService, SupabaseRestService>();
+    Console.WriteLine("Using SupabaseRestService for production");
+}
 
 // Add health checks
 builder.Services.AddHealthChecks();
