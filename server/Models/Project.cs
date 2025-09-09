@@ -8,6 +8,7 @@ namespace ShowroomBackend.Models
     [Table("projects")]
     public class Project : BaseModel
     {
+        [PrimaryKey]
         [JsonPropertyName("id")]
         public Guid Id { get; set; }
         
