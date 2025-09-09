@@ -34,6 +34,11 @@ class ShowroomPortal {
         if (getStartedButton) {
             getStartedButton.addEventListener('click', this.showAuthSection.bind(this));
         }
+
+        const retryButton = document.getElementById('retry-magic-link');
+        if (retryButton) {
+            retryButton.addEventListener('click', this.enableMagicLinkForm.bind(this));
+        }
     }
 
     hideLogoutButton() {
@@ -124,6 +129,8 @@ class ShowroomPortal {
         const email = document.getElementById('email-input').value;
         const submitButton = e.target.querySelector('button[type="submit"]');
         const messageEl = document.getElementById('auth-message');
+        const formEl = document.getElementById('magic-link-form');
+        const retryContainer = document.getElementById('retry-container');
         
         if (!email) {
             this.showMessage('Please enter your email address', 'error', messageEl);
@@ -144,6 +151,9 @@ class ShowroomPortal {
             if (response.ok) {
                 this.showMessage('Magic link sent! Check your email and click the link to sign in.', 'success', messageEl);
                 document.getElementById('email-input').value = '';
+                // Hide form and show retry option
+                if (formEl) formEl.classList.add('hidden');
+                if (retryContainer) retryContainer.style.display = 'block';
             } else {
                 const error = await response.json();
                 this.showMessage(error.error || 'Failed to send magic link', 'error', messageEl);
@@ -155,6 +165,17 @@ class ShowroomPortal {
             submitButton.textContent = originalText;
             submitButton.disabled = false;
         }
+    }
+
+    enableMagicLinkForm() {
+        const formEl = document.getElementById('magic-link-form');
+        const retryContainer = document.getElementById('retry-container');
+        const messageEl = document.getElementById('auth-message');
+        if (formEl) formEl.classList.remove('hidden');
+        if (retryContainer) retryContainer.style.display = 'none';
+        if (messageEl) messageEl.textContent = '';
+        const emailInput = document.getElementById('email-input');
+        if (emailInput) emailInput.focus();
     }
 
     async handleLogout() {
@@ -253,6 +274,9 @@ class ShowroomPortal {
         const dashboardSection = document.getElementById('dashboard-section');
         const projectDetailSection = document.getElementById('project-detail-section');
         const logoutButton = document.getElementById('logout-button');
+        const retryContainer = document.getElementById('retry-container');
+        const formEl = document.getElementById('magic-link-form');
+        const messageEl = document.getElementById('auth-message');
         
         if (heroSection) heroSection.classList.add('hidden');
         if (authSection) authSection.classList.remove('hidden');
@@ -261,6 +285,11 @@ class ShowroomPortal {
         
         // Hide logout button when not authenticated
         if (logoutButton) logoutButton.style.display = 'none';
+
+        // Reset auth UI
+        if (retryContainer) retryContainer.style.display = 'none';
+        if (formEl) formEl.classList.remove('hidden');
+        if (messageEl) messageEl.textContent = '';
     }
 
     showDashboard() {

@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using ShowroomBackend.Models;
+using System.Net.Http.Headers;
 
 namespace ShowroomBackend.Services
 {
@@ -73,46 +74,41 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                // Verify the token with Supabase
-                var verifyPayload = new
-                {
-                    access_token = accessToken,
-                    refresh_token = refreshToken
-                };
+                // Use access token from magic link to fetch user info
+                var request = new HttpRequestMessage(HttpMethod.Get, "user");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                request.Headers.Add("apikey", _supabaseAnonKey);
 
-                var json = JsonSerializer.Serialize(verifyPayload);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.SendAsync(request);
 
-                var response = await _httpClient.PostAsync("token?grant_type=refresh_token", content);
-                
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var tokenResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
-                    
-                    if (tokenResponse.TryGetProperty("user", out var user) && 
-                        tokenResponse.TryGetProperty("access_token", out var newAccessToken))
+                    var content = await response.Content.ReadAsStringAsync();
+                    var user = JsonSerializer.Deserialize<JsonElement>(content);
+
+                    if (user.ValueKind == JsonValueKind.Object &&
+                        user.TryGetProperty("id", out var idElement) &&
+                        user.TryGetProperty("email", out var emailElement))
                     {
-                        var userId = user.GetProperty("id").GetString();
-                        var email = user.GetProperty("email").GetString();
-                        
+                        var userId = idElement.GetString() ?? string.Empty;
+                        var email = emailElement.GetString() ?? string.Empty;
+
                         _logger.LogInformation("User authenticated: {Email} ({UserId})", email, userId);
-                        
+
                         return new
                         {
                             user = new
                             {
                                 id = userId,
-                                email = email,
-                                created_at = user.TryGetProperty("created_at", out var createdAt) ? createdAt.GetString() : DateTime.UtcNow.ToString("o")
+                                email = email
                             },
-                            access_token = newAccessToken.GetString(),
-                            refresh_token = tokenResponse.TryGetProperty("refresh_token", out var newRefreshToken) ? newRefreshToken.GetString() : refreshToken
+                            access_token = accessToken,
+                            refresh_token = string.IsNullOrEmpty(refreshToken) ? null : refreshToken
                         };
                     }
                 }
-                
-                _logger.LogWarning("Failed to verify magic link token");
+
+                _logger.LogWarning("Failed to verify magic link token (user endpoint)");
                 return null;
             }
             catch (Exception ex)

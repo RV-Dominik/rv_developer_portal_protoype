@@ -640,6 +640,11 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--rv-blue-35);
 }
 
+/* Retry container */
+#retry-container {
+  opacity: 0.9;
+}
+
 /* Loading animation */
 .loading {
   display: inline-block;
