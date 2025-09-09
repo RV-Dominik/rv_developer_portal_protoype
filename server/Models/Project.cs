@@ -141,6 +141,7 @@ namespace ShowroomBackend.Models
         [JsonPropertyName("onboarding_completed_at")]
         public DateTime? OnboardingCompletedAt { get; set; }
         
+        [JsonIgnore]
         public List<Asset> Assets { get; set; } = new();
     }
 }

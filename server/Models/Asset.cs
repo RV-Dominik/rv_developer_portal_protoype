@@ -45,6 +45,7 @@ namespace ShowroomBackend.Models
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
+        [JsonIgnore]
         public Project? Project { get; set; }
     }
 }
