@@ -849,16 +849,18 @@ class ShowroomPortal {
     bindOnboardingEvents() {
         // Form submission
         const form = document.getElementById('onboarding-form');
-        form.addEventListener('submit', this.handleOnboardingSubmit.bind(this));
+        if (form) {
+            form.addEventListener('submit', this.handleOnboardingSubmit.bind(this));
+        }
         
         // Navigation buttons
         const backBtn = document.getElementById('wizard-back');
         const skipBtn = document.getElementById('wizard-skip');
         const exitBtn = document.getElementById('wizard-exit');
         
-        backBtn.addEventListener('click', this.goToPreviousStep.bind(this));
-        skipBtn.addEventListener('click', this.skipCurrentStep.bind(this));
-        exitBtn.addEventListener('click', this.exitOnboarding.bind(this));
+        if (backBtn) backBtn.addEventListener('click', this.goToPreviousStep.bind(this));
+        if (skipBtn) skipBtn.addEventListener('click', this.skipCurrentStep.bind(this));
+        if (exitBtn) exitBtn.addEventListener('click', this.exitOnboarding.bind(this));
         
         // File upload handlers
         this.bindFileUploadEvents();
@@ -951,8 +953,11 @@ class ShowroomPortal {
 
     async handleOnboardingSubmit(event) {
         event.preventDefault();
+        console.log('Form submitted for step:', this.currentOnboardingStep);
         
         const formData = this.collectStepData();
+        console.log('Collected form data:', formData);
+        
         const nextStep = this.getNextStep();
         
         try {
@@ -994,6 +999,16 @@ class ShowroomPortal {
                 if (document.getElementById('ob-platform-linux')?.checked) platforms.push('Linux');
                 if (document.getElementById('ob-platform-web')?.checked) platforms.push('Web');
                 data.targetPlatforms = JSON.stringify(platforms);
+                
+                // Debug: Log what we're collecting
+                console.log('Collecting basics data:', {
+                    shortDescription: data.shortDescription,
+                    fullDescription: data.fullDescription,
+                    genre: data.genre,
+                    publishingTrack: data.publishingTrack,
+                    buildStatus: data.buildStatus,
+                    targetPlatforms: data.targetPlatforms
+                });
                 break;
                 
             case 'assets':
@@ -1058,8 +1073,11 @@ class ShowroomPortal {
             throw new Error('Failed to save onboarding step');
         }
         
+        const result = await response.json();
+        
         // Update local project data
         Object.assign(this.currentOnboardingProject, data);
+        return result;
     }
 
     goToPreviousStep() {
