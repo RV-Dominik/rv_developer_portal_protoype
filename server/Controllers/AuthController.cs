@@ -96,8 +96,9 @@ namespace ShowroomBackend.Controllers
                         {
                             HttpOnly = true,
                             Secure = true,
-                            SameSite = SameSiteMode.Strict,
-                            Expires = DateTime.UtcNow.AddDays(7)
+                            SameSite = SameSiteMode.Lax,
+                            Expires = DateTime.UtcNow.AddDays(7),
+                            Path = "/"
                         };
                         
                         Response.Cookies.Append("auth_token", jwtToken, cookieOptions);

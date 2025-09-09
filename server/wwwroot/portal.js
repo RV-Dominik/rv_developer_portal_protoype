@@ -4,6 +4,7 @@ class ShowroomPortal {
         this.apiBaseUrl = window.location.origin;
         this.currentUser = null;
         this.projects = [];
+        this.isVerifyingMagicLink = false;
         this.init();
     }
 
@@ -59,7 +60,10 @@ class ShowroomPortal {
         const refreshToken = hashParams.get('refresh_token') || searchParams.get('refresh_token');
 
         if (accessToken) {
-            this.verifyMagicLink(accessToken, refreshToken);
+            this.isVerifyingMagicLink = true;
+            this.verifyMagicLink(accessToken, refreshToken).finally(() => {
+                this.isVerifyingMagicLink = false;
+            });
         }
     }
 
@@ -102,6 +106,7 @@ class ShowroomPortal {
 
     async checkAuthStatus() {
         try {
+            if (this.isVerifyingMagicLink) return; // wait for verification to complete
             const response = await fetch(`${this.apiBaseUrl}/api/auth/session`);
             if (response.ok) {
                 const data = await response.json();
