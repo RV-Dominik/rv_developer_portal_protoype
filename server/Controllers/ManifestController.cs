@@ -44,7 +44,7 @@ namespace ShowroomBackend.Controllers
                 {
                     try
                     {
-                        var signedUrl = await _supabaseService.GetSignedUrlAsync(asset.FileKey, ttl);
+                        var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", asset.FileKey, ttl);
                         if (signedUrl != null)
                         {
                             if (asset.Kind == "screenshot")

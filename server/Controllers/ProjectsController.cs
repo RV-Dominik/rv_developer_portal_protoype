@@ -100,7 +100,7 @@ namespace ShowroomBackend.Controllers
                     return Unauthorized(new { error = "Not authenticated" });
                 }
 
-                var project = await _supabaseService.GetProjectByIdAsync(id, "mock-user-id");
+                var project = await _supabaseService.GetProjectByIdAsync(id);
                 if (project == null)
                 {
                     return NotFound(new { error = "Project not found" });
@@ -126,7 +126,7 @@ namespace ShowroomBackend.Controllers
                     return Unauthorized(new { error = "Not authenticated" });
                 }
 
-                var project = await _supabaseService.GetProjectByIdAsync(id, "mock-user-id");
+                var project = await _supabaseService.GetProjectByIdAsync(id);
                 if (project == null)
                 {
                     return NotFound(new { error = "Project not found" });
@@ -149,7 +149,7 @@ namespace ShowroomBackend.Controllers
                     project.Slug = GenerateSlug(dto.Name);
                 }
 
-                var updatedProject = await _supabaseService.UpdateProjectAsync(project);
+                var updatedProject = await _supabaseService.UpdateProjectAsync(id, project);
                 if (updatedProject == null)
                 {
                     return StatusCode(500, new { error = "Failed to update project" });
@@ -175,7 +175,7 @@ namespace ShowroomBackend.Controllers
                     return Unauthorized(new { error = "Not authenticated" });
                 }
 
-                var success = await _supabaseService.DeleteProjectAsync(id, "mock-user-id");
+                var success = await _supabaseService.DeleteProjectAsync(id);
                 if (!success)
                 {
                     return NotFound(new { error = "Project not found" });

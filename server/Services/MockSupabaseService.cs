@@ -6,6 +6,8 @@ namespace ShowroomBackend.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<MockSupabaseService> _logger;
+        private static bool _isLoggedIn = false;
+        private static string? _currentUserEmail = null;
 
         public MockSupabaseService(IConfiguration configuration, ILogger<MockSupabaseService> logger)
         {
@@ -16,14 +18,24 @@ namespace ShowroomBackend.Services
         public async Task<object?> GetSessionAsync()
         {
             await Task.Delay(1);
-            _logger.LogInformation("Mock: Getting session");
-            return new { User = new { Id = "mock-user-id", Email = "test@example.com" } };
+            if (_isLoggedIn && !string.IsNullOrEmpty(_currentUserEmail))
+            {
+                _logger.LogInformation("Mock: Getting session - user logged in as {Email}", _currentUserEmail);
+                return new { User = new { Id = "mock-user-id", Email = _currentUserEmail } };
+            }
+            _logger.LogInformation("Mock: Getting session - no active session");
+            return null;
         }
 
         public async Task<object?> SignInWithOtpAsync(string email, string redirectTo)
         {
             await Task.Delay(1);
             _logger.LogInformation("Mock: Sending magic link to {Email}", email);
+            
+            // Simulate successful login after magic link
+            _isLoggedIn = true;
+            _currentUserEmail = email;
+            
             return new { User = new { Id = "mock-user-id", Email = email } };
         }
 
@@ -31,6 +43,8 @@ namespace ShowroomBackend.Services
         {
             await Task.Delay(1);
             _logger.LogInformation("Mock: Signing out");
+            _isLoggedIn = false;
+            _currentUserEmail = null;
         }
 
         public async Task<Project?> GetProjectBySlugAsync(string slug)
@@ -48,8 +62,7 @@ namespace ShowroomBackend.Services
                 IsPublic = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                UserId = "mock-user-id",
-                Assets = new List<Asset>()
+                UserId = "mock-user-id"
             };
         }
 
@@ -63,34 +76,25 @@ namespace ShowroomBackend.Services
                 new Project
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Mock Project 1",
-                    Slug = "mock-project-1",
-                    Description = "First mock project",
+                    Name = "Sample Project 1",
+                    Slug = "sample-project-1",
+                    Description = "A sample project for testing",
                     IsPublic = true,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow.AddDays(-7),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    UserId = userId
+                },
+                new Project
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Sample Project 2",
+                    Slug = "sample-project-2",
+                    Description = "Another sample project",
+                    IsPublic = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
                     UpdatedAt = DateTime.UtcNow,
-                    UserId = userId,
-                    Assets = new List<Asset>()
+                    UserId = userId
                 }
-            };
-        }
-
-        public async Task<Project?> GetProjectByIdAsync(Guid id, string userId)
-        {
-            await Task.Delay(1);
-            _logger.LogInformation("Mock: Getting project {Id} for user {UserId}", id, userId);
-            
-            return new Project
-            {
-                Id = id,
-                Name = "Mock Project",
-                Slug = "mock-project",
-                Description = "A mock project for testing",
-                IsPublic = true,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                UserId = userId,
-                Assets = new List<Asset>()
             };
         }
 
@@ -102,24 +106,46 @@ namespace ShowroomBackend.Services
             project.Id = Guid.NewGuid();
             project.CreatedAt = DateTime.UtcNow;
             project.UpdatedAt = DateTime.UtcNow;
+            project.UserId = "mock-user-id";
             
             return project;
         }
 
-        public async Task<Project?> UpdateProjectAsync(Project project)
+        public async Task<Project?> UpdateProjectAsync(Guid id, Project project)
         {
             await Task.Delay(1);
-            _logger.LogInformation("Mock: Updating project {ProjectId}", project.Id);
+            _logger.LogInformation("Mock: Updating project {ProjectId}", id);
             
+            project.Id = id;
             project.UpdatedAt = DateTime.UtcNow;
+            project.UserId = "mock-user-id";
+            
             return project;
         }
 
-        public async Task<bool> DeleteProjectAsync(Guid id, string userId)
+        public async Task<bool> DeleteProjectAsync(Guid id)
         {
             await Task.Delay(1);
-            _logger.LogInformation("Mock: Deleting project {Id} for user {UserId}", id, userId);
+            _logger.LogInformation("Mock: Deleting project {ProjectId}", id);
             return true;
+        }
+
+        public async Task<Project?> GetProjectByIdAsync(Guid id)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting project by ID {ProjectId}", id);
+            
+            return new Project
+            {
+                Id = id,
+                Name = "Mock Project",
+                Slug = "mock-project",
+                Description = "A mock project for testing",
+                IsPublic = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                UserId = "mock-user-id"
+            };
         }
 
         public async Task<List<Asset>> GetProjectAssetsAsync(Guid projectId)
@@ -133,12 +159,11 @@ namespace ShowroomBackend.Services
                 {
                     Id = Guid.NewGuid(),
                     ProjectId = projectId,
-                    FileName = "mock-asset.jpg",
-                    FileKey = "mock-file-key",
+                    FileKey = "screenshots/screenshot1.jpg",
+                    FileName = "screenshot1.jpg",
                     MimeType = "image/jpeg",
-                    FileSize = 1024,
                     Kind = "screenshot",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow.AddDays(-1)
                 }
             };
         }
@@ -154,25 +179,28 @@ namespace ShowroomBackend.Services
             return asset;
         }
 
-        public async Task<bool> DeleteAssetAsync(Guid id, Guid projectId, string userId)
+        public async Task<bool> DeleteAssetAsync(Guid id)
         {
             await Task.Delay(1);
-            _logger.LogInformation("Mock: Deleting asset {Id} from project {ProjectId}", id, projectId);
+            _logger.LogInformation("Mock: Deleting asset {AssetId}", id);
             return true;
         }
 
-        public async Task<string?> GetSignedUrlAsync(string fileKey, int ttlSeconds = 3600)
+        public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string bucketName, string folder = "")
         {
             await Task.Delay(1);
-            _logger.LogInformation("Mock: Creating signed URL for {FileKey}", fileKey);
-            return $"https://mock-signed-url.com/{fileKey}";
+            _logger.LogInformation("Mock: Uploading file {FileName} to bucket {BucketName}", fileName, bucketName);
+            
+            var fileKey = string.IsNullOrEmpty(folder) ? fileName : $"{folder}/{fileName}";
+            return fileKey;
         }
 
-        public async Task<string?> UploadFileAsync(Stream fileStream, string fileName, string contentType)
+        public async Task<string> GetSignedUrlAsync(string bucketName, string fileKey, int expiresIn = 3600)
         {
             await Task.Delay(1);
-            _logger.LogInformation("Mock: Uploading file {FileName}", fileName);
-            return $"mock-file-key-{Guid.NewGuid()}";
+            _logger.LogInformation("Mock: Getting signed URL for {FileKey}", fileKey);
+            
+            return $"https://mock-bucket.supabase.co/storage/v1/object/sign/{bucketName}/{fileKey}?expiresIn={expiresIn}";
         }
     }
 }

@@ -36,8 +36,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add Supabase service
+// Add Supabase services
 builder.Services.AddScoped<MockSupabaseService>();
+// builder.Services.AddScoped<SupabaseService>(); // Commented out due to API compatibility issues
 
 // Add health checks
 builder.Services.AddHealthChecks();
@@ -62,6 +63,19 @@ else
 }
 
 app.UseCors("AllowFrontend");
+
+// Add Content Security Policy for fonts and Swagger
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Content-Security-Policy"] = 
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+        "img-src 'self' data: https:; " +
+        "font-src 'self' https://fonts.gstatic.com https://cdn.prod.website-files.com; " +
+        "connect-src 'self';";
+    await next();
+});
 
 // Serve static files from web directory
 app.UseStaticFiles();

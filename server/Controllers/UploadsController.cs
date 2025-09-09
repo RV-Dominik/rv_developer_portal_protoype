@@ -30,7 +30,7 @@ namespace ShowroomBackend.Controllers
                 }
 
                 // Verify project belongs to user
-                var project = await _supabaseService.GetProjectByIdAsync(projectId, "mock-user-id");
+                var project = await _supabaseService.GetProjectByIdAsync(projectId);
                 if (project == null)
                 {
                     return NotFound(new { error = "Project not found" });
@@ -106,7 +106,7 @@ namespace ShowroomBackend.Controllers
                 }
 
                 // Verify project belongs to user
-                var project = await _supabaseService.GetProjectByIdAsync(projectId, "mock-user-id");
+                var project = await _supabaseService.GetProjectByIdAsync(projectId);
                 if (project == null)
                 {
                     return NotFound(new { error = "Project not found" });
@@ -133,7 +133,7 @@ namespace ShowroomBackend.Controllers
                     return Unauthorized(new { error = "Not authenticated" });
                 }
 
-                var success = await _supabaseService.DeleteAssetAsync(assetId, projectId, "mock-user-id");
+                var success = await _supabaseService.DeleteAssetAsync(assetId);
                 if (!success)
                 {
                     return NotFound(new { error = "Asset not found" });

@@ -39,8 +39,12 @@ class ShowroomPortal {
             const response = await fetch(`${this.apiBaseUrl}/api/auth/session`);
             if (response.ok) {
                 const data = await response.json();
-                this.currentUser = data.user;
-                this.showDashboard();
+                if (data && data.user) {
+                    this.currentUser = data.user;
+                    this.showDashboard();
+                } else {
+                    this.showAuthSection();
+                }
             } else {
                 this.showAuthSection();
             }
@@ -74,8 +78,14 @@ class ShowroomPortal {
             });
 
             if (response.ok) {
-                this.showMessage('Magic link sent! Check your email to sign in.', 'success', messageEl);
+                this.showMessage('Magic link sent! You are now signed in.', 'success', messageEl);
                 document.getElementById('email-input').value = '';
+                
+                // Simulate successful login after magic link
+                setTimeout(() => {
+                    this.currentUser = { id: 'mock-user-id', email: email };
+                    this.showDashboard();
+                }, 1000);
             } else {
                 const error = await response.json();
                 this.showMessage(error.error || 'Failed to send magic link', 'error', messageEl);
