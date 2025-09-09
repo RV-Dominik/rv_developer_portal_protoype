@@ -175,51 +175,61 @@ ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_organizations ENABLE ROW LEVEL SECURITY;
 
 -- Projects policies
-CREATE POLICY IF NOT EXISTS "Users can view their own projects" ON projects
+DROP POLICY IF EXISTS "Users can view their own projects" ON projects;
+CREATE POLICY "Users can view their own projects" ON projects
     FOR SELECT USING (auth.uid()::text = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can insert their own projects" ON projects
+DROP POLICY IF EXISTS "Users can insert their own projects" ON projects;
+CREATE POLICY "Users can insert their own projects" ON projects
     FOR INSERT WITH CHECK (auth.uid()::text = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can update their own projects" ON projects
+DROP POLICY IF EXISTS "Users can update their own projects" ON projects;
+CREATE POLICY "Users can update their own projects" ON projects
     FOR UPDATE USING (auth.uid()::text = user_id);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their own projects" ON projects
+DROP POLICY IF EXISTS "Users can delete their own projects" ON projects;
+CREATE POLICY "Users can delete their own projects" ON projects
     FOR DELETE USING (auth.uid()::text = user_id);
 
-CREATE POLICY IF NOT EXISTS "Anyone can view public projects" ON projects
+DROP POLICY IF EXISTS "Anyone can view public projects" ON projects;
+CREATE POLICY "Anyone can view public projects" ON projects
     FOR SELECT USING (is_public = true);
 
 -- Assets policies
-CREATE POLICY IF NOT EXISTS "Users can view assets of their projects" ON assets
+DROP POLICY IF EXISTS "Users can view assets of their projects" ON assets;
+CREATE POLICY "Users can view assets of their projects" ON assets
     FOR SELECT USING (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY IF NOT EXISTS "Users can insert assets to their projects" ON assets
+DROP POLICY IF EXISTS "Users can insert assets to their projects" ON assets;
+CREATE POLICY "Users can insert assets to their projects" ON assets
     FOR INSERT WITH CHECK (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY IF NOT EXISTS "Users can update assets of their projects" ON assets
+DROP POLICY IF EXISTS "Users can update assets of their projects" ON assets;
+CREATE POLICY "Users can update assets of their projects" ON assets
     FOR UPDATE USING (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY IF NOT EXISTS "Users can delete assets of their projects" ON assets
+DROP POLICY IF EXISTS "Users can delete assets of their projects" ON assets;
+CREATE POLICY "Users can delete assets of their projects" ON assets
     FOR DELETE USING (
         project_id IN (
             SELECT id FROM projects WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY IF NOT EXISTS "Anyone can view assets of public projects" ON assets
+DROP POLICY IF EXISTS "Anyone can view assets of public projects" ON assets;
+CREATE POLICY "Anyone can view assets of public projects" ON assets
     FOR SELECT USING (
         project_id IN (
             SELECT id FROM projects WHERE is_public = true
@@ -227,24 +237,28 @@ CREATE POLICY IF NOT EXISTS "Anyone can view assets of public projects" ON asset
     );
 
 -- Organizations policies
-CREATE POLICY IF NOT EXISTS "Users can view their organizations" ON organizations
+DROP POLICY IF EXISTS "Users can view their organizations" ON organizations;
+CREATE POLICY "Users can view their organizations" ON organizations
     FOR SELECT USING (
         id IN (
             SELECT organization_id FROM user_organizations WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY IF NOT EXISTS "Users can insert organizations" ON organizations
+DROP POLICY IF EXISTS "Users can insert organizations" ON organizations;
+CREATE POLICY "Users can insert organizations" ON organizations
     FOR INSERT WITH CHECK (true); -- Will be linked via user_organizations
 
-CREATE POLICY IF NOT EXISTS "Users can update their organizations" ON organizations
+DROP POLICY IF EXISTS "Users can update their organizations" ON organizations;
+CREATE POLICY "Users can update their organizations" ON organizations
     FOR UPDATE USING (
         id IN (
             SELECT organization_id FROM user_organizations WHERE user_id = auth.uid()::text
         )
     );
 
-CREATE POLICY IF NOT EXISTS "Users can delete their organizations" ON organizations
+DROP POLICY IF EXISTS "Users can delete their organizations" ON organizations;
+CREATE POLICY "Users can delete their organizations" ON organizations
     FOR DELETE USING (
         id IN (
             SELECT organization_id FROM user_organizations WHERE user_id = auth.uid()::text
@@ -252,16 +266,20 @@ CREATE POLICY IF NOT EXISTS "Users can delete their organizations" ON organizati
     );
 
 -- User-Organizations policies
-CREATE POLICY IF NOT EXISTS "Users can view their user_organizations" ON user_organizations
+DROP POLICY IF EXISTS "Users can view their user_organizations" ON user_organizations;
+CREATE POLICY "Users can view their user_organizations" ON user_organizations
     FOR SELECT USING (user_id = auth.uid()::text);
 
-CREATE POLICY IF NOT EXISTS "Users can insert their user_organizations" ON user_organizations
+DROP POLICY IF EXISTS "Users can insert their user_organizations" ON user_organizations;
+CREATE POLICY "Users can insert their user_organizations" ON user_organizations
     FOR INSERT WITH CHECK (user_id = auth.uid()::text);
 
-CREATE POLICY IF NOT EXISTS "Users can update their user_organizations" ON user_organizations
+DROP POLICY IF EXISTS "Users can update their user_organizations" ON user_organizations;
+CREATE POLICY "Users can update their user_organizations" ON user_organizations
     FOR UPDATE USING (user_id = auth.uid()::text);
 
-CREATE POLICY IF NOT EXISTS "Users can delete their user_organizations" ON user_organizations
+DROP POLICY IF EXISTS "Users can delete their user_organizations" ON user_organizations;
+CREATE POLICY "Users can delete their user_organizations" ON user_organizations
     FOR DELETE USING (user_id = auth.uid()::text);
 ```
 
