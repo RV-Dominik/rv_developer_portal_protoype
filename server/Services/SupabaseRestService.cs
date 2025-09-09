@@ -474,6 +474,20 @@ namespace ShowroomBackend.Services
                         {
                             return organization;
                         }
+                        else
+                        {
+                            var errorContent = await userOrgResponse.Content.ReadAsStringAsync();
+                            _logger.LogError("Failed to create user_organizations relationship: {StatusCode} - {Content}", 
+                                userOrgResponse.StatusCode, errorContent);
+                            throw new Exception($"Failed to create user_organizations relationship: {userOrgResponse.StatusCode} - {errorContent}");
+                        }
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        _logger.LogError("Failed to create organization: {StatusCode} - {Content}", 
+                            response.StatusCode, errorContent);
+                        throw new Exception($"Failed to create organization: {response.StatusCode} - {errorContent}");
                     }
                 }
                 

@@ -77,8 +77,8 @@ namespace ShowroomBackend.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating/updating organization");
-                return StatusCode(500, "Internal server error");
+                _logger.LogError(ex, "Error creating/updating organization: {Message}", ex.Message);
+                return StatusCode(500, new { error = "Internal server error", details = ex.Message });
             }
         }
 
