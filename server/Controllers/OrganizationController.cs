@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace ShowroomBackend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/org")]
     [Authorize]
     public class OrganizationController : ControllerBase
     {
