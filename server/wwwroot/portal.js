@@ -9,6 +9,7 @@ class ShowroomPortal {
 
     init() {
         this.bindEvents();
+        this.hideLogoutButton(); // Hide logout button by default
         this.checkAuthStatus();
     }
 
@@ -31,6 +32,13 @@ class ShowroomPortal {
         const getStartedButton = document.getElementById('get-started-btn');
         if (getStartedButton) {
             getStartedButton.addEventListener('click', this.showAuthSection.bind(this));
+        }
+    }
+
+    hideLogoutButton() {
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+            logoutButton.style.display = 'none';
         }
     }
 
@@ -178,11 +186,15 @@ class ShowroomPortal {
         const authSection = document.getElementById('auth-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const projectDetailSection = document.getElementById('project-detail-section');
+        const logoutButton = document.getElementById('logout-button');
         
         if (heroSection) heroSection.classList.add('hidden');
         if (authSection) authSection.classList.remove('hidden');
         if (dashboardSection) dashboardSection.classList.add('hidden');
         if (projectDetailSection) projectDetailSection.classList.add('hidden');
+        
+        // Hide logout button when not authenticated
+        if (logoutButton) logoutButton.style.display = 'none';
     }
 
     showDashboard() {
@@ -190,11 +202,15 @@ class ShowroomPortal {
         const authSection = document.getElementById('auth-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const projectDetailSection = document.getElementById('project-detail-section');
+        const logoutButton = document.getElementById('logout-button');
         
         if (heroSection) heroSection.classList.add('hidden');
         if (authSection) authSection.classList.add('hidden');
         if (dashboardSection) dashboardSection.classList.remove('hidden');
         if (projectDetailSection) projectDetailSection.classList.add('hidden');
+        
+        // Show logout button when authenticated
+        if (logoutButton) logoutButton.style.display = 'inline-block';
         
         this.showProjectsList();
     }

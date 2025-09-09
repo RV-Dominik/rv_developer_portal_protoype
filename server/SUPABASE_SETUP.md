@@ -127,9 +127,10 @@ CREATE TABLE assets (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Storage bucket
+-- Storage bucket (only create if it doesn't exist)
 INSERT INTO storage.buckets (id, name, public) 
-VALUES ('showrooms', 'showrooms', true);
+VALUES ('showrooms', 'showrooms', true)
+ON CONFLICT (id) DO NOTHING;
 ```
 
 ### **Step 4: Row Level Security (RLS)**

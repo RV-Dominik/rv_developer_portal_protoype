@@ -761,3 +761,79 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.9rem;
   line-height: 1.5;
 }
+
+/* Guide Section */
+.guide-section {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--rv-blue-35);
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.guide-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--rv-white);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.guide-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border-left: 3px solid var(--rv-blue);
+}
+
+.guide-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.guide-text {
+  flex: 1;
+}
+
+.guide-text strong {
+  display: block;
+  color: var(--rv-white);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.guide-text p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Responsive guide */
+@media (max-width: 768px) {
+  .guide-section {
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  
+  .guide-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .guide-icon {
+    margin-top: 0;
+  }
+}
