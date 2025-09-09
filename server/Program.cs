@@ -1,5 +1,8 @@
 using ShowroomBackend.Services;
 using ShowroomBackend.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +38,39 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+// Add JWT Authentication
+var jwtSecret = builder.Configuration["JWT_SECRET"] ?? "your-super-secret-jwt-key-change-this-in-production";
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Try to get token from cookie first, then from Authorization header
+                if (context.Request.Cookies.ContainsKey("auth_token"))
+                {
+                    context.Token = context.Request.Cookies["auth_token"];
+                }
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+// Add Authentication Service
+builder.Services.AddHttpClient<AuthenticationService>();
+builder.Services.AddScoped<AuthenticationService>();
 
 // Add Supabase services
 builder.Services.AddScoped<MockSupabaseService>();
@@ -77,6 +113,10 @@ else
 }
 
 app.UseCors("AllowFrontend");
+
+// Add Authentication & Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Add Content Security Policy for fonts and Swagger
 app.Use(async (context, next) =>

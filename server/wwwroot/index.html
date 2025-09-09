@@ -65,62 +65,69 @@
         <!-- Auth Section -->
         <section id="auth-section" class="auth-section hidden">
             <div class="container">
-                <div class="auth-card">
-                    <div class="text-center mb-4">
-                        <h2 class="text-h2 mb-2">Welcome to Readyverse</h2>
-                        <p class="text-body">Sign in with your email to access the developer portal</p>
+                <div class="auth-layout">
+                    <!-- Main Auth Card - Get Started -->
+                    <div class="auth-main">
+                        <div class="auth-card">
+                            <div class="text-center mb-4">
+                                <h2 class="text-h2 mb-2">Welcome to Readyverse</h2>
+                                <p class="text-body">Sign in with your email to access the developer portal</p>
+                            </div>
+                            
+                            <form id="magic-link-form" class="auth-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="email-input">Email Address</label>
+                                    <input type="email" id="email-input" class="form-input" placeholder="Enter your email" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Send Magic Link</button>
+                            </form>
+                            <p id="auth-message" class="message"></p>
+                        </div>
                     </div>
                     
-                    <!-- Developer Portal Guide -->
-                    <div class="guide-section mb-4">
-                        <h3 class="guide-title">What you can do on the Developer Portal:</h3>
-                        <div class="guide-content">
-                            <div class="guide-item">
-                                <span class="guide-icon">🎮</span>
-                                <div class="guide-text">
-                                    <strong>Submit Games for Readyverse</strong>
-                                    <p>Upload your games through three publishing tracks: Platform Games (Steam/Epic), Self-Hosted, or Readyverse Hosted</p>
+                    <!-- Sidebar - What you can do -->
+                    <div class="auth-sidebar">
+                        <div class="guide-card">
+                            <h3 class="guide-title">What you can do:</h3>
+                            <div class="guide-content">
+                                <div class="guide-item">
+                                    <span class="guide-icon">🎮</span>
+                                    <div class="guide-text">
+                                        <strong>Submit Games</strong>
+                                        <p>Three publishing tracks: Platform Games, Self-Hosted, or Readyverse Hosted</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="guide-item">
-                                <span class="guide-icon">📋</span>
-                                <div class="guide-text">
-                                    <strong>Complete Partner Intake</strong>
-                                    <p>Fill out comprehensive forms with company info, game details, technical integration status, and compliance requirements</p>
+                                <div class="guide-item">
+                                    <span class="guide-icon">📋</span>
+                                    <div class="guide-text">
+                                        <strong>Partner Intake</strong>
+                                        <p>Company info, game details, and compliance requirements</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="guide-item">
-                                <span class="guide-icon">🔧</span>
-                                <div class="guide-text">
-                                    <strong>Track Integration Progress</strong>
-                                    <p>Monitor your Pass SSO and Readyverse SDK integration status through the submission workflow</p>
+                                <div class="guide-item">
+                                    <span class="guide-icon">🔧</span>
+                                    <div class="guide-text">
+                                        <strong>Track Progress</strong>
+                                        <p>Monitor Pass SSO and Readyverse SDK integration</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="guide-item">
-                                <span class="guide-icon">📁</span>
-                                <div class="guide-text">
-                                    <strong>Manage Assets & Builds</strong>
-                                    <p>Upload game logos, cover art, screenshots, trailers, and build files for distribution</p>
+                                <div class="guide-item">
+                                    <span class="guide-icon">📁</span>
+                                    <div class="guide-text">
+                                        <strong>Manage Assets</strong>
+                                        <p>Upload logos, screenshots, trailers, and build files</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="guide-item">
-                                <span class="guide-icon">📊</span>
-                                <div class="guide-text">
-                                    <strong>Monitor Submission Status</strong>
-                                    <p>Track your game through Intake → Technical Integration → Compliance Review → Game Submission → Approval</p>
+                                <div class="guide-item">
+                                    <span class="guide-icon">📊</span>
+                                    <div class="guide-text">
+                                        <strong>Monitor Status</strong>
+                                        <p>Track through Intake → Integration → Review → Submission → Approval</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <form id="magic-link-form" class="auth-form">
-                        <div class="form-group">
-                            <label class="form-label" for="email-input">Email Address</label>
-                            <input type="email" id="email-input" class="form-input" placeholder="Enter your email" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Send Magic Link</button>
-                    </form>
-                    <p id="auth-message" class="message"></p>
                 </div>
             </div>
         </section>

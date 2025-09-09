@@ -10,6 +10,7 @@ class ShowroomPortal {
     init() {
         this.bindEvents();
         this.hideLogoutButton(); // Hide logout button by default
+        this.handleMagicLinkCallback();
         this.checkAuthStatus();
     }
 
@@ -39,6 +40,48 @@ class ShowroomPortal {
         const logoutButton = document.getElementById('logout-button');
         if (logoutButton) {
             logoutButton.style.display = 'none';
+        }
+    }
+
+    handleMagicLinkCallback() {
+        // Check if this is a magic link callback
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token');
+        
+        if (accessToken) {
+            this.verifyMagicLink(accessToken, refreshToken);
+        }
+    }
+
+    async verifyMagicLink(accessToken, refreshToken) {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/api/auth/verify`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    access_token: accessToken,
+                    refresh_token: refreshToken
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.currentUser = data.user;
+                this.showMessage('Authentication successful!', 'success');
+                this.showDashboard();
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                const error = await response.json();
+                this.showMessage(error.error || 'Authentication failed', 'error');
+            }
+        } catch (error) {
+            console.error('Magic link verification error:', error);
+            this.showMessage('Authentication failed. Please try again.', 'error');
         }
     }
 
@@ -86,14 +129,8 @@ class ShowroomPortal {
             });
 
             if (response.ok) {
-                this.showMessage('Magic link sent! You are now signed in.', 'success', messageEl);
+                this.showMessage('Magic link sent! Check your email and click the link to sign in.', 'success', messageEl);
                 document.getElementById('email-input').value = '';
-                
-                // Simulate successful login after magic link
-                setTimeout(() => {
-                    this.currentUser = { id: 'mock-user-id', email: email };
-                    this.showDashboard();
-                }, 1000);
             } else {
                 const error = await response.json();
                 this.showMessage(error.error || 'Failed to send magic link', 'error', messageEl);

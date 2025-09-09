@@ -762,43 +762,65 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.5;
 }
 
-/* Guide Section */
-.guide-section {
-  background: rgba(0, 0, 0, 0.3);
+/* Auth Layout */
+.auth-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.auth-main {
+  /* Main auth card takes up more space */
+}
+
+.auth-sidebar {
+  /* Sidebar with guide takes up less space */
+}
+
+/* Guide Card (Sidebar) */
+.guide-card {
+  background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--rv-blue-35);
   border-radius: 12px;
-  padding: 2rem;
-  margin: 2rem 0;
+  padding: 1.5rem;
+  position: sticky;
+  top: 2rem;
 }
 
 .guide-title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--rv-white);
-  margin-bottom: 1.5rem;
-  text-align: center;
+  margin-bottom: 1rem;
+  text-align: left;
 }
 
 .guide-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .guide-item {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-  border-left: 3px solid var(--rv-blue);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  border-left: 2px solid var(--rv-blue);
+  transition: background-color 0.2s ease;
+}
+
+.guide-item:hover {
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .guide-icon {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   flex-shrink: 0;
-  margin-top: 0.25rem;
+  margin-top: 0.125rem;
 }
 
 .guide-text {
@@ -808,32 +830,52 @@ h1, h2, h3, h4, h5, h6 {
 .guide-text strong {
   display: block;
   color: var(--rv-white);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .guide-text p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  line-height: 1.4;
   margin: 0;
 }
 
-/* Responsive guide */
+/* Responsive auth layout */
+@media (max-width: 1024px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .guide-card {
+    position: static;
+    order: -1; /* Show guide above auth on mobile */
+  }
+}
+
 @media (max-width: 768px) {
-  .guide-section {
-    padding: 1.5rem;
-    margin: 1.5rem 0;
+  .guide-card {
+    padding: 1rem;
   }
   
   .guide-item {
     flex-direction: column;
     text-align: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
   
   .guide-icon {
     margin-top: 0;
+  }
+  
+  .guide-text strong {
+    font-size: 0.9rem;
+  }
+  
+  .guide-text p {
+    font-size: 0.75rem;
   }
 }

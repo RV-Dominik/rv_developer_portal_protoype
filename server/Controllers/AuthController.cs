@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShowroomBackend.Services;
 using ShowroomBackend.Models.DTOs;
+using System.Security.Claims;
 
 namespace ShowroomBackend.Controllers
 {
@@ -8,16 +10,16 @@ namespace ShowroomBackend.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly ISupabaseService _supabaseService;
+        private readonly AuthenticationService _authService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            ISupabaseService supabaseService, 
+            AuthenticationService authService, 
             IConfiguration configuration, 
             ILogger<AuthController> logger)
         {
-            _supabaseService = supabaseService;
+            _authService = authService;
             _configuration = configuration;
             _logger = logger;
         }
@@ -38,16 +40,16 @@ namespace ShowroomBackend.Controllers
                 }
 
                 var publicBaseUrl = _configuration["PUBLIC_BASE_URL"] ?? "http://localhost:8080";
-                var redirectTo = $"{publicBaseUrl}/web?auth=success";
+                var redirectTo = $"{publicBaseUrl}/?auth=callback";
 
-                var session = await _supabaseService.SignInWithOtpAsync(request.Email, redirectTo);
+                var result = await _authService.SendMagicLinkAsync(request.Email, redirectTo);
 
-                if (session == null)
+                if (result == null)
                 {
                     return BadRequest(new { error = "Failed to send magic link" });
                 }
 
-                return Ok(new { message = "Magic link sent to your email" });
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -56,14 +58,81 @@ namespace ShowroomBackend.Controllers
             }
         }
 
-        [HttpGet("session")]
-        public async Task<IActionResult> GetSession()
+        /// <summary>
+        /// Verify magic link callback and create session
+        /// </summary>
+        /// <param name="request">The magic link verification request</param>
+        /// <returns>User session with JWT token</returns>
+        [HttpPost("verify")]
+        public async Task<IActionResult> VerifyMagicLink([FromBody] MagicLinkVerifyRequest request)
         {
             try
             {
-                var session = await _supabaseService.GetSessionAsync();
+                if (string.IsNullOrEmpty(request.AccessToken))
+                {
+                    return BadRequest(new { error = "Access token is required" });
+                }
 
-                if (session == null)
+                var result = await _authService.VerifyMagicLinkAsync(request.AccessToken, request.RefreshToken ?? "");
+
+                if (result == null)
+                {
+                    return BadRequest(new { error = "Invalid magic link" });
+                }
+
+                // Generate our own JWT token for session management
+                var user = result.GetType().GetProperty("user")?.GetValue(result);
+                if (user != null)
+                {
+                    var userId = user.GetType().GetProperty("id")?.GetValue(user)?.ToString();
+                    var email = user.GetType().GetProperty("email")?.GetValue(user)?.ToString();
+                    
+                    if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(email))
+                    {
+                        var jwtToken = _authService.GenerateJwtToken(userId, email);
+                        
+                        // Set HTTP-only cookie
+                        var cookieOptions = new CookieOptions
+                        {
+                            HttpOnly = true,
+                            Secure = true,
+                            SameSite = SameSiteMode.Strict,
+                            Expires = DateTime.UtcNow.AddDays(7)
+                        };
+                        
+                        Response.Cookies.Append("auth_token", jwtToken, cookieOptions);
+                        
+                        return Ok(new
+                        {
+                            user = new
+                            {
+                                id = userId,
+                                email = email
+                            },
+                            message = "Authentication successful"
+                        });
+                    }
+                }
+
+                return BadRequest(new { error = "Failed to create session" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying magic link");
+                return StatusCode(500, new { error = "Failed to verify magic link" });
+            }
+        }
+
+        [HttpGet("session")]
+        [Authorize]
+        public IActionResult GetSession()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
                 {
                     return Unauthorized(new { error = "Not authenticated" });
                 }
@@ -72,9 +141,8 @@ namespace ShowroomBackend.Controllers
                 {
                     user = new
                     {
-                        id = "mock-user-id",
-                        email = "test@example.com",
-                        created_at = DateTime.UtcNow
+                        id = userId,
+                        email = email
                     }
                 });
             }
@@ -86,11 +154,12 @@ namespace ShowroomBackend.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult Logout()
         {
             try
             {
-                await _supabaseService.SignOutAsync();
+                // Clear the authentication cookie
+                Response.Cookies.Delete("auth_token");
                 return Ok(new { message = "Logged out successfully" });
             }
             catch (Exception ex)
@@ -104,5 +173,11 @@ namespace ShowroomBackend.Controllers
     public class MagicLinkRequest
     {
         public string Email { get; set; } = string.Empty;
+    }
+
+    public class MagicLinkVerifyRequest
+    {
+        public string AccessToken { get; set; } = string.Empty;
+        public string? RefreshToken { get; set; }
     }
 }
