@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Supabase.Postgrest.Models;
 using Supabase.Postgrest.Attributes;
 
 namespace ShowroomBackend.Models
 {
     [Table("organizations")]
-    public class Organization : BaseModel
+    public class Organization
     {
         [PrimaryKey]
         [JsonPropertyName("id")]
