@@ -8,6 +8,8 @@ class PortalCore {
         this.currentOnboardingProject = null;
         this.currentOnboardingStep = 'basics';
         this.autoSaveTimeout = null;
+        this.projectManager = null;
+        this.organizationManager = null;
         this.analytics = {
             sessionStart: Date.now(),
             stepStartTimes: {},
@@ -32,7 +34,11 @@ class PortalCore {
 
         const createProjectBtn = document.getElementById('create-project-button');
         if (createProjectBtn) {
-            createProjectBtn.addEventListener('click', this.showCreateProjectForm.bind(this));
+            createProjectBtn.addEventListener('click', () => {
+                if (this.projectManager) {
+                    this.projectManager.showCreateProjectForm();
+                }
+            });
         }
 
         const logoutBtn = document.getElementById('logout-button');
@@ -183,7 +189,9 @@ class PortalCore {
             if (response.ok) {
                 this.currentUser = result.user;
                 this.showDashboard();
-                this.loadProjects();
+                if (this.projectManager) {
+                    this.projectManager.loadProjects();
+                }
                 this.showMessage('Successfully logged in!', 'success');
                 
                 // Clear URL hash
@@ -209,7 +217,9 @@ class PortalCore {
                 const result = await response.json();
                 this.currentUser = result.user;
                 this.showDashboard();
-                this.loadProjects();
+                if (this.projectManager) {
+                    this.projectManager.loadProjects();
+                }
             } else {
                 this.showLandingPage();
             }
