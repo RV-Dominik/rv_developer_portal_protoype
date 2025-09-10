@@ -116,23 +116,22 @@ namespace ShowroomBackend.Controllers
                     return StatusCode(500, new { error = "Failed to create asset record" });
                 }
 
-                // Update project fields for primary assets (logo/cover/trailer)
+                // Update project fields for primary assets (logo/cover/trailer) using storage keys
                 var bucket = "showrooms";
-                var publicUrl = $"{_configuration["SUPABASE_URL"]}/storage/v1/object/public/{bucket}/{createdAsset.FileKey}";
                 var fields = new Dictionary<string, object?>();
                 switch ((createdAsset.Kind ?? "").ToLowerInvariant())
                 {
                     case "game_logo":
                     case "logo":
-                        fields["gameLogoUrl"] = fileKey; // Store storage key, not public URL
+                        fields["gameLogoKey"] = fileKey;
                         break;
                     case "cover_art":
                     case "cover":
                     case "hero_image":
-                        fields["coverArtUrl"] = fileKey; // Store storage key, not public URL
+                        fields["coverArtKey"] = fileKey;
                         break;
                     case "trailer":
-                        fields["trailerUrl"] = fileKey; // Store storage key, not public URL
+                        fields["trailerKey"] = fileKey;
                         break;
                 }
                 if (fields.Count > 0)

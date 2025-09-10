@@ -9,6 +9,10 @@ CREATE TABLE projects (
     title TEXT NOT NULL,
     short_desc TEXT,
     long_desc TEXT,
+    -- Storage keys for primary showcase assets (not public URLs)
+    game_logo_key TEXT,
+    cover_art_key TEXT,
+    trailer_key TEXT,
     theme JSONB DEFAULT '{"primary": "#141414", "accent": "#59c1ff"}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -18,7 +22,7 @@ CREATE TABLE projects (
 CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    kind TEXT NOT NULL CHECK (kind IN ('logo', 'header', 'screenshot', 'trailer', 'custom')),
+    kind TEXT NOT NULL CHECK (kind IN ('logo', 'hero_image', 'screenshot', 'trailer', 'custom')),
     file_key TEXT NOT NULL,
     mime TEXT NOT NULL,
     width INTEGER,

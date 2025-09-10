@@ -43,7 +43,9 @@ namespace ShowroomBackend.Services
             "is_listed_on_platform","platform_listing_url","has_stable_url","has_https_support","has_uptime_monitoring","has_support_commitment",
             "has_distribution_rights","build_format","meets_performance_guidelines","has_install_instructions","has_patch_commitment",
             // Compliance & assets per setup guide
-            "age_rating","game_logo_url","cover_art_url","trailer_url",
+            "age_rating",
+            // Storage keys for primary assets
+            "game_logo_key","cover_art_key","trailer_key",
             // Optional add-ons and system
             "showroom_interest","wants_surreal_estate","submission_status","intake_submitted_at","technical_integration_submitted_at",
             "compliance_review_submitted_at","game_submission_submitted_at","approved_at","rejection_reason","readyverse_tech_team_notes",

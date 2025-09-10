@@ -390,6 +390,7 @@ class OnboardingSteps {
                 <div class="preview-card-header">
                     <h4>Project Preview</h4>
                     <div class="preview-badge">Live Preview</div>
+                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="preview-project-card">
                     <div class="preview-project-title" id="preview-project-name">${project.name}</div>
@@ -412,6 +413,7 @@ class OnboardingSteps {
                 <div class="preview-card-header">
                     <h4>Asset Gallery</h4>
                     <div class="preview-badge">Upload Preview</div>
+                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="asset-gallery-preview">
                     <div class="asset-slot logo-slot">
@@ -443,6 +445,7 @@ class OnboardingSteps {
                 <div class="preview-card-header">
                     <h4>Integration Dashboard</h4>
                     <div class="preview-badge">Status Overview</div>
+                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="integration-status-grid">
                     <div class="status-card">
@@ -477,6 +480,7 @@ class OnboardingSteps {
                 <div class="preview-card-header">
                     <h4>Compliance Checklist</h4>
                     <div class="preview-badge">Legal Review</div>
+                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="compliance-checklist">
                     <div class="checklist-item" id="preview-legal-req">
@@ -502,29 +506,14 @@ class OnboardingSteps {
 
     getReviewPreview(project) {
         return `
-            <div class="preview-card enhanced final">
+            <div class="preview-card enhanced">
                 <div class="preview-card-header">
-                    <h4>Ready for Submission</h4>
-                    <div class="preview-badge success">Complete</div>
+                    <h4>Review</h4>
+                    <div class="preview-badge">Final Check</div>
+                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
-                <div class="final-preview">
-                    <div class="completion-summary">
-                        <div class="summary-item">
-                            <strong>Project:</strong> ${project.name}
-                        </div>
-                        <div class="summary-item">
-                            <strong>Description:</strong> ${project.shortDescription || 'No description'}
-                        </div>
-                        <div class="summary-item">
-                            <strong>Genre:</strong> ${project.genre || 'Not specified'}
-                        </div>
-                        <div class="summary-item">
-                            <strong>Track:</strong> ${project.publishingTrack || 'Not specified'}
-                        </div>
-                    </div>
-                    <div class="submission-note">
-                        <p>Your project will be reviewed by the Readyverse team within 2-3 business days.</p>
-                    </div>
+                <div class="preview-summary">
+                    <p>Verify all details before submission.</p>
                 </div>
             </div>
         `;
