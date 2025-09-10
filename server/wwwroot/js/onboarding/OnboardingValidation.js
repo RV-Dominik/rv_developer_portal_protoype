@@ -10,7 +10,9 @@ class OnboardingValidation {
         let isValid = true;
         let errorMessage = '';
 
-        this.clearFieldValidation(field);
+        // Only clear validation on form submission, not during typing
+        // This prevents DOM manipulation issues that cause fields to disappear
+        // this.clearFieldValidation(field);
 
         switch (fieldId) {
             case 'ob-short-description':
@@ -118,11 +120,13 @@ class OnboardingValidation {
                 break;
         }
 
-        if (!isValid) {
-            this.showFieldError(field, errorMessage);
-        } else {
-            this.showFieldSuccess(field);
-        }
+        // Only show validation errors on form submission, not during typing
+        // This prevents DOM manipulation issues that cause fields to disappear
+        // if (!isValid) {
+        //     this.showFieldError(field, errorMessage);
+        // } else {
+        //     this.showFieldSuccess(field);
+        // }
 
         return isValid;
     }
@@ -131,14 +135,72 @@ class OnboardingValidation {
         const requiredFields = this.getRequiredFieldsForStep(step);
         let isValid = true;
 
+        // Clear all validation first
         requiredFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
-            if (field && !this.validateField(field)) {
-                isValid = false;
+            if (field) {
+                this.clearFieldValidation(field);
+            }
+        });
+
+        // Validate each field and show errors
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                const fieldValid = this.validateField(field);
+                if (!fieldValid) {
+                    isValid = false;
+                    // Show error for this field
+                    this.showFieldError(field, this.getFieldErrorMessage(field));
+                } else {
+                    // Show success for this field
+                    this.showFieldSuccess(field);
+                }
             }
         });
 
         return isValid;
+    }
+
+    getFieldErrorMessage(field) {
+        const fieldId = field.id;
+        const value = field.value.trim();
+
+        switch (fieldId) {
+            case 'ob-short-description':
+                if (!value) return 'Short description is required';
+                if (value.length < 10) return 'Description must be at least 10 characters';
+                if (value.length > 500) return 'Description must be less than 500 characters';
+                break;
+            case 'ob-genre':
+                if (!value) return 'Please select a genre';
+                break;
+            case 'ob-publishing-track':
+                if (!value) return 'Please select a publishing track';
+                break;
+            case 'ob-build-status':
+                if (!value) return 'Please select a build status';
+                break;
+            case 'ob-pass-sso':
+                if (!value) return 'Please select Pass SSO integration status';
+                break;
+            case 'ob-sdk-status':
+                if (!value) return 'Please select Readyverse SDK integration status';
+                break;
+            case 'ob-legal-requirements':
+                if (!field.checked) return 'Legal requirements must be completed';
+                break;
+            case 'ob-privacy-policy':
+                if (!field.checked) return 'Privacy policy must be provided';
+                break;
+            case 'ob-terms-accepted':
+                if (!field.checked) return 'Terms must be accepted';
+                break;
+            case 'ob-content-guidelines':
+                if (!field.checked) return 'Content guidelines must be accepted';
+                break;
+        }
+        return 'This field is required';
     }
 
     getRequiredFieldsForStep(step) {

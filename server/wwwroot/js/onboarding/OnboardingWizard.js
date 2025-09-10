@@ -181,25 +181,16 @@ class OnboardingWizard {
     bindLivePreviewEvents() {
         const inputs = document.querySelectorAll('#onboarding-form input, #onboarding-form textarea, #onboarding-form select');
         inputs.forEach(input => {
-            // Use debounced validation for input events to prevent excessive DOM manipulation
-            let validationTimeout;
+            // Only update live preview, no validation to prevent DOM issues
             input.addEventListener('input', () => {
                 this.updateLivePreview();
-                // Debounce validation to prevent excessive DOM manipulation
-                clearTimeout(validationTimeout);
-                validationTimeout = setTimeout(() => {
-                    this.validateField(input);
-                }, 300); // 300ms delay
             });
             
-            // Immediate validation for change events (dropdowns, checkboxes)
             input.addEventListener('change', () => {
                 this.updateLivePreview();
-                this.validateField(input);
             });
             
-            // Immediate validation for blur events
-            input.addEventListener('blur', () => this.validateField(input));
+            // No blur validation to prevent DOM manipulation issues
         });
     }
 
@@ -436,10 +427,9 @@ class OnboardingWizard {
         try {
             const formData = this.collectStepData(this.core.currentOnboardingStep);
             
-            // Only attempt to save when current step is valid to avoid 400s
-            const stepIsValid = this.validation
-                ? this.validation.validateStep(this.core.currentOnboardingStep)
-                : true;
+            // Skip validation during auto-save to prevent DOM issues
+            // Validation will happen on form submission
+            const stepIsValid = true;
 
             // Skip autosave during file uploads to avoid server 500s mid-transfer
             if (this.core.currentOnboardingStep === 'assets' && this.isUploadInFlight) {
@@ -537,23 +527,9 @@ class OnboardingWizard {
     }
 
     validateField(field) {
-        // Safety check: don't validate if the field is no longer in the DOM
-        if (!field || !document.body.contains(field)) {
-            return false;
-        }
-        
-        // Safety check: don't validate if the form is being re-rendered
-        const form = document.getElementById('onboarding-form');
-        if (!form || !document.body.contains(form)) {
-            return false;
-        }
-        
-        // Safety check: don't validate during rendering
-        if (this.isRendering) {
-            return false;
-        }
-        
-        return this.validation.validateField(field);
+        // Only validate on form submission, not during typing
+        // This prevents DOM manipulation issues that cause fields to disappear
+        return true; // Skip real-time validation
     }
 
     restoreFormData(project) {
@@ -754,8 +730,10 @@ class OnboardingWizard {
         
         const step = this.core.currentOnboardingStep;
         
-        // Validate the current step
-        if (!this.validation.validateStep(step)) {
+        // Only validate on form submission, not during typing
+        // This prevents DOM manipulation issues that cause fields to disappear
+        const isValid = this.validation.validateStep(step);
+        if (!isValid) {
             this.core.trackEvent('validation_failed', {
                 step: step,
                 errors: this.validation.getValidationErrors()
