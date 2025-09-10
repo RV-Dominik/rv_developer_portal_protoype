@@ -663,7 +663,21 @@ namespace ShowroomBackend.Services
                     organization.UpdatedAt = DateTime.UtcNow;
                     
                     var updateUrl = $"organizations?id=eq.{organization.Id}";
-                    var json = JsonSerializer.Serialize(organization);
+                    var updatePayload = new Dictionary<string, object?>
+                    {
+                        ["name"] = organization.Name,
+                        ["website"] = organization.Website,
+                        ["primary_contact_name"] = organization.PrimaryContactName,
+                        ["primary_contact_email"] = organization.PrimaryContactEmail,
+                        ["primary_contact_phone"] = organization.PrimaryContactPhone,
+                        ["description"] = organization.Description,
+                        ["industry"] = organization.Industry,
+                        ["company_size"] = organization.CompanySize,
+                        ["country"] = organization.Country,
+                        ["is_verified"] = organization.IsVerified,
+                        ["updated_at"] = organization.UpdatedAt
+                    };
+                    var json = JsonSerializer.Serialize(updatePayload);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
                     
                     var response = await _httpClient.PatchAsync(updateUrl, content);
@@ -681,7 +695,23 @@ namespace ShowroomBackend.Services
                     organization.UpdatedAt = DateTime.UtcNow;
                     
                     var createUrl = "organizations";
-                    var json = JsonSerializer.Serialize(organization);
+                    var createPayload = new Dictionary<string, object?>
+                    {
+                        ["id"] = organization.Id,
+                        ["name"] = organization.Name,
+                        ["website"] = organization.Website,
+                        ["primary_contact_name"] = organization.PrimaryContactName,
+                        ["primary_contact_email"] = organization.PrimaryContactEmail,
+                        ["primary_contact_phone"] = organization.PrimaryContactPhone,
+                        ["description"] = organization.Description,
+                        ["industry"] = organization.Industry,
+                        ["company_size"] = organization.CompanySize,
+                        ["country"] = organization.Country,
+                        ["is_verified"] = organization.IsVerified,
+                        ["created_at"] = organization.CreatedAt,
+                        ["updated_at"] = organization.UpdatedAt
+                    };
+                    var json = JsonSerializer.Serialize(createPayload);
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
                     
                     var response = await _httpClient.PostAsync(createUrl, content);
