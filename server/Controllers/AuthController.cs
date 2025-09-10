@@ -95,8 +95,10 @@ namespace ShowroomBackend.Controllers
                         var cookieOptions = new CookieOptions
                         {
                             HttpOnly = true,
-                            Secure = !(_configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT")?.Equals("Development") ?? false),
-                            SameSite = SameSiteMode.Lax,
+                            // Always secure in production hosting; required for SameSite=None
+                            Secure = true,
+                            // Ensure cookie is sent on cross-site requests and after redirects
+                            SameSite = SameSiteMode.None,
                             Expires = DateTime.UtcNow.AddDays(7),
                             Path = "/"
                         };
