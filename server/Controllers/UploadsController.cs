@@ -113,14 +113,15 @@ namespace ShowroomBackend.Controllers
                 {
                     case "game_logo":
                     case "logo":
-                        fields["gameLogoUrl"] = publicUrl;
+                        fields["gameLogoUrl"] = fileKey; // Store storage key, not public URL
                         break;
                     case "cover_art":
                     case "cover":
-                        fields["coverArtUrl"] = publicUrl;
+                    case "hero_image":
+                        fields["coverArtUrl"] = fileKey; // Store storage key, not public URL
                         break;
                     case "trailer":
-                        fields["trailerUrl"] = publicUrl;
+                        fields["trailerUrl"] = fileKey; // Store storage key, not public URL
                         break;
                 }
                 if (fields.Count > 0)
@@ -180,6 +181,46 @@ namespace ShowroomBackend.Controllers
             {
                 _logger.LogError(ex, "Error getting assets for project {ProjectId}", projectId);
                 return StatusCode(500, new { error = "Failed to get assets" });
+            }
+        }
+
+        [HttpGet("{projectId}/project-urls")]
+        public async Task<IActionResult> GetProjectAssetUrls(Guid projectId)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+
+                var project = await _supabaseService.GetProjectByIdAsync(projectId);
+                if (project == null) return NotFound(new { error = "Project not found" });
+
+                var ttl = 3600;
+                var ttlStr = _configuration["ASSET_URL_TTL"];
+                if (int.TryParse(ttlStr, out var parsed)) ttl = parsed;
+
+                var result = new Dictionary<string, string?>();
+
+                // Convert storage keys to signed URLs
+                if (!string.IsNullOrEmpty(project.GameLogoUrl))
+                {
+                    result["gameLogoUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.GameLogoUrl, ttl);
+                }
+                if (!string.IsNullOrEmpty(project.CoverArtUrl))
+                {
+                    result["coverArtUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtUrl, ttl);
+                }
+                if (!string.IsNullOrEmpty(project.TrailerUrl))
+                {
+                    result["trailerUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerUrl, ttl);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting project asset URLs for project {ProjectId}", projectId);
+                return StatusCode(500, new { error = "Failed to get project asset URLs" });
             }
         }
 

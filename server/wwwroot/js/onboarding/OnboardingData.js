@@ -176,6 +176,9 @@ class OnboardingData {
             case 'basics':
                 this.restoreBasicsData(project);
                 break;
+            case 'assets':
+                this.restoreAssetsData(project);
+                break;
             case 'integration':
                 this.restoreIntegrationData(project);
                 break;
@@ -306,6 +309,76 @@ class OnboardingData {
         const supportEl = document.getElementById('ob-support-email');
         if (supportEl && project.supportEmail) {
             supportEl.value = project.supportEmail;
+        }
+    }
+
+    async restoreAssetsData(project) {
+        // Get project asset URLs (storage keys converted to signed URLs)
+        const projectUrls = await this.getProjectAssetUrls(project.id);
+        
+        // Also get individual assets for screenshots
+        const assets = await this.getSignedAssets(project.id);
+        
+        // Update single-image upload areas with project URLs
+        if (projectUrls.gameLogoUrl) {
+            const logoArea = document.getElementById('appicon-upload');
+            if (logoArea) {
+                const background = logoArea.querySelector('.upload-background');
+                if (background) {
+                    background.style.backgroundImage = `url(${projectUrls.gameLogoUrl})`;
+                }
+                logoArea.classList.add('has-image');
+            }
+        }
+        
+        if (projectUrls.coverArtUrl) {
+            const heroArea = document.getElementById('hero-upload');
+            if (heroArea) {
+                const background = heroArea.querySelector('.upload-background');
+                if (background) {
+                    background.style.backgroundImage = `url(${projectUrls.coverArtUrl})`;
+                }
+                heroArea.classList.add('has-image');
+            }
+        }
+        
+        if (projectUrls.trailerUrl) {
+            const trailerArea = document.getElementById('trailer-upload');
+            if (trailerArea) {
+                const background = trailerArea.querySelector('.upload-background');
+                if (background) {
+                    background.style.backgroundImage = `url(${projectUrls.trailerUrl})`;
+                }
+                trailerArea.classList.add('has-image');
+            }
+        }
+
+        // Handle screenshots (multiple files)
+        const screenshotsArea = document.getElementById('screenshots-upload');
+        for (const a of assets) {
+            if ((a.kind || '').toLowerCase() === 'screenshot') {
+                if (!screenshotsArea) continue;
+                if (a.mimeType && a.mimeType.startsWith('image/')) {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'thumb-item';
+                    const bust = `${a.signedUrl}${a.signedUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+                    thumb.style.backgroundImage = `url(${bust})`;
+                    screenshotsArea.appendChild(thumb);
+                }
+            }
+        }
+    }
+
+    async getProjectAssetUrls(projectId) {
+        try {
+            const response = await fetch(`/api/uploads/${projectId}/project-urls`, {
+                headers: { 'Authorization': `Bearer ${this.getAuthToken()}` }
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Failed to get project asset URLs:', error);
+            return {};
         }
     }
 }

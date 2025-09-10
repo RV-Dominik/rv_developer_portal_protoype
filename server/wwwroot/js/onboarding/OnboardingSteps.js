@@ -121,10 +121,13 @@ class OnboardingSteps {
                 <div class="asset-upload-grid">
                     <div class="asset-upload-item small">
                         <div class="file-upload-area ratio-1-1" id="appicon-upload" data-kind="app_icon" data-w="1024" data-h="1024">
-                            <div class="upload-icon">🧩</div>
-                            <div class="upload-text">
-                                <strong>App Icon</strong>
-                                <p>PNG 1024x1024 px</p>
+                            <div class="upload-background"></div>
+                            <div class="upload-overlay">
+                                <div class="upload-icon">🧩</div>
+                                <div class="upload-text">
+                                    <strong>App Icon</strong>
+                                    <p>PNG 1024x1024 px</p>
+                                </div>
                             </div>
                             <input type="file" id="appicon-file" accept="image/png" style="display: none;">
                         </div>
@@ -132,10 +135,13 @@ class OnboardingSteps {
                     
                     <div class="asset-upload-item wide">
                         <div class="file-upload-area ratio-16-9" id="hero-upload" data-kind="hero_image" data-w="1920" data-h="1080">
-                            <div class="upload-icon">🖼️</div>
-                            <div class="upload-text">
-                                <strong>Thumbnail / Hero Image</strong>
-                                <p>PNG 1920x1080 px</p>
+                            <div class="upload-background"></div>
+                            <div class="upload-overlay">
+                                <div class="upload-icon">🖼️</div>
+                                <div class="upload-text">
+                                    <strong>Thumbnail / Hero Image</strong>
+                                    <p>PNG 1920x1080 px</p>
+                                </div>
                             </div>
                             <input type="file" id="hero-file" accept="image/png" style="display: none;">
                         </div>
@@ -143,10 +149,13 @@ class OnboardingSteps {
                     
                     <div class="asset-upload-item medium">
                         <div class="file-upload-area ratio-16-9" id="screenshots-upload" data-kind="screenshot" data-w="1920" data-h="1080">
-                            <div class="upload-icon">📸</div>
-                            <div class="upload-text">
-                                <strong>Screenshots</strong>
-                                <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
+                            <div class="upload-background"></div>
+                            <div class="upload-overlay">
+                                <div class="upload-icon">📸</div>
+                                <div class="upload-text">
+                                    <strong>Screenshots</strong>
+                                    <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
+                                </div>
                             </div>
                             <input type="file" id="screenshots-file" accept="image/*" multiple style="display: none;">
                         </div>
@@ -154,10 +163,13 @@ class OnboardingSteps {
                     
                     <div class="asset-upload-item medium">
                         <div class="file-upload-area ratio-16-9" id="trailer-upload" data-kind="trailer" data-w="1920" data-h="1080" data-duration="15" data-maxsize="5242880">
-                            <div class="upload-icon">🎬</div>
-                            <div class="upload-text">
-                                <strong>Trailer</strong>
-                                <p>MP4 Full HD 1920x1080, 15s max, 5MB max</p>
+                            <div class="upload-background"></div>
+                            <div class="upload-overlay">
+                                <div class="upload-icon">🎬</div>
+                                <div class="upload-text">
+                                    <strong>Trailer</strong>
+                                    <p>MP4 Full HD 1920x1080, 15s max, 5MB max</p>
+                                </div>
                             </div>
                             <input type="file" id="trailer-file" accept="video/mp4" style="display: none;">
                         </div>

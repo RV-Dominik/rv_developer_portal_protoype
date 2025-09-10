@@ -617,8 +617,11 @@ class OnboardingWizard {
             }
             list.appendChild(item);
         } else {
+            const overlay = uploadArea.querySelector('.upload-overlay');
+            const background = uploadArea.querySelector('.upload-background');
             const icon = uploadArea.querySelector('.upload-icon');
             const text = uploadArea.querySelector('.upload-text');
+            
             if (icon) icon.textContent = '✓';
             if (text) {
                 text.innerHTML = `
@@ -626,12 +629,15 @@ class OnboardingWizard {
                     <p>Uploaded successfully</p>
                 `;
             }
-            // If we have an image URL for logo/hero, replace the surface with an image preview
+            
+            // If we have an image URL for logo/hero, set it as background
             if (url && file.type.startsWith('image/')) {
                 uploadArea.classList.add('has-image');
                 // Cache-bust to avoid stale previews
                 const bust = `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
-                uploadArea.style.backgroundImage = `url('${bust}')`;
+                if (background) {
+                    background.style.backgroundImage = `url('${bust}')`;
+                }
             }
             uploadArea.classList.add('uploaded');
         }

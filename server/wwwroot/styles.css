@@ -1233,23 +1233,49 @@ h1, h2, h3, h4, h5, h6 {
 .file-upload-area {
   border: 2px dashed var(--rv-blue-20);
   border-radius: 8px;
-  padding: 2rem;
+  padding: 0;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   background: var(--card-light);
+  position: relative;
+  overflow: hidden;
 }
 
-.file-upload-area.has-image {
+/* Background layer for images */
+.upload-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: contain; /* keep aspect ratio, fit within */
-  padding: 1rem; /* make space for frame */
+  background-size: contain;
+  transition: opacity 0.3s ease;
 }
 
-/* Ensure overlay text remains readable on top of background image */
-.file-upload-area.has-image .upload-text {
+/* Overlay layer for text and icons */
+.upload-overlay {
+  position: relative;
+  z-index: 2;
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+/* When image is uploaded, hide the overlay text */
+.file-upload-area.has-image .upload-overlay {
   background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
+}
+
+.file-upload-area.has-image .upload-text {
+  background: rgba(0,0,0,0.5);
   display: inline-block;
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
@@ -1274,7 +1300,16 @@ h1, h2, h3, h4, h5, h6 {
 
 .file-upload-area:hover {
   border-color: var(--rv-blue);
+}
+
+.file-upload-area:hover .upload-overlay {
   background: var(--rv-blue-20);
+}
+
+/* Hover effect for areas with images */
+.file-upload-area.has-image:hover .upload-overlay {
+  background: rgba(65, 175, 255, 0.2);
+  backdrop-filter: blur(2px);
 }
 
 /* Grid sizing modifiers for asset upload items */
