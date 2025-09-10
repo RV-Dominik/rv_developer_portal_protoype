@@ -155,6 +155,22 @@ class OnboardingData {
         }
     }
 
+    async getSignedAssets(projectId) {
+        try {
+            const response = await fetch(`${this.core.apiBaseUrl}/api/uploads/${projectId}/signed`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            if (response.ok) {
+                return await response.json();
+            }
+            return [];
+        } catch (e) {
+            console.warn('Failed to load signed assets', e);
+            return [];
+        }
+    }
+
     restoreFormData(project) {
         switch (this.core.currentOnboardingStep) {
             case 'basics':

@@ -525,35 +525,37 @@ class OnboardingWizard {
     }
 
     async handleFileUpload(event, uploadArea) {
-        const file = event.target.files[0];
-        if (!file) return;
+        const files = Array.from(event.target.files || []);
+        if (!files.length) return;
 
         const projectId = this.core.currentOnboardingProject?.id;
         if (!projectId) return;
 
         try {
             this.isUploadInFlight = true;
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('projectId', projectId);
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('projectId', projectId);
 
-            const response = await fetch(`${this.core.apiBaseUrl}/api/uploads/${projectId}`, {
-                method: 'POST',
-                credentials: 'include',
-                body: formData
-            });
+                const response = await fetch(`${this.core.apiBaseUrl}/api/uploads/${projectId}`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
 
-            if (response.ok) {
-                const result = await response.json();
-                this.core.showMessage('File uploaded successfully!', 'success');
-                this.updateUploadArea(uploadArea, file, result.url);
-            } else {
-                let message = 'Upload failed';
-                try {
-                    const error = await response.json();
-                    if (error && error.error) message = error.error;
-                } catch (_) {}
-                this.core.showMessage(message, 'error');
+                if (response.ok) {
+                    const result = await response.json();
+                    this.core.showMessage('File uploaded successfully!', 'success');
+                    this.updateUploadArea(uploadArea, file, result.signedUrl || null);
+                } else {
+                    let message = 'Upload failed';
+                    try {
+                        const error = await response.json();
+                        if (error && error.error) message = error.error;
+                    } catch (_) {}
+                    this.core.showMessage(message, 'error');
+                }
             }
         } catch (error) {
             console.error('Upload error:', error);
@@ -564,18 +566,37 @@ class OnboardingWizard {
     }
 
     updateUploadArea(uploadArea, file, url) {
-        const icon = uploadArea.querySelector('.upload-icon');
-        const text = uploadArea.querySelector('.upload-text');
-        
-        if (icon) icon.textContent = '✓';
-        if (text) {
-            text.innerHTML = `
-                <strong>${file.name}</strong>
-                <p>Uploaded successfully</p>
-            `;
+        // For the screenshots area, append thumbnails for each uploaded file
+        if (uploadArea.id === 'screenshots-upload') {
+            let list = uploadArea.querySelector('.thumb-list');
+            if (!list) {
+                list = document.createElement('div');
+                list.className = 'thumb-list';
+                uploadArea.appendChild(list);
+            }
+            const item = document.createElement('div');
+            item.className = 'thumb-item';
+            if (url && file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = file.name;
+                item.appendChild(img);
+            } else {
+                item.textContent = file.name;
+            }
+            list.appendChild(item);
+        } else {
+            const icon = uploadArea.querySelector('.upload-icon');
+            const text = uploadArea.querySelector('.upload-text');
+            if (icon) icon.textContent = '✓';
+            if (text) {
+                text.innerHTML = `
+                    <strong>${file.name}</strong>
+                    <p>Uploaded successfully</p>
+                `;
+            }
+            uploadArea.classList.add('uploaded');
         }
-        
-        uploadArea.classList.add('uploaded');
     }
 
     updateBasicsPreview(data) {

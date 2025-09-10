@@ -50,10 +50,12 @@ namespace ShowroomBackend.Controllers
                     return BadRequest(new { error = "Invalid file type. Only images and videos are allowed." });
                 }
 
-                // Validate file size (10MB max)
-                if (request.File.Length > 10 * 1024 * 1024)
+                // Validate file size: images 10MB, videos 100MB
+                var isVideo = request.File.ContentType.StartsWith("video/");
+                var maxBytes = isVideo ? 100L * 1024 * 1024 : 10L * 1024 * 1024;
+                if (request.File.Length > maxBytes)
                 {
-                    return BadRequest(new { error = "File too large. Maximum size is 10MB." });
+                    return BadRequest(new { error = isVideo ? "File too large. Maximum video size is 100MB." : "File too large. Maximum image size is 10MB." });
                 }
 
                 // Upload file to Supabase Storage (namespaced per project)
@@ -87,7 +89,27 @@ namespace ShowroomBackend.Controllers
                     return StatusCode(500, new { error = "Failed to create asset record" });
                 }
 
-                return Ok(createdAsset);
+                // Optionally include a signed URL to display immediately
+                var ttl = 3600;
+                var ttlStr = _configuration["ASSET_URL_TTL"];
+                if (int.TryParse(ttlStr, out var parsed)) ttl = parsed;
+                var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", createdAsset.FileKey, ttl);
+
+                return Ok(new
+                {
+                    createdAsset.Id,
+                    createdAsset.ProjectId,
+                    createdAsset.FileName,
+                    createdAsset.FileKey,
+                    createdAsset.MimeType,
+                    createdAsset.FileSize,
+                    createdAsset.Kind,
+                    createdAsset.DurationSeconds,
+                    createdAsset.Width,
+                    createdAsset.Height,
+                    createdAsset.CreatedAt,
+                    signedUrl
+                });
             }
             catch (Exception ex)
             {
