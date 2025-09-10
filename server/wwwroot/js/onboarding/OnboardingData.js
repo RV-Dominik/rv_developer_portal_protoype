@@ -326,6 +326,8 @@ class OnboardingData {
         console.log('Fetching fresh signed URLs from server...');
         const projectUrls = await this.getProjectAssetUrls(project.id);
         console.log('Fetched project URLs:', projectUrls);
+        console.log('Project has coverArtKey:', !!project[AssetConstants.ASSET_KEYS.COVER_ART]);
+        console.log('API returned coverArtUrl:', !!projectUrls.coverArtUrl);
         
         // Also get individual assets for screenshots
         const assets = await this.getSignedAssets(project.id);
@@ -396,11 +398,19 @@ class OnboardingData {
 
     async getProjectAssetUrls(projectId) {
         try {
+            console.log('Calling API for project asset URLs:', projectId);
             const response = await fetch(`/api/uploads/${projectId}/project-urls`, {
                 headers: { 'Authorization': `Bearer ${this.getAuthToken()}` }
             });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return await response.json();
+            console.log('API response status:', response.status);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error response:', errorText);
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+            const result = await response.json();
+            console.log('API returned data:', result);
+            return result;
         } catch (error) {
             console.error('Failed to get project asset URLs:', error);
             return {};
