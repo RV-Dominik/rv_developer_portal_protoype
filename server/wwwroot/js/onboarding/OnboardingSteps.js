@@ -390,7 +390,6 @@ class OnboardingSteps {
                 <div class="preview-card-header">
                     <h4>Project Preview</h4>
                     <div class="preview-badge">Live Preview</div>
-                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="preview-project-card">
                     <div class="preview-project-title" id="preview-project-name">${project.name}</div>
@@ -403,17 +402,26 @@ class OnboardingSteps {
                         <span class="status-badge" id="preview-status">${project.buildStatus || 'Development'}</span>
                     </div>
                 </div>
+                <div class="preview-card-footer">
+                    <button class="btn btn-secondary disabled" id="open-unreal-btn" disabled>
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">Upload Assets First</span>
+                    </button>
+                </div>
             </div>
         `;
     }
 
     getAssetsPreview(project) {
+        const hasAssets = this.hasRequiredAssets(project);
+        const buttonClass = hasAssets ? 'btn btn-primary' : 'btn btn-secondary disabled';
+        const buttonText = hasAssets ? 'Open in Readyverse' : 'Upload Assets First';
+        
         return `
             <div class="preview-card enhanced">
                 <div class="preview-card-header">
                     <h4>Asset Gallery</h4>
                     <div class="preview-badge">Upload Preview</div>
-                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="asset-gallery-preview">
                     <div class="asset-slot logo-slot">
@@ -435,17 +443,26 @@ class OnboardingSteps {
                         </div>
                     </div>
                 </div>
+                <div class="preview-card-footer">
+                    <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">${buttonText}</span>
+                    </button>
+                </div>
             </div>
         `;
     }
 
     getIntegrationPreview(project) {
+        const hasAssets = this.hasRequiredAssets(project);
+        const buttonClass = hasAssets ? 'btn btn-primary' : 'btn btn-secondary disabled';
+        const buttonText = hasAssets ? 'Open in Readyverse' : 'Upload Assets First';
+        
         return `
             <div class="preview-card enhanced">
                 <div class="preview-card-header">
                     <h4>Integration Dashboard</h4>
                     <div class="preview-badge">Status Overview</div>
-                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="integration-status-grid">
                     <div class="status-card">
@@ -470,17 +487,26 @@ class OnboardingSteps {
                         </div>
                     </div>
                 </div>
+                <div class="preview-card-footer">
+                    <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">${buttonText}</span>
+                    </button>
+                </div>
             </div>
         `;
     }
 
     getCompliancePreview(project) {
+        const hasAssets = this.hasRequiredAssets(project);
+        const buttonClass = hasAssets ? 'btn btn-primary' : 'btn btn-secondary disabled';
+        const buttonText = hasAssets ? 'Open in Readyverse' : 'Upload Assets First';
+        
         return `
             <div class="preview-card enhanced">
                 <div class="preview-card-header">
                     <h4>Compliance Checklist</h4>
                     <div class="preview-badge">Legal Review</div>
-                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="compliance-checklist">
                     <div class="checklist-item" id="preview-legal-req">
@@ -500,6 +526,12 @@ class OnboardingSteps {
                         <span>Content Guidelines</span>
                     </div>
                 </div>
+                <div class="preview-card-footer">
+                    <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">${buttonText}</span>
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -510,12 +542,98 @@ class OnboardingSteps {
                 <div class="preview-card-header">
                     <h4>Review</h4>
                     <div class="preview-badge">Final Check</div>
-                    <div class="preview-actions"><a class="btn-primary" href="rvshowroom://open?projectId=${project.id}">Open in Unreal</a></div>
                 </div>
                 <div class="preview-summary">
                     <p>Verify all details before submission.</p>
                 </div>
+                <div class="preview-card-footer">
+                    <button class="btn btn-primary" id="open-unreal-btn">
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">Open in Readyverse</span>
+                    </button>
+                </div>
             </div>
         `;
+    }
+
+    hasRequiredAssets(project) {
+        // Check if at least one asset has been uploaded
+        return !!(project.gameLogoUrl || project.coverArtUrl || project.trailerUrl);
+    }
+
+    // Modal functionality for Readyverse warning
+    showReadyverseModal(projectId) {
+        const modal = document.getElementById('readyverse-modal');
+        if (!modal) return;
+
+        // Show modal
+        modal.classList.add('show');
+
+        // Handle cancel button
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+        if (cancelBtn) {
+            cancelBtn.onclick = () => {
+                this.hideReadyverseModal();
+            };
+        }
+
+        // Handle continue button
+        const continueBtn = document.getElementById('modal-continue-btn');
+        if (continueBtn) {
+            continueBtn.onclick = () => {
+                this.hideReadyverseModal();
+                // Attempt to open in Readyverse
+                this.openInReadyverse(projectId);
+            };
+        }
+
+        // Close modal when clicking outside
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                this.hideReadyverseModal();
+            }
+        };
+    }
+
+    hideReadyverseModal() {
+        const modal = document.getElementById('readyverse-modal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    openInReadyverse(projectId) {
+        // Try to open the project in Readyverse
+        const url = `rvshowroom://open?projectId=${projectId}`;
+        
+        // Create a temporary link and click it
+        const link = document.createElement('a');
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Show a toast message
+        this.showToast('Opening project in Readyverse...', 'info');
+    }
+
+    showToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `rv-toast rv-toast-${type}`;
+        toast.textContent = message;
+        
+        // Add to page
+        document.body.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 200);
+        }, 3000);
     }
 }

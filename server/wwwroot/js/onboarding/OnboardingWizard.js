@@ -168,6 +168,7 @@ class OnboardingWizard {
         this.bindFileUploadEvents();
         this.bindLivePreviewEvents();
         this.bindStepperEvents();
+        this.bindReadyverseButtons();
     }
 
     bindLivePreviewEvents() {
@@ -192,6 +193,27 @@ class OnboardingWizard {
                 const targetStep = e.currentTarget.getAttribute('data-step');
                 if (targetStep && this.canNavigateToStep(targetStep)) {
                     this.navigateToStep(targetStep);
+                }
+            });
+        });
+    }
+
+    bindReadyverseButtons() {
+        const readyverseButtons = document.querySelectorAll('#open-unreal-btn');
+        readyverseButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const projectId = this.core.currentOnboardingProject?.id;
+                if (projectId) {
+                    // Check if assets are uploaded
+                    const hasAssets = this.steps.hasRequiredAssets(this.core.currentOnboardingProject);
+                    if (hasAssets) {
+                        // Show modal warning
+                        this.steps.showReadyverseModal(projectId);
+                    } else {
+                        // Show message that assets need to be uploaded first
+                        this.core.showMessage('Please upload assets first before opening in Readyverse.', 'info');
+                    }
                 }
             });
         });

@@ -2233,6 +2233,110 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.8rem;
 }
 
+/* Preview Card Footer */
+.preview-card-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rv-blue-20);
+  display: flex;
+  justify-content: center;
+}
+
+.preview-card-footer .btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.preview-card-footer .btn .btn-icon {
+  font-size: 1rem;
+}
+
+.preview-card-footer .btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Readyverse Modal */
+.readyverse-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.readyverse-modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.readyverse-modal-content {
+  background: var(--card-light);
+  border: 1px solid var(--rv-blue-50);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.readyverse-modal.show .readyverse-modal-content {
+  transform: scale(1);
+}
+
+.readyverse-modal-header {
+  margin-bottom: 1.5rem;
+}
+
+.readyverse-modal-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--rv-blue);
+}
+
+.readyverse-modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--rv-white);
+  margin-bottom: 0.5rem;
+  font-family: "Plaak 45 B Foch 205 Tf", sans-serif;
+}
+
+.readyverse-modal-message {
+  color: var(--rv-grey-1);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 2rem;
+}
+
+.readyverse-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.readyverse-modal-actions .btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
 /* Responsive project cards */
 @media (max-width: 768px) {
   .projects-grid {
@@ -2253,5 +2357,14 @@ h1, h2, h3, h4, h5, h6 {
   .project-meta {
     flex-direction: column;
     gap: 0.5rem;
+  }
+  
+  .readyverse-modal-content {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .readyverse-modal-actions {
+    flex-direction: column;
   }
 }
