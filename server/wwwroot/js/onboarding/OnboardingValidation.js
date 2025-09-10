@@ -162,6 +162,24 @@ class OnboardingValidation {
         return isValid;
     }
 
+    // Silent validation for auto-save (no visual feedback)
+    validateStepSilent(step) {
+        const requiredFields = this.getRequiredFieldsForStep(step);
+        let isValid = true;
+
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                const fieldValid = this.validateField(field);
+                if (!fieldValid) {
+                    isValid = false;
+                }
+            }
+        });
+
+        return isValid;
+    }
+
     getFieldErrorMessage(field) {
         const fieldId = field.id;
         const value = field.value.trim();

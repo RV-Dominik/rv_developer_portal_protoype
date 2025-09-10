@@ -181,17 +181,48 @@ class OnboardingWizard {
     bindLivePreviewEvents() {
         const inputs = document.querySelectorAll('#onboarding-form input, #onboarding-form textarea, #onboarding-form select');
         inputs.forEach(input => {
-            // Only update live preview, no validation to prevent DOM issues
+            // Update live preview and clear validation errors when user starts typing
             input.addEventListener('input', () => {
                 this.updateLivePreview();
+                // Clear validation errors when user starts typing
+                this.clearFieldValidation(input);
             });
             
             input.addEventListener('change', () => {
                 this.updateLivePreview();
+                // Clear validation errors when user makes a selection
+                this.clearFieldValidation(input);
             });
-            
-            // No blur validation to prevent DOM manipulation issues
         });
+    }
+
+    clearFieldValidation(field) {
+        // Clear validation errors for a specific field
+        if (!field || !document.body.contains(field)) return;
+        
+        const container = field.closest('.form-group') || field.parentElement;
+        if (!container || !document.body.contains(container)) return;
+
+        const errorEl = container.querySelector('.field-error');
+        const successEl = container.querySelector('.field-success');
+        
+        if (errorEl && container.contains(errorEl)) {
+            try {
+                container.removeChild(errorEl);
+            } catch (e) {
+                // Ignore if already removed
+            }
+        }
+        
+        if (successEl && container.contains(successEl)) {
+            try {
+                container.removeChild(successEl);
+            } catch (e) {
+                // Ignore if already removed
+            }
+        }
+        
+        field.classList.remove('field-error', 'field-success');
     }
 
     bindStepperEvents() {
@@ -427,33 +458,40 @@ class OnboardingWizard {
         try {
             const formData = this.collectStepData(this.core.currentOnboardingStep);
             
-            // Skip validation during auto-save to prevent DOM issues
-            // Validation will happen on form submission
-            const stepIsValid = true;
+            // Only auto-save if we have meaningful data to save
+            if (!this.hasFormData(formData)) {
+                return;
+            }
 
             // Skip autosave during file uploads to avoid server 500s mid-transfer
             if (this.core.currentOnboardingStep === 'assets' && this.isUploadInFlight) {
                 return;
             }
             
-            if (stepIsValid && this.hasFormData(formData)) {
-                console.log('Auto-saving progress for step:', this.core.currentOnboardingStep);
-                
-                this.showSavingIndicator();
-                
-                const result = await this.saveOnboardingStep({
-                    step: this.core.currentOnboardingStep,
-                    ...formData
-                });
+            // Only auto-save if the step has valid data (but don't show validation errors)
+            const stepIsValid = this.validation.validateStepSilent(this.core.currentOnboardingStep);
+            if (!stepIsValid) {
+                // Don't auto-save if validation fails - wait for user to complete the form
+                return;
+            }
+            
+            console.log('Auto-saving progress for step:', this.core.currentOnboardingStep);
+            
+            this.showSavingIndicator();
+            
+            const result = await this.saveOnboardingStep({
+                step: this.core.currentOnboardingStep,
+                ...formData
+            });
 
-                if (result) {
-                    Object.assign(this.core.currentOnboardingProject, formData);
-                    console.log('Progress auto-saved successfully');
-                    this.showSavedIndicator();
-                }
+            if (result) {
+                Object.assign(this.core.currentOnboardingProject, formData);
+                console.log('Progress auto-saved successfully');
+                this.showSavedIndicator();
             }
         } catch (error) {
             console.warn('Auto-save failed:', error);
+            // Don't show error to user for auto-save failures
         }
     }
 
