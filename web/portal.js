@@ -4,6 +4,7 @@ class ShowroomPortal {
         this.apiBaseUrl = window.location.origin;
         this.currentUser = null;
         this.projects = [];
+        this.hasOrganization = false;
         this.init();
     }
 
@@ -25,7 +26,14 @@ class ShowroomPortal {
 
         const createProjectButton = document.getElementById('create-project-button');
         if (createProjectButton) {
-            createProjectButton.addEventListener('click', this.showCreateProjectForm.bind(this));
+            createProjectButton.addEventListener('click', (e) => {
+                if (!this.hasOrganization) {
+                    e.preventDefault();
+                    this.showOrgModal();
+                    return;
+                }
+                this.showCreateProjectForm();
+            });
         }
     }
 
@@ -35,6 +43,7 @@ class ShowroomPortal {
             if (response.ok) {
                 const data = await response.json();
                 this.currentUser = data.user;
+                await this.ensureOrganization();
                 this.showDashboard();
             } else {
                 this.showAuthSection();
@@ -43,6 +52,85 @@ class ShowroomPortal {
             console.error('Auth check failed:', error);
             this.showAuthSection();
         }
+    }
+
+    async ensureOrganization() {
+        try {
+            const res = await fetch(`${this.apiBaseUrl}/api/org/me`, { credentials: 'include' });
+            if (res.ok) { this.hasOrganization = true; return; } // org exists
+        } catch {}
+        this.hasOrganization = false;
+        this.showOrgModal();
+    }
+
+    showOrgModal() {
+        let modal = document.getElementById('org-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'org-modal';
+            modal.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:10000;';
+            modal.innerHTML = `
+                <div class="auth-card" style="max-width:640px;width:92%;background:#0f1b29;border:1px solid rgba(255,255,255,0.08);">
+                    <div class="section-header" style="margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <h2 class="section-title" style="margin:0">Organization</h2>
+                            <p class="section-subtitle" style="margin:0">Tell us about your company</p>
+                        </div>
+                    </div>
+                    <form id="org-form" class="auth-form">
+                        <div class="form-group">
+                            <label class="form-label" for="org-name">Company Name *</label>
+                            <input id="org-name" class="form-input" required placeholder="Acme Inc.">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="org-website">Website</label>
+                            <input id="org-website" class="form-input" placeholder="https://example.com">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label" for="contact-name">Primary Contact</label>
+                                <input id="contact-name" class="form-input" placeholder="Jane Doe">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label class="form-label" for="contact-email">Contact Email</label>
+                                <input id="contact-email" type="email" class="form-input" placeholder="jane@example.com">
+                            </div>
+                        </div>
+                        <div class="flex gap-20">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>`;
+            document.body.appendChild(modal);
+
+            const form = modal.querySelector('#org-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const submit = form.querySelector('button[type="submit"]');
+                const original = submit.textContent; submit.textContent = 'Saving...'; submit.disabled = true;
+                try {
+                    const body = {
+                        name: form.querySelector('#org-name').value.trim(),
+                        website: form.querySelector('#org-website').value.trim(),
+                        primaryContactName: form.querySelector('#contact-name').value.trim(),
+                        primaryContactEmail: form.querySelector('#contact-email').value.trim()
+                    };
+                    if (!body.name) { this.showMessage('Company name is required', 'error'); return; }
+                    const r = await fetch(`${this.apiBaseUrl}/api/org`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(body)
+                    });
+                    if (r.ok) {
+                        this.showMessage('Organization saved', 'success');
+                        modal.style.display = 'none';
+                    } else {
+                        let msg = 'Failed to save organization';
+                        try { const e2 = await r.json(); msg = e2.error || msg; } catch {}
+                        this.showMessage(msg, 'error');
+                    }
+                } finally { submit.textContent = original; submit.disabled = false; }
+            });
+        }
+        modal.style.display = 'flex';
     }
 
     async handleMagicLinkSubmit(e) {
@@ -201,15 +289,15 @@ class ShowroomPortal {
                     <p class="section-subtitle">Manage your Readyverse projects and experiences</p>
                 </div>
                 <div class="text-center mb-4">
-                    <button id="create-project-button" class="btn btn-primary">
-                        Create New Project
+                    <button id="create-project-button" class="btn btn-primary" ${this.hasOrganization ? '' : 'disabled title="Add your organization first"'}>
+                        ${this.hasOrganization ? 'Create New Project' : 'Add Organization to Create Project'}
                     </button>
                 </div>
                 <div id="projects-list" class="projects-grid">
                     <div class="text-center">
                         <p class="text-body mb-4">No projects yet. Create your first project to get started!</p>
-                        <button class="btn btn-primary" onclick="portal.showCreateProjectForm()">
-                            Create Project
+                        <button class="btn btn-primary" ${this.hasOrganization ? '' : 'disabled'} onclick="portal.hasOrganization ? portal.showCreateProjectForm() : portal.showOrgModal()">
+                            ${this.hasOrganization ? 'Create Project' : 'Add Organization'}
                         </button>
                     </div>
                 </div>
