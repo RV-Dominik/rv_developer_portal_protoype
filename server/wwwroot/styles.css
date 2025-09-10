@@ -1012,6 +1012,23 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 2;
   cursor: pointer;
   transition: all 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.wizard-step:hover {
+  background: rgba(65, 175, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.wizard-step:not(.active):not(.completed) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wizard-step:not(.active):not(.completed):hover {
+  background: transparent;
+  transform: none;
 }
 
 .step-number {
@@ -1085,15 +1102,131 @@ h1, h2, h3, h4, h5, h6 {
 .wizard-actions {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--rv-blue-20);
+  gap: 2rem;
 }
 
 .wizard-nav {
   display: flex;
   gap: 1rem;
+}
+
+.wizard-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.step-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.progress-text {
+  font-size: 0.8rem;
+  color: var(--rv-grey-1);
+  font-weight: 500;
+}
+
+.progress-bar {
+  width: 200px;
+  height: 4px;
+  background: var(--rv-blue-20);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rv-blue), var(--rv-green));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Enhanced Button Styles */
+.wizard-nav-btn, .wizard-cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.wizard-nav-btn .btn-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.wizard-cta-btn .btn-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.wizard-cta-btn {
+  background: linear-gradient(135deg, var(--rv-blue), var(--rv-green));
+  border: none;
+  color: var(--rv-black);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 15px rgba(65, 175, 255, 0.3);
+}
+
+.wizard-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(65, 175, 255, 0.4);
+}
+
+.wizard-nav-btn.btn-outline {
+  border-color: var(--rv-grey-2);
+  color: var(--rv-grey-2);
+}
+
+.wizard-nav-btn.btn-outline:hover {
+  border-color: var(--rv-white);
+  color: var(--rv-white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wizard-nav-btn.btn-secondary {
+  background: var(--rv-blue-35);
+  border-color: var(--rv-blue-35);
+  color: var(--rv-white);
+}
+
+.wizard-nav-btn.btn-secondary:hover {
+  background: var(--rv-blue);
+  border-color: var(--rv-blue);
+  color: var(--rv-black);
+}
+
+/* Responsive wizard actions */
+@media (max-width: 768px) {
+  .wizard-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+  
+  .wizard-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .wizard-cta {
+    align-items: center;
+  }
+  
+  .progress-bar {
+    width: 100%;
+  }
 }
 
 /* File Upload Areas */

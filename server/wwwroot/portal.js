@@ -5,6 +5,15 @@ class ShowroomPortal {
         this.currentUser = null;
         this.projects = [];
         this.isVerifyingMagicLink = false;
+        this.currentOnboardingProject = null;
+        this.currentOnboardingStep = 'basics';
+        this.autoSaveTimeout = null;
+        this.analytics = {
+            sessionStart: Date.now(),
+            stepStartTimes: {},
+            dropOffPoints: [],
+            interactions: []
+        };
         this.init();
     }
 
@@ -13,6 +22,7 @@ class ShowroomPortal {
         this.hideLogoutButton(); // Hide logout button by default
         this.handleMagicLinkCallback();
         this.checkAuthStatus();
+        this.bindAnalyticsEvents();
     }
 
     bindEvents() {
@@ -270,6 +280,13 @@ class ShowroomPortal {
         this.currentOnboardingProject = project;
         this.currentOnboardingStep = project.onboardingStep || 'basics';
         
+        // Track onboarding start
+        this.trackEvent('onboarding_start', {
+            projectId: project.id,
+            step: this.currentOnboardingStep
+        });
+        this.trackStepStart(this.currentOnboardingStep);
+        
         this.renderOnboardingWizard();
         
         // Restore form data after a short delay to ensure DOM is ready
@@ -450,13 +467,31 @@ class ShowroomPortal {
                             
                             <div class="wizard-actions">
                                 <div class="wizard-nav">
-                                    <button type="button" class="btn btn-secondary" id="wizard-back" ${step === 'basics' ? 'style="display: none;"' : ''}>Back</button>
-                                    <button type="button" class="btn btn-outline" id="wizard-skip" ${step === 'review' ? 'style="display: none;"' : ''}>Skip Step</button>
-                                    <button type="button" class="btn btn-outline" id="wizard-exit">Exit</button>
+                                    <button type="button" class="btn btn-secondary wizard-nav-btn" id="wizard-back" ${step === 'basics' ? 'style="display: none;"' : ''}>
+                                        <span class="btn-icon">←</span>
+                                        <span class="btn-text">Back</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline wizard-nav-btn" id="wizard-skip" ${step === 'review' ? 'style="display: none;"' : ''}>
+                                        <span class="btn-icon">⏭</span>
+                                        <span class="btn-text">Skip Step</span>
+                                    </button>
+                                    <button type="button" class="btn btn-outline wizard-nav-btn" id="wizard-exit">
+                                        <span class="btn-icon">🚪</span>
+                                        <span class="btn-text">Exit</span>
+                                    </button>
                                 </div>
-                                <button type="submit" class="btn btn-primary" id="wizard-next">
-                                    ${step === 'review' ? 'Complete Onboarding' : 'Save & Continue'}
-                                </button>
+                                <div class="wizard-cta">
+                                    <div class="step-progress">
+                                        <span class="progress-text">Step ${this.getStepNumber(step)} of 5</span>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: ${this.getStepProgress(step)}%"></div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary wizard-cta-btn" id="wizard-next">
+                                        <span class="btn-icon">${step === 'review' ? '✓' : '→'}</span>
+                                        <span class="btn-text">${this.getCtaText(step)}</span>
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -1063,13 +1098,16 @@ class ShowroomPortal {
         
         if (backBtn) backBtn.addEventListener('click', this.goToPreviousStep.bind(this));
         if (skipBtn) skipBtn.addEventListener('click', this.skipCurrentStep.bind(this));
-        if (exitBtn) exitBtn.addEventListener('click', this.exitOnboarding.bind(this));
+        if (exitBtn) exitBtn.addEventListener('click', this.confirmExitOnboarding.bind(this));
         
         // File upload handlers
         this.bindFileUploadEvents();
         
         // Live preview updates
         this.bindLivePreviewEvents();
+        
+        // Stepper click events
+        this.bindStepperEvents();
     }
 
     bindLivePreviewEvents() {
@@ -1086,6 +1124,54 @@ class ShowroomPortal {
             });
             input.addEventListener('blur', () => this.validateField(input));
         });
+    }
+
+    bindStepperEvents() {
+        // Make stepper steps clickable
+        const stepperSteps = document.querySelectorAll('.wizard-step');
+        stepperSteps.forEach(step => {
+            step.addEventListener('click', (e) => {
+                const targetStep = e.currentTarget.getAttribute('data-step');
+                if (targetStep && this.canNavigateToStep(targetStep)) {
+                    this.navigateToStep(targetStep);
+                }
+            });
+        });
+    }
+
+    canNavigateToStep(targetStep) {
+        const steps = this.getWizardSteps();
+        const currentIndex = steps.indexOf(this.currentOnboardingStep);
+        const targetIndex = steps.indexOf(targetStep);
+        
+        // Can navigate to previous steps or current step
+        return targetIndex <= currentIndex;
+    }
+
+    navigateToStep(targetStep) {
+        if (targetStep === this.currentOnboardingStep) return;
+        
+        // Track step end for current step
+        this.trackStepEnd(this.currentOnboardingStep, false);
+        
+        // Auto-save current progress
+        this.autoSaveProgress();
+        
+        this.currentOnboardingStep = targetStep;
+        
+        // Track step start for target step
+        this.trackStepStart(targetStep);
+        this.trackEvent('step_navigation', {
+            from: this.currentOnboardingStep,
+            to: targetStep
+        });
+        
+        this.renderOnboardingWizard();
+        
+        // Restore form data for the target step
+        setTimeout(() => {
+            this.restoreFormData(this.currentOnboardingProject);
+        }, 100);
     }
 
     validateField(field) {
@@ -1236,6 +1322,284 @@ class ShowroomPortal {
             default:
                 return [];
         }
+    }
+
+    getValidationErrors() {
+        const errors = [];
+        const requiredFields = this.getRequiredFieldsForStep(this.currentOnboardingStep);
+        
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && !this.validateField(field)) {
+                const errorEl = field.parentNode.querySelector('.field-error');
+                if (errorEl) {
+                    errors.push({
+                        field: fieldId,
+                        message: errorEl.textContent
+                    });
+                }
+            }
+        });
+        
+        return errors;
+    }
+
+    getStepNumber(step) {
+        const stepNumbers = {
+            'basics': 1,
+            'assets': 2,
+            'integration': 3,
+            'compliance': 4,
+            'review': 5
+        };
+        return stepNumbers[step] || 1;
+    }
+
+    getStepProgress(step) {
+        const stepProgress = {
+            'basics': 20,
+            'assets': 40,
+            'integration': 60,
+            'compliance': 80,
+            'review': 100
+        };
+        return stepProgress[step] || 0;
+    }
+
+    getCtaText(step) {
+        const ctaTexts = {
+            'basics': 'Continue to Assets',
+            'assets': 'Continue to Integration',
+            'integration': 'Continue to Compliance',
+            'compliance': 'Review & Submit',
+            'review': 'Complete Onboarding'
+        };
+        return ctaTexts[step] || 'Continue';
+    }
+
+    getWizardSteps() {
+        return ['basics', 'assets', 'integration', 'compliance', 'review'];
+    }
+
+    getStepClasses(stepName, currentStep) {
+        const steps = this.getWizardSteps();
+        const currentIndex = steps.indexOf(currentStep);
+        const stepIndex = steps.indexOf(stepName);
+        
+        if (stepName === currentStep) {
+            return 'active';
+        } else if (stepIndex < currentIndex) {
+            return 'completed';
+        } else {
+            return '';
+        }
+    }
+
+    confirmExitOnboarding() {
+        // Check if there's unsaved data
+        const hasUnsavedData = this.hasUnsavedChanges();
+        
+        if (hasUnsavedData) {
+            const confirmed = confirm(
+                'You have unsaved changes. Are you sure you want to exit? Your progress will be saved automatically.'
+            );
+            if (!confirmed) return;
+        }
+        
+        this.exitOnboarding();
+    }
+
+    hasUnsavedChanges() {
+        // Check if any form fields have been modified
+        const inputs = document.querySelectorAll('#onboarding-form input, #onboarding-form textarea, #onboarding-form select');
+        return Array.from(inputs).some(input => {
+            const value = input.value.trim();
+            const originalValue = input.getAttribute('data-original-value') || '';
+            return value !== originalValue;
+        });
+    }
+
+    goToPreviousStep() {
+        const steps = ['basics', 'assets', 'integration', 'compliance', 'review'];
+        const currentIndex = steps.indexOf(this.currentOnboardingStep);
+        
+        if (currentIndex > 0) {
+            // Track step navigation
+            this.trackStepEnd(this.currentOnboardingStep, false);
+            this.trackEvent('step_back', { 
+                from: this.currentOnboardingStep,
+                to: steps[currentIndex - 1]
+            });
+            
+            this.currentOnboardingStep = steps[currentIndex - 1];
+            this.trackStepStart(this.currentOnboardingStep);
+            this.renderOnboardingWizard();
+            
+            // Restore form data for the previous step
+            setTimeout(() => {
+                this.restoreFormData(this.currentOnboardingProject);
+            }, 100);
+        }
+    }
+
+    skipCurrentStep() {
+        // Track skip event
+        this.trackEvent('step_skipped', {
+            step: this.currentOnboardingStep,
+            timeSpent: this.getTimeSpentOnStep()
+        });
+        
+        // Auto-save current progress before skipping
+        this.autoSaveProgress();
+        
+        const steps = ['basics', 'assets', 'integration', 'compliance', 'review'];
+        const currentIndex = steps.indexOf(this.currentOnboardingStep);
+        
+        if (currentIndex < steps.length - 1) {
+            this.trackStepEnd(this.currentOnboardingStep, false);
+            this.currentOnboardingStep = steps[currentIndex + 1];
+            this.trackStepStart(this.currentOnboardingStep);
+            this.renderOnboardingWizard();
+            
+            // Restore form data for the next step
+            setTimeout(() => {
+                this.restoreFormData(this.currentOnboardingProject);
+            }, 100);
+        }
+    }
+
+    exitOnboarding() {
+        // Track exit event
+        this.trackEvent('onboarding_exit', {
+            step: this.currentOnboardingStep,
+            timeSpent: this.getTimeSpentOnStep(),
+            completion: this.getStepProgress(this.currentOnboardingStep)
+        });
+        
+        // Auto-save before exiting
+        this.autoSaveProgress();
+        
+        // Show projects list
+        this.showProjectsList();
+        this.showMessage('Onboarding progress saved. You can continue later.', 'info');
+    }
+
+    // Analytics Methods
+    trackEvent(eventName, data = {}) {
+        const event = {
+            name: eventName,
+            timestamp: Date.now(),
+            step: this.currentOnboardingStep,
+            projectId: this.currentOnboardingProject?.id,
+            userId: this.currentUser?.id,
+            data: data
+        };
+        
+        this.analytics.interactions.push(event);
+        
+        // Log to console for debugging (in production, send to analytics service)
+        console.log('Analytics Event:', event);
+        
+        // Send to backend for storage (optional)
+        this.sendAnalyticsEvent(event);
+    }
+
+    trackStepStart(step) {
+        this.analytics.stepStartTimes[step] = Date.now();
+        this.trackEvent('step_start', { step });
+    }
+
+    trackStepEnd(step, completed = false) {
+        const timeSpent = this.getTimeSpentOnStep(step);
+        this.trackEvent('step_end', { 
+            step, 
+            completed, 
+            timeSpent 
+        });
+    }
+
+    trackDropOff(reason, step = null) {
+        const dropOff = {
+            reason,
+            step: step || this.currentOnboardingStep,
+            timestamp: Date.now(),
+            timeSpent: this.getTimeSpentOnStep(),
+            projectId: this.currentOnboardingProject?.id
+        };
+        
+        this.analytics.dropOffPoints.push(dropOff);
+        this.trackEvent('drop_off', dropOff);
+    }
+
+    getTimeSpentOnStep(step = null) {
+        const targetStep = step || this.currentOnboardingStep;
+        const startTime = this.analytics.stepStartTimes[targetStep];
+        return startTime ? Date.now() - startTime : 0;
+    }
+
+    async sendAnalyticsEvent(event) {
+        try {
+            // In a real implementation, you'd send this to your analytics service
+            // For now, we'll just log it
+            console.log('Sending analytics event:', event);
+            
+            // Example: Send to backend analytics endpoint
+            // await fetch(`${this.apiBaseUrl}/api/analytics/event`, {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     credentials: 'include',
+            //     body: JSON.stringify(event)
+            // });
+        } catch (error) {
+            console.warn('Failed to send analytics event:', error);
+        }
+    }
+
+    bindAnalyticsEvents() {
+        // Track page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && this.currentOnboardingProject) {
+                this.trackEvent('page_hidden', {
+                    step: this.currentOnboardingStep,
+                    timeSpent: this.getTimeSpentOnStep()
+                });
+            } else if (!document.hidden && this.currentOnboardingProject) {
+                this.trackEvent('page_visible', {
+                    step: this.currentOnboardingStep
+                });
+            }
+        });
+
+        // Track beforeunload to detect unexpected exits
+        window.addEventListener('beforeunload', (e) => {
+            if (this.currentOnboardingProject) {
+                this.trackDropOff('page_unload', this.currentOnboardingStep);
+                
+                // Send analytics immediately
+                this.sendAnalyticsEvent({
+                    name: 'page_unload',
+                    timestamp: Date.now(),
+                    step: this.currentOnboardingStep,
+                    projectId: this.currentOnboardingProject?.id,
+                    userId: this.currentUser?.id,
+                    data: {
+                        timeSpent: this.getTimeSpentOnStep(),
+                        totalTime: Date.now() - this.analytics.sessionStart
+                    }
+                });
+            }
+        });
+
+        // Track form field interactions
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('#onboarding-form input, #onboarding-form textarea, #onboarding-form select')) {
+                this.trackEvent('field_interaction', {
+                    field: e.target.id,
+                    step: this.currentOnboardingStep,
+                    value: e.target.value.length
+                });
+            }
+        });
     }
 
     updateLivePreview() {
@@ -1493,8 +1857,15 @@ class ShowroomPortal {
         event.preventDefault();
         console.log('Form submitted for step:', this.currentOnboardingStep);
         
+        // Track form submission attempt
+        this.trackEvent('form_submit_attempt', { step: this.currentOnboardingStep });
+        
         // Validate current step before submitting
         if (!this.validateStep(this.currentOnboardingStep)) {
+            this.trackEvent('validation_failed', { 
+                step: this.currentOnboardingStep,
+                errors: this.getValidationErrors()
+            });
             this.showMessage('Please fix the validation errors before continuing', 'error');
             return;
         }
@@ -1508,18 +1879,34 @@ class ShowroomPortal {
             // Save current step data
             await this.saveOnboardingStep(formData);
             
+            // Track successful step completion
+            this.trackStepEnd(this.currentOnboardingStep, true);
+            this.trackEvent('step_completed', { 
+                step: this.currentOnboardingStep,
+                timeSpent: this.getTimeSpentOnStep()
+            });
+            
             if (nextStep) {
                 // Move to next step
                 this.currentOnboardingStep = nextStep;
+                this.trackStepStart(nextStep);
                 this.renderOnboardingWizard();
             } else {
                 // Complete onboarding
                 await this.completeOnboarding();
+                this.trackEvent('onboarding_completed', {
+                    totalTime: Date.now() - this.analytics.sessionStart,
+                    projectId: this.currentOnboardingProject?.id
+                });
                 this.showMessage('Onboarding completed successfully!', 'success');
                 this.showProjectsList();
             }
         } catch (error) {
             console.error('Onboarding error:', error);
+            this.trackEvent('step_error', {
+                step: this.currentOnboardingStep,
+                error: error.message
+            });
             this.showMessage('Error saving onboarding data', 'error');
         }
     }
