@@ -205,24 +205,35 @@ class OnboardingValidation {
         const successEl = container.querySelector('.field-success');
         
         // Remove error element if it exists and is still in the DOM
-        if (errorEl && errorEl.parentNode === container) {
+        if (errorEl && errorEl.parentNode === container && document.body.contains(errorEl)) {
             try {
-                container.removeChild(errorEl);
+                // Double-check the element is still a child before removing
+                if (container.contains(errorEl)) {
+                    container.removeChild(errorEl);
+                }
             } catch (e) {
                 // Element was already removed or moved, ignore silently
+                console.warn('Failed to remove error element:', e);
             }
         }
         
         // Remove success element if it exists and is still in the DOM
-        if (successEl && successEl.parentNode === container) {
+        if (successEl && successEl.parentNode === container && document.body.contains(successEl)) {
             try {
-                container.removeChild(successEl);
+                // Double-check the element is still a child before removing
+                if (container.contains(successEl)) {
+                    container.removeChild(successEl);
+                }
             } catch (e) {
                 // Element was already removed or moved, ignore silently
+                console.warn('Failed to remove success element:', e);
             }
         }
         
-        field.classList.remove('field-error', 'field-success');
+        // Only remove classes if the field is still in the DOM
+        if (document.body.contains(field)) {
+            field.classList.remove('field-error', 'field-success');
+        }
     }
 
     showFieldError(field, message) {
@@ -233,6 +244,9 @@ class OnboardingValidation {
         // Clear any existing validation first
         this.clearFieldValidation(field);
 
+        // Double-check field is still in DOM before modifying
+        if (!document.body.contains(field)) return;
+
         field.classList.add('field-error');
         field.classList.remove('field-success');
         
@@ -240,7 +254,10 @@ class OnboardingValidation {
         errorEl.className = 'field-error';
         errorEl.textContent = message;
         
-        container.appendChild(errorEl);
+        // Double-check container is still in DOM before appending
+        if (document.body.contains(container)) {
+            container.appendChild(errorEl);
+        }
     }
 
     showFieldSuccess(field) {
@@ -251,6 +268,9 @@ class OnboardingValidation {
         // Clear any existing validation first
         this.clearFieldValidation(field);
 
+        // Double-check field is still in DOM before modifying
+        if (!document.body.contains(field)) return;
+
         field.classList.add('field-success');
         field.classList.remove('field-error');
         
@@ -258,6 +278,9 @@ class OnboardingValidation {
         successEl.className = 'field-success';
         successEl.textContent = '✓';
         
-        container.appendChild(successEl);
+        // Double-check container is still in DOM before appending
+        if (document.body.contains(container)) {
+            container.appendChild(successEl);
+        }
     }
 }

@@ -5,6 +5,7 @@ class OnboardingWizard {
         this.steps = onboardingSteps;
         this.validation = onboardingValidation;
         this.data = onboardingData;
+        this.isRendering = false; // Flag to prevent validation during rendering
     }
 
     startOnboarding(projectOrId) {
@@ -72,6 +73,9 @@ class OnboardingWizard {
     renderOnboardingWizard() {
         const dashboardSection = document.getElementById('dashboard-section');
         if (!dashboardSection || !this.core.currentOnboardingProject) return;
+        
+        // Set rendering flag to prevent validation during DOM updates
+        this.isRendering = true;
         
         const project = this.core.currentOnboardingProject;
         const step = this.core.currentOnboardingStep;
@@ -149,6 +153,9 @@ class OnboardingWizard {
         `;
 
         this.bindOnboardingEvents();
+        
+        // Clear rendering flag after events are bound
+        this.isRendering = false;
     }
 
     bindOnboardingEvents() {
@@ -174,14 +181,24 @@ class OnboardingWizard {
     bindLivePreviewEvents() {
         const inputs = document.querySelectorAll('#onboarding-form input, #onboarding-form textarea, #onboarding-form select');
         inputs.forEach(input => {
+            // Use debounced validation for input events to prevent excessive DOM manipulation
+            let validationTimeout;
             input.addEventListener('input', () => {
                 this.updateLivePreview();
-                this.validateField(input);
+                // Debounce validation to prevent excessive DOM manipulation
+                clearTimeout(validationTimeout);
+                validationTimeout = setTimeout(() => {
+                    this.validateField(input);
+                }, 300); // 300ms delay
             });
+            
+            // Immediate validation for change events (dropdowns, checkboxes)
             input.addEventListener('change', () => {
                 this.updateLivePreview();
                 this.validateField(input);
             });
+            
+            // Immediate validation for blur events
             input.addEventListener('blur', () => this.validateField(input));
         });
     }
@@ -520,6 +537,22 @@ class OnboardingWizard {
     }
 
     validateField(field) {
+        // Safety check: don't validate if the field is no longer in the DOM
+        if (!field || !document.body.contains(field)) {
+            return false;
+        }
+        
+        // Safety check: don't validate if the form is being re-rendered
+        const form = document.getElementById('onboarding-form');
+        if (!form || !document.body.contains(form)) {
+            return false;
+        }
+        
+        // Safety check: don't validate during rendering
+        if (this.isRendering) {
+            return false;
+        }
+        
         return this.validation.validateField(field);
     }
 
