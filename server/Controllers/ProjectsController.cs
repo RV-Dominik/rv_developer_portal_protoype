@@ -32,7 +32,14 @@ namespace ShowroomBackend.Controllers
             try
             {
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+                _logger.LogInformation("SaveOnboardingStep called for project {ProjectId}, UserId: {UserId}, IsAuthenticated: {IsAuthenticated}", 
+                    id, userId, User.Identity?.IsAuthenticated);
+                
+                if (string.IsNullOrEmpty(userId)) 
+                {
+                    _logger.LogWarning("No userId found in token for project {ProjectId}", id);
+                    return Unauthorized(new { error = "Not authenticated" });
+                }
 
                 var project = await _supabaseService.GetProjectByIdAsync(id);
                 if (project == null) return NotFound(new { error = "Project not found" });

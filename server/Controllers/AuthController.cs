@@ -95,13 +95,15 @@ namespace ShowroomBackend.Controllers
                         var cookieOptions = new CookieOptions
                         {
                             HttpOnly = true,
-                            Secure = true,
+                            Secure = !(_configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT")?.Equals("Development") ?? false),
                             SameSite = SameSiteMode.Lax,
                             Expires = DateTime.UtcNow.AddDays(7),
                             Path = "/"
                         };
                         
                         Response.Cookies.Append("auth_token", jwtToken, cookieOptions);
+                        
+                        _logger.LogInformation("Set auth_token cookie for user {UserId} with Secure={Secure}", userId, cookieOptions.Secure);
                         
                         return Ok(new
                         {
@@ -133,8 +135,12 @@ namespace ShowroomBackend.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
+                _logger.LogInformation("GetSession called - UserId: {UserId}, Email: {Email}, IsAuthenticated: {IsAuthenticated}", 
+                    userId, email, User.Identity?.IsAuthenticated);
+
                 if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
                 {
+                    _logger.LogWarning("Missing userId or email in session");
                     return Unauthorized(new { error = "Not authenticated" });
                 }
 
@@ -152,6 +158,18 @@ namespace ShowroomBackend.Controllers
                 _logger.LogError(ex, "Error getting session");
                 return StatusCode(500, new { error = "Failed to get session" });
             }
+        }
+
+        [HttpGet("test-auth")]
+        [Authorize]
+        public IActionResult TestAuth()
+        {
+            return Ok(new { 
+                message = "Authentication working!",
+                userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+                email = User.FindFirst(ClaimTypes.Email)?.Value,
+                isAuthenticated = User.Identity?.IsAuthenticated
+            });
         }
 
         [HttpPost("logout")]
