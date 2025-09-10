@@ -18,11 +18,11 @@ class PortalCore {
         };
     }
 
-    init() {
+    async init() {
         this.bindEvents();
         this.hideLogoutButton();
         this.handleMagicLinkCallback();
-        this.checkAuthStatus();
+        await this.checkAuthStatus();
         this.bindAnalyticsEvents();
     }
 

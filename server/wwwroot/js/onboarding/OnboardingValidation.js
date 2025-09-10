@@ -196,15 +196,31 @@ class OnboardingValidation {
 
         // Prefer a stable container to append/remove validation UI
         const container = field.closest('.form-group') || field.parentElement;
-        if (!container) {
+        if (!container || !document.body.contains(container)) {
             return;
         }
 
+        // Use a more defensive approach - check if elements exist before trying to remove them
         const errorEl = container.querySelector('.field-error');
         const successEl = container.querySelector('.field-success');
         
-        if (errorEl && errorEl.parentNode) errorEl.parentNode.removeChild(errorEl);
-        if (successEl && successEl.parentNode) successEl.parentNode.removeChild(successEl);
+        // Remove error element if it exists and is still in the DOM
+        if (errorEl && errorEl.parentNode === container) {
+            try {
+                container.removeChild(errorEl);
+            } catch (e) {
+                // Element was already removed or moved, ignore silently
+            }
+        }
+        
+        // Remove success element if it exists and is still in the DOM
+        if (successEl && successEl.parentNode === container) {
+            try {
+                container.removeChild(successEl);
+            } catch (e) {
+                // Element was already removed or moved, ignore silently
+            }
+        }
         
         field.classList.remove('field-error', 'field-success');
     }
@@ -212,7 +228,10 @@ class OnboardingValidation {
     showFieldError(field, message) {
         if (!field || !document.body.contains(field)) return;
         const container = field.closest('.form-group') || field.parentElement;
-        if (!container) return;
+        if (!container || !document.body.contains(container)) return;
+
+        // Clear any existing validation first
+        this.clearFieldValidation(field);
 
         field.classList.add('field-error');
         field.classList.remove('field-success');
@@ -227,7 +246,10 @@ class OnboardingValidation {
     showFieldSuccess(field) {
         if (!field || !document.body.contains(field)) return;
         const container = field.closest('.form-group') || field.parentElement;
-        if (!container) return;
+        if (!container || !document.body.contains(container)) return;
+
+        // Clear any existing validation first
+        this.clearFieldValidation(field);
 
         field.classList.add('field-success');
         field.classList.remove('field-error');

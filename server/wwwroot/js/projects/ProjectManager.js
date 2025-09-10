@@ -54,10 +54,10 @@ class ProjectManager {
                     <span class="project-track">${project.publishingTrack || 'No track'}</span>
                 </div>
                 <div class="project-actions">
-                    <button class="btn btn-primary" onclick="portal.startOnboarding('${project.id}')">
+                    <button class="btn btn-primary" onclick="window.portal.startOnboarding('${project.id}')">
                         ${project.onboardingStep === 'done' ? 'View Project' : 'Continue Setup'}
                     </button>
-                    <button class="btn btn-secondary" onclick="portal.showProjectDetail('${project.id}')">
+                    <button class="btn btn-secondary" onclick="window.portal.showProjectDetail('${project.id}')">
                         Details
                     </button>
                 </div>
@@ -146,7 +146,11 @@ class ProjectManager {
                 this.core.showMessage('Project created successfully!', 'success');
                 
                 // Start onboarding for the new project
-                this.core.startOnboarding(result);
+                if (window.portal && window.portal.startOnboarding) {
+                    window.portal.startOnboarding(result);
+                } else {
+                    console.error('Portal not available for starting onboarding');
+                }
             } else {
                 this.core.showMessage(result.error || 'Failed to create project', 'error');
             }
@@ -163,7 +167,11 @@ class ProjectManager {
         if (!project) return;
 
         // For now, just start onboarding
-        this.core.startOnboarding(project);
+        if (window.portal && window.portal.startOnboarding) {
+            window.portal.startOnboarding(project);
+        } else {
+            console.error('Portal not available for starting onboarding');
+        }
     }
 
     showProjectsList() {

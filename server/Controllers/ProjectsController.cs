@@ -201,6 +201,13 @@ namespace ShowroomBackend.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
 
+                // Check for duplicate project name
+                var nameExists = await _supabaseService.ProjectNameExistsAsync(dto.Name, userId);
+                if (nameExists)
+                {
+                    return BadRequest(new { error = "A project with this name already exists. Please choose a different name." });
+                }
+
                 // Get user's organization to populate company name
                 var organization = await _supabaseService.GetUserOrganizationAsync(userId);
                 if (organization == null)

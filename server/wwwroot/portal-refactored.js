@@ -24,18 +24,11 @@ class ShowroomPortal {
     }
 
     async init() {
-        this.core.init();
+        // Initialize core first and wait for authentication check to complete
+        await this.core.init();
         
-        // Check if user is authenticated
-        if (this.core.currentUser) {
-            // Check organization status
-            const org = await this.organizationManager.loadOrganization();
-            if (org) {
-                // Organization exists, show projects
-                this.projectManager.showProjectsList();
-            }
-            // If no org, organization setup will be shown by loadOrganization
-        }
+        // The core.init() calls checkAuthStatus() which will handle authentication
+        // and project loading if the user is authenticated
     }
 
     // Project management methods

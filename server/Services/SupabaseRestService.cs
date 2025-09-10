@@ -419,6 +419,34 @@ namespace ShowroomBackend.Services
             }
         }
 
+        public async Task<bool> ProjectNameExistsAsync(string name, string userId)
+        {
+            try
+            {
+                var encodedName = Uri.EscapeDataString(name);
+                var response = await _httpClient.GetAsync($"projects?name=eq.{encodedName}&user_id=eq.{userId}&select=id");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+                    
+                    return projects?.Length > 0;
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to check if project name exists: {ProjectName}", name);
+                return false;
+            }
+        }
+
         public async Task<List<Asset>> GetProjectAssetsAsync(Guid projectId)
         {
             try

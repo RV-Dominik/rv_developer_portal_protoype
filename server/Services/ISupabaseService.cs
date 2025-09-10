@@ -16,6 +16,7 @@ namespace ShowroomBackend.Services
         Task<Project?> UpdateProjectFieldsAsync(Guid id, Dictionary<string, object?> fields);
         Task<bool> DeleteProjectAsync(Guid id);
         Task<Project?> GetProjectByIdAsync(Guid id);
+        Task<bool> ProjectNameExistsAsync(string name, string userId);
         Task<List<Asset>> GetProjectAssetsAsync(Guid projectId);
         Task<Asset?> CreateAssetAsync(Asset asset);
         Task<bool> DeleteAssetAsync(Guid id);
