@@ -271,6 +271,130 @@ class ShowroomPortal {
         this.currentOnboardingStep = project.onboardingStep || 'basics';
         
         this.renderOnboardingWizard();
+        
+        // Restore form data after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            this.restoreFormData(project);
+        }, 100);
+    }
+
+    restoreFormData(project) {
+        // Restore form fields based on the current step
+        switch (this.currentOnboardingStep) {
+            case 'basics':
+                this.restoreBasicsData(project);
+                break;
+            case 'integration':
+                this.restoreIntegrationData(project);
+                break;
+            case 'compliance':
+                this.restoreComplianceData(project);
+                break;
+        }
+    }
+
+    restoreBasicsData(project) {
+        // Restore basic project information
+        const shortDescEl = document.getElementById('ob-short-description');
+        if (shortDescEl && project.shortDescription) {
+            shortDescEl.value = project.shortDescription;
+        }
+
+        const fullDescEl = document.getElementById('ob-full-description');
+        if (fullDescEl && project.fullDescription) {
+            fullDescEl.value = project.fullDescription;
+        }
+
+        const genreEl = document.getElementById('ob-genre');
+        if (genreEl && project.genre) {
+            genreEl.value = project.genre;
+        }
+
+        const trackEl = document.getElementById('ob-publishing-track');
+        if (trackEl && project.publishingTrack) {
+            trackEl.value = project.publishingTrack;
+        }
+
+        const statusEl = document.getElementById('ob-build-status');
+        if (statusEl && project.buildStatus) {
+            statusEl.value = project.buildStatus;
+        }
+
+        // Restore target platforms
+        if (project.targetPlatforms) {
+            try {
+                const platforms = JSON.parse(project.targetPlatforms);
+                platforms.forEach(platform => {
+                    const checkbox = document.getElementById(`ob-platform-${platform.toLowerCase()}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            } catch (e) {
+                console.warn('Failed to parse target platforms:', e);
+            }
+        }
+
+        // Restore public setting
+        const publicEl = document.getElementById('ob-is-public');
+        if (publicEl) {
+            publicEl.checked = project.isPublic || false;
+        }
+    }
+
+    restoreIntegrationData(project) {
+        // Restore integration status
+        const passSsoEl = document.getElementById('ob-pass-sso');
+        if (passSsoEl && project.passSsoIntegrationStatus) {
+            passSsoEl.value = project.passSsoIntegrationStatus;
+        }
+
+        const sdkEl = document.getElementById('ob-sdk-status');
+        if (sdkEl && project.readyverseSdkIntegrationStatus) {
+            sdkEl.value = project.readyverseSdkIntegrationStatus;
+        }
+
+        const gameUrlEl = document.getElementById('ob-game-url');
+        if (gameUrlEl && project.gameUrl) {
+            gameUrlEl.value = project.gameUrl;
+        }
+    }
+
+    restoreComplianceData(project) {
+        // Restore compliance checkboxes
+        const legalEl = document.getElementById('ob-legal-requirements');
+        if (legalEl) {
+            legalEl.checked = project.legalRequirementsCompleted || false;
+        }
+
+        const privacyEl = document.getElementById('ob-privacy-policy');
+        if (privacyEl) {
+            privacyEl.checked = project.privacyPolicyProvided || false;
+        }
+
+        const termsEl = document.getElementById('ob-terms-accepted');
+        if (termsEl) {
+            termsEl.checked = project.termsAccepted || false;
+        }
+
+        const contentEl = document.getElementById('ob-content-guidelines');
+        if (contentEl) {
+            contentEl.checked = project.contentGuidelinesAccepted || false;
+        }
+
+        const distributionEl = document.getElementById('ob-distribution-rights');
+        if (distributionEl) {
+            distributionEl.checked = project.distributionRightsConfirmed || false;
+        }
+
+        // Restore other fields
+        const ratingEl = document.getElementById('ob-rating-board');
+        if (ratingEl && project.ratingBoard) {
+            ratingEl.value = project.ratingBoard;
+        }
+
+        const supportEl = document.getElementById('ob-support-email');
+        if (supportEl && project.supportEmail) {
+            supportEl.value = project.supportEmail;
+        }
     }
 
     renderOnboardingWizard() {
@@ -312,7 +436,10 @@ class ShowroomPortal {
                     
                     <div class="wizard-content">
                         <div class="step-header">
-                            <h3 class="step-title" id="step-title">${this.getStepTitle(step)}</h3>
+                            <div class="step-title-row">
+                                <h3 class="step-title" id="step-title">${this.getStepTitle(step)}</h3>
+                                <div id="save-indicator" class="save-indicator"></div>
+                            </div>
                             <p class="step-description" id="step-description">${this.getStepDescription(step)}</p>
                         </div>
                         
@@ -783,62 +910,138 @@ class ShowroomPortal {
         switch (step) {
             case 'basics':
                 return `
-                    <div class="preview-card">
-                        <h4>Project Preview</h4>
-                        <div class="preview-field">
-                            <strong>Name:</strong> ${project.name}
+                    <div class="preview-card enhanced">
+                        <div class="preview-card-header">
+                            <h4>Project Preview</h4>
+                            <div class="preview-badge">Live Preview</div>
                         </div>
-                        <div class="preview-field">
-                            <strong>Description:</strong> ${project.shortDescription || 'Will be filled in this step'}
-                        </div>
-                        <div class="preview-field">
-                            <strong>Genre:</strong> ${project.genre || 'Will be selected'}
+                        <div class="preview-project-card">
+                            <div class="preview-project-title" id="preview-project-name">${project.name}</div>
+                            <div class="preview-project-description" id="preview-project-desc">${project.shortDescription || 'Your project description will appear here'}</div>
+                            <div class="preview-project-meta">
+                                <span class="preview-genre" id="preview-genre">${project.genre || 'Genre'}</span>
+                                <span class="preview-track" id="preview-track">${project.publishingTrack || 'Track'}</span>
+                            </div>
+                            <div class="preview-project-status">
+                                <span class="status-badge" id="preview-status">${project.buildStatus || 'Development'}</span>
+                            </div>
                         </div>
                     </div>
                 `;
             case 'assets':
                 return `
-                    <div class="preview-card">
-                        <h4>Asset Preview</h4>
-                        <div class="asset-preview">
-                            <div class="asset-placeholder">Game Logo</div>
-                            <div class="asset-placeholder">Cover Art</div>
+                    <div class="preview-card enhanced">
+                        <div class="preview-card-header">
+                            <h4>Asset Gallery</h4>
+                            <div class="preview-badge">Upload Preview</div>
+                        </div>
+                        <div class="asset-gallery-preview">
+                            <div class="asset-slot logo-slot">
+                                <div class="asset-placeholder" id="logo-placeholder">
+                                    <div class="asset-icon">🎮</div>
+                                    <div class="asset-label">Game Logo</div>
+                                </div>
+                            </div>
+                            <div class="asset-slot cover-slot">
+                                <div class="asset-placeholder" id="cover-placeholder">
+                                    <div class="asset-icon">🖼️</div>
+                                    <div class="asset-label">Cover Art</div>
+                                </div>
+                            </div>
+                            <div class="asset-slot screenshot-slot">
+                                <div class="asset-placeholder" id="screenshot-placeholder">
+                                    <div class="asset-icon">📸</div>
+                                    <div class="asset-label">Screenshots</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
             case 'integration':
                 return `
-                    <div class="preview-card">
-                        <h4>Integration Status</h4>
-                        <div class="status-item">
-                            <span class="status-label">Pass SSO:</span>
-                            <span class="status-value">${project.passSsoIntegrationStatus || 'Not started'}</span>
+                    <div class="preview-card enhanced">
+                        <div class="preview-card-header">
+                            <h4>Integration Dashboard</h4>
+                            <div class="preview-badge">Status Overview</div>
                         </div>
-                        <div class="status-item">
-                            <span class="status-label">Readyverse SDK:</span>
-                            <span class="status-value">${project.readyverseSdkIntegrationStatus || 'Not started'}</span>
+                        <div class="integration-status-grid">
+                            <div class="status-card">
+                                <div class="status-icon">🔐</div>
+                                <div class="status-info">
+                                    <div class="status-title">Pass SSO</div>
+                                    <div class="status-value" id="preview-pass-sso">${project.passSsoIntegrationStatus || 'Not started'}</div>
+                                </div>
+                            </div>
+                            <div class="status-card">
+                                <div class="status-icon">⚡</div>
+                                <div class="status-info">
+                                    <div class="status-title">Readyverse SDK</div>
+                                    <div class="status-value" id="preview-sdk-status">${project.readyverseSdkIntegrationStatus || 'Not started'}</div>
+                                </div>
+                            </div>
+                            <div class="status-card">
+                                <div class="status-icon">🌐</div>
+                                <div class="status-info">
+                                    <div class="status-title">Game URL</div>
+                                    <div class="status-value" id="preview-game-url">${project.gameUrl ? 'Configured' : 'Not set'}</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
             case 'compliance':
                 return `
-                    <div class="preview-card">
-                        <h4>Compliance Status</h4>
-                        <div class="status-item">
-                            <span class="status-label">Age Rating:</span>
-                            <span class="status-value">${project.ageRating || 'Not selected'}</span>
+                    <div class="preview-card enhanced">
+                        <div class="preview-card-header">
+                            <h4>Compliance Checklist</h4>
+                            <div class="preview-badge">Legal Review</div>
                         </div>
-                        <div class="status-item">
-                            <span class="status-label">Legal:</span>
-                            <span class="status-value">${project.legalRequirementsCompleted ? 'Complete' : 'Pending'}</span>
+                        <div class="compliance-checklist">
+                            <div class="checklist-item" id="preview-legal-req">
+                                <span class="check-icon">${project.legalRequirementsCompleted ? '✅' : '⏳'}</span>
+                                <span>Legal Requirements</span>
+                            </div>
+                            <div class="checklist-item" id="preview-privacy">
+                                <span class="check-icon">${project.privacyPolicyProvided ? '✅' : '⏳'}</span>
+                                <span>Privacy Policy</span>
+                            </div>
+                            <div class="checklist-item" id="preview-terms">
+                                <span class="check-icon">${project.termsAccepted ? '✅' : '⏳'}</span>
+                                <span>Terms Accepted</span>
+                            </div>
+                            <div class="checklist-item" id="preview-content">
+                                <span class="check-icon">${project.contentGuidelinesAccepted ? '✅' : '⏳'}</span>
+                                <span>Content Guidelines</span>
+                            </div>
                         </div>
                     </div>
                 `;
             case 'review':
                 return `
-                    <div class="preview-card">
-                        <h4>Ready to Submit</h4>
-                        <p>All information has been collected. Review the details and submit for approval.</p>
+                    <div class="preview-card enhanced final">
+                        <div class="preview-card-header">
+                            <h4>Ready for Submission</h4>
+                            <div class="preview-badge success">Complete</div>
+                        </div>
+                        <div class="final-preview">
+                            <div class="completion-summary">
+                                <div class="summary-item">
+                                    <strong>Project:</strong> ${project.name}
+                                </div>
+                                <div class="summary-item">
+                                    <strong>Description:</strong> ${project.shortDescription || 'No description'}
+                                </div>
+                                <div class="summary-item">
+                                    <strong>Genre:</strong> ${project.genre || 'Not specified'}
+                                </div>
+                                <div class="summary-item">
+                                    <strong>Track:</strong> ${project.publishingTrack || 'Not specified'}
+                                </div>
+                            </div>
+                            <div class="submission-note">
+                                <p>Your project will be reviewed by the Readyverse team within 2-3 business days.</p>
+                            </div>
+                        </div>
                     </div>
                 `;
             default:
@@ -864,6 +1067,343 @@ class ShowroomPortal {
         
         // File upload handlers
         this.bindFileUploadEvents();
+        
+        // Live preview updates
+        this.bindLivePreviewEvents();
+    }
+
+    bindLivePreviewEvents() {
+        // Update preview as user types
+        const inputs = document.querySelectorAll('#onboarding-form input, #onboarding-form textarea, #onboarding-form select');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                this.updateLivePreview();
+                this.validateField(input);
+            });
+            input.addEventListener('change', () => {
+                this.updateLivePreview();
+                this.validateField(input);
+            });
+            input.addEventListener('blur', () => this.validateField(input));
+        });
+    }
+
+    validateField(field) {
+        const fieldId = field.id;
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        // Clear previous validation
+        this.clearFieldValidation(field);
+
+        // Field-specific validation
+        switch (fieldId) {
+            case 'ob-short-description':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Short description is required';
+                } else if (value.length < 10) {
+                    isValid = false;
+                    errorMessage = 'Description must be at least 10 characters';
+                } else if (value.length > 500) {
+                    isValid = false;
+                    errorMessage = 'Description must be less than 500 characters';
+                }
+                break;
+
+            case 'ob-full-description':
+                if (value && value.length > 2000) {
+                    isValid = false;
+                    errorMessage = 'Full description must be less than 2000 characters';
+                }
+                break;
+
+            case 'ob-genre':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Please select a genre';
+                }
+                break;
+
+            case 'ob-publishing-track':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Please select a publishing track';
+                }
+                break;
+
+            case 'ob-build-status':
+                if (!value) {
+                    isValid = false;
+                    errorMessage = 'Please select a build status';
+                }
+                break;
+
+            case 'ob-game-url':
+                if (value && !this.isValidUrl(value)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid URL';
+                }
+                break;
+
+            case 'ob-support-email':
+                if (value && !this.isValidEmail(value)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid email address';
+                }
+                break;
+        }
+
+        // Show validation result
+        if (!isValid) {
+            this.showFieldError(field, errorMessage);
+        } else {
+            this.showFieldSuccess(field);
+        }
+
+        return isValid;
+    }
+
+    isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    clearFieldValidation(field) {
+        const errorEl = field.parentNode.querySelector('.field-error');
+        const successEl = field.parentNode.querySelector('.field-success');
+        
+        if (errorEl) errorEl.remove();
+        if (successEl) successEl.remove();
+        
+        field.classList.remove('field-error', 'field-success');
+    }
+
+    showFieldError(field, message) {
+        field.classList.add('field-error');
+        field.classList.remove('field-success');
+        
+        const errorEl = document.createElement('div');
+        errorEl.className = 'field-error';
+        errorEl.textContent = message;
+        
+        field.parentNode.appendChild(errorEl);
+    }
+
+    showFieldSuccess(field) {
+        field.classList.add('field-success');
+        field.classList.remove('field-error');
+        
+        const successEl = document.createElement('div');
+        successEl.className = 'field-success';
+        successEl.textContent = '✓';
+        
+        field.parentNode.appendChild(successEl);
+    }
+
+    validateStep(step) {
+        const requiredFields = this.getRequiredFieldsForStep(step);
+        let isValid = true;
+
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && !this.validateField(field)) {
+                isValid = false;
+            }
+        });
+
+        return isValid;
+    }
+
+    getRequiredFieldsForStep(step) {
+        switch (step) {
+            case 'basics':
+                return ['ob-short-description', 'ob-genre', 'ob-publishing-track', 'ob-build-status'];
+            case 'integration':
+                return ['ob-pass-sso', 'ob-sdk-status'];
+            case 'compliance':
+                return ['ob-legal-requirements', 'ob-privacy-policy', 'ob-terms-accepted', 'ob-content-guidelines'];
+            default:
+                return [];
+        }
+    }
+
+    updateLivePreview() {
+        if (!this.currentOnboardingProject) return;
+
+        // Collect current form data
+        const formData = this.collectStepData(this.currentOnboardingStep);
+        
+        // Update the preview elements based on current step
+        switch (this.currentOnboardingStep) {
+            case 'basics':
+                this.updateBasicsPreview(formData);
+                break;
+            case 'integration':
+                this.updateIntegrationPreview(formData);
+                break;
+            case 'compliance':
+                this.updateCompliancePreview(formData);
+                break;
+        }
+
+        // Auto-save progress (debounced)
+        this.debouncedAutoSave();
+    }
+
+    debouncedAutoSave() {
+        // Clear existing timeout
+        if (this.autoSaveTimeout) {
+            clearTimeout(this.autoSaveTimeout);
+        }
+
+        // Set new timeout for auto-save (2 seconds after user stops typing)
+        this.autoSaveTimeout = setTimeout(() => {
+            this.autoSaveProgress();
+        }, 2000);
+    }
+
+    async autoSaveProgress() {
+        if (!this.currentOnboardingProject) return;
+
+        try {
+            const formData = this.collectStepData(this.currentOnboardingStep);
+            
+            // Only save if there's actual data to save
+            if (this.hasFormData(formData)) {
+                console.log('Auto-saving progress for step:', this.currentOnboardingStep);
+                
+                // Show saving indicator
+                this.showSavingIndicator();
+                
+                const result = await this.saveOnboardingStep({
+                    step: this.currentOnboardingStep,
+                    ...formData
+                });
+
+                if (result) {
+                    // Update local project data
+                    Object.assign(this.currentOnboardingProject, formData);
+                    console.log('Progress auto-saved successfully');
+                    
+                    // Show saved indicator
+                    this.showSavedIndicator();
+                }
+            }
+        } catch (error) {
+            console.warn('Auto-save failed:', error);
+            // Don't show error to user for auto-save failures
+        }
+    }
+
+    showSavingIndicator() {
+        const indicator = document.getElementById('save-indicator');
+        if (indicator) {
+            indicator.textContent = 'Saving...';
+            indicator.className = 'save-indicator saving';
+        }
+    }
+
+    showSavedIndicator() {
+        const indicator = document.getElementById('save-indicator');
+        if (indicator) {
+            indicator.textContent = 'Saved';
+            indicator.className = 'save-indicator saved';
+            
+            // Hide after 2 seconds
+            setTimeout(() => {
+                if (indicator) {
+                    indicator.textContent = '';
+                    indicator.className = 'save-indicator';
+                }
+            }, 2000);
+        }
+    }
+
+    hasFormData(data) {
+        // Check if there's meaningful data to save
+        return Object.values(data).some(value => 
+            value !== null && 
+            value !== undefined && 
+            value !== '' && 
+            value !== false
+        );
+    }
+
+    updateBasicsPreview(data) {
+        // Update project name
+        const nameEl = document.getElementById('preview-project-name');
+        if (nameEl) nameEl.textContent = data.name || this.currentOnboardingProject.name;
+
+        // Update description
+        const descEl = document.getElementById('preview-project-desc');
+        if (descEl) descEl.textContent = data.shortDescription || 'Your project description will appear here';
+
+        // Update genre
+        const genreEl = document.getElementById('preview-genre');
+        if (genreEl) genreEl.textContent = data.genre || 'Genre';
+
+        // Update track
+        const trackEl = document.getElementById('preview-track');
+        if (trackEl) trackEl.textContent = data.publishingTrack || 'Track';
+
+        // Update status
+        const statusEl = document.getElementById('preview-status');
+        if (statusEl) statusEl.textContent = data.buildStatus || 'Development';
+    }
+
+    updateIntegrationPreview(data) {
+        // Update Pass SSO status
+        const passSsoEl = document.getElementById('preview-pass-sso');
+        if (passSsoEl) passSsoEl.textContent = data.passSsoIntegrationStatus || 'Not started';
+
+        // Update SDK status
+        const sdkEl = document.getElementById('preview-sdk-status');
+        if (sdkEl) sdkEl.textContent = data.readyverseSdkIntegrationStatus || 'Not started';
+
+        // Update Game URL
+        const urlEl = document.getElementById('preview-game-url');
+        if (urlEl) urlEl.textContent = data.gameUrl ? 'Configured' : 'Not set';
+    }
+
+    updateCompliancePreview(data) {
+        // Update legal requirements
+        const legalEl = document.getElementById('preview-legal-req');
+        if (legalEl) {
+            const iconEl = legalEl.querySelector('.check-icon');
+            if (iconEl) iconEl.textContent = data.legalRequirementsCompleted ? '✅' : '⏳';
+        }
+
+        // Update privacy policy
+        const privacyEl = document.getElementById('preview-privacy');
+        if (privacyEl) {
+            const iconEl = privacyEl.querySelector('.check-icon');
+            if (iconEl) iconEl.textContent = data.privacyPolicyProvided ? '✅' : '⏳';
+        }
+
+        // Update terms
+        const termsEl = document.getElementById('preview-terms');
+        if (termsEl) {
+            const iconEl = termsEl.querySelector('.check-icon');
+            if (iconEl) iconEl.textContent = data.termsAccepted ? '✅' : '⏳';
+        }
+
+        // Update content guidelines
+        const contentEl = document.getElementById('preview-content');
+        if (contentEl) {
+            const iconEl = contentEl.querySelector('.check-icon');
+            if (iconEl) iconEl.textContent = data.contentGuidelinesAccepted ? '✅' : '⏳';
+        }
     }
 
     bindFileUploadEvents() {
@@ -952,6 +1492,12 @@ class ShowroomPortal {
     async handleOnboardingSubmit(event) {
         event.preventDefault();
         console.log('Form submitted for step:', this.currentOnboardingStep);
+        
+        // Validate current step before submitting
+        if (!this.validateStep(this.currentOnboardingStep)) {
+            this.showMessage('Please fix the validation errors before continuing', 'error');
+            return;
+        }
         
         const formData = this.collectStepData();
         console.log('Collected form data:', formData);

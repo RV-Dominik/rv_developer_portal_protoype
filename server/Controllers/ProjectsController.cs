@@ -45,6 +45,13 @@ namespace ShowroomBackend.Controllers
                 if (project == null) return NotFound(new { error = "Project not found" });
                 if (project.UserId != userId) return Forbid();
 
+                // Validate the DTO
+                var validationResult = ValidateOnboardingStep(dto);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(new { error = "Validation failed", details = validationResult.Errors });
+                }
+
                 // Debug logging
                 _logger.LogInformation("Saving onboarding step {Step} for project {ProjectId}. DTO: {Dto}", 
                     dto.Step, id, System.Text.Json.JsonSerializer.Serialize(dto));
@@ -63,6 +70,8 @@ namespace ShowroomBackend.Controllers
                 if (!string.IsNullOrEmpty(dto.PassSsoIntegrationStatus)) project.PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus;
                 if (!string.IsNullOrEmpty(dto.ReadyverseSdkIntegrationStatus)) project.ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus;
                 if (!string.IsNullOrEmpty(dto.GameUrl)) project.GameUrl = dto.GameUrl;
+                if (!string.IsNullOrEmpty(dto.LauncherUrl)) project.LauncherUrl = dto.LauncherUrl;
+                if (!string.IsNullOrEmpty(dto.IntegrationNotes)) project.IntegrationNotes = dto.IntegrationNotes;
 
                 // Compliance fields
                 if (!string.IsNullOrEmpty(dto.RatingBoard)) project.RatingBoard = dto.RatingBoard;
@@ -72,6 +81,13 @@ namespace ShowroomBackend.Controllers
                 if (dto.ContentGuidelinesAccepted.HasValue) project.ContentGuidelinesAccepted = dto.ContentGuidelinesAccepted.Value;
                 if (dto.DistributionRightsConfirmed.HasValue) project.DistributionRightsConfirmed = dto.DistributionRightsConfirmed.Value;
                 if (!string.IsNullOrEmpty(dto.SupportEmail)) project.SupportEmail = dto.SupportEmail;
+
+                // Review fields
+                if (dto.ReviewCompleted.HasValue) project.ReviewCompleted = dto.ReviewCompleted.Value;
+                if (!string.IsNullOrEmpty(dto.ReviewNotes)) project.ReviewNotes = dto.ReviewNotes;
+
+                // Assets completion
+                if (dto.AssetsCompleted.HasValue) project.AssetsCompleted = dto.AssetsCompleted.Value;
 
                 // Advance step
                 project.OnboardingStep = dto.Step;
@@ -312,5 +328,90 @@ namespace ShowroomBackend.Controllers
                 .Replace("--", "-")
                 .Trim('-') + "-" + Guid.NewGuid().ToString("N")[..8];
         }
+
+        private ValidationResult ValidateOnboardingStep(ProjectOnboardingStepDto dto)
+        {
+            var errors = new List<string>();
+
+            // Step-specific validation
+            switch (dto.Step)
+            {
+                case "basics":
+                    if (string.IsNullOrWhiteSpace(dto.ShortDescription))
+                        errors.Add("Short description is required");
+                    else if (dto.ShortDescription.Length < 10)
+                        errors.Add("Short description must be at least 10 characters");
+                    else if (dto.ShortDescription.Length > 500)
+                        errors.Add("Short description must be less than 500 characters");
+
+                    if (dto.FullDescription != null && dto.FullDescription.Length > 2000)
+                        errors.Add("Full description must be less than 2000 characters");
+
+                    if (string.IsNullOrWhiteSpace(dto.Genre))
+                        errors.Add("Genre is required");
+
+                    if (string.IsNullOrWhiteSpace(dto.PublishingTrack))
+                        errors.Add("Publishing track is required");
+
+                    if (string.IsNullOrWhiteSpace(dto.BuildStatus))
+                        errors.Add("Build status is required");
+                    break;
+
+                case "integration":
+                    if (string.IsNullOrWhiteSpace(dto.PassSsoIntegrationStatus))
+                        errors.Add("Pass SSO integration status is required");
+
+                    if (string.IsNullOrWhiteSpace(dto.ReadyverseSdkIntegrationStatus))
+                        errors.Add("Readyverse SDK integration status is required");
+
+                    if (!string.IsNullOrWhiteSpace(dto.GameUrl) && !IsValidUrl(dto.GameUrl))
+                        errors.Add("Game URL must be a valid URL");
+                    break;
+
+                case "compliance":
+                    if (!dto.LegalRequirementsCompleted.HasValue || !dto.LegalRequirementsCompleted.Value)
+                        errors.Add("Legal requirements must be completed");
+
+                    if (!dto.PrivacyPolicyProvided.HasValue || !dto.PrivacyPolicyProvided.Value)
+                        errors.Add("Privacy policy must be provided");
+
+                    if (!dto.TermsAccepted.HasValue || !dto.TermsAccepted.Value)
+                        errors.Add("Terms must be accepted");
+
+                    if (!dto.ContentGuidelinesAccepted.HasValue || !dto.ContentGuidelinesAccepted.Value)
+                        errors.Add("Content guidelines must be accepted");
+
+                    if (!string.IsNullOrWhiteSpace(dto.SupportEmail) && !IsValidEmail(dto.SupportEmail))
+                        errors.Add("Support email must be a valid email address");
+                    break;
+            }
+
+            return new ValidationResult { IsValid = errors.Count == 0, Errors = errors };
+        }
+
+        private bool IsValidUrl(string url)
+        {
+            return Uri.TryCreate(url, UriKind.Absolute, out var result) && 
+                   (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+                return addr.Address == email;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
+    public class ValidationResult
+    {
+        public bool IsValid { get; set; }
+        public List<string> Errors { get; set; } = new();
     }
 }

@@ -39,6 +39,8 @@ namespace ShowroomBackend.Models
         // Technical Integration
         public string? PassSsoIntegrationStatus { get; set; } // Not Started, In Progress, Complete
         public string? ReadyverseSdkIntegrationStatus { get; set; } // Not Started, In Progress, Complete
+        public string? LauncherUrl { get; set; }
+        public string? IntegrationNotes { get; set; }
         public bool RequiresLauncher { get; set; } = false;
         public bool HttpsEnabled { get; set; } = false;
         public string? BuildFormat { get; set; } // Unreal Engine, Unity, Custom Engine, WebGL, Native
@@ -102,6 +104,9 @@ namespace ShowroomBackend.Models
         // Onboarding progress
         public string? OnboardingStep { get; set; } // basics, assets, integration, compliance, review, done
         public DateTime? OnboardingCompletedAt { get; set; }
+        public bool AssetsCompleted { get; set; } = false;
+        public bool ReviewCompleted { get; set; } = false;
+        public string? ReviewNotes { get; set; }
         
         [JsonIgnore]
         public List<Asset> Assets { get; set; } = new();
