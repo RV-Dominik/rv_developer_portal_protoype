@@ -34,7 +34,11 @@ class OnboardingData {
         if (shortDesc) data.shortDescription = shortDesc.value;
         if (fullDesc) data.fullDescription = fullDesc.value;
         if (genre) data.genre = genre.value;
-        if (track) data.publishingTrack = track.value;
+        if (track) {
+            // Normalize common variants to stored values
+            const value = track.value;
+            data.publishingTrack = value === 'Self Hosted' ? 'Self-Hosted' : value;
+        }
         if (status) data.buildStatus = status.value;
         if (isPublic) data.isPublic = isPublic.checked;
         
@@ -183,7 +187,9 @@ class OnboardingData {
         console.log('Track element found:', !!trackEl);
         console.log('Project publishingTrack:', project.publishingTrack);
         if (trackEl && project.publishingTrack) {
-            trackEl.value = project.publishingTrack;
+            // Handle mismatch between stored/display variants
+            const normalized = project.publishingTrack === 'Self Hosted' ? 'Self-Hosted' : project.publishingTrack;
+            trackEl.value = normalized;
             console.log('Set track to:', trackEl.value);
         }
 

@@ -189,16 +189,31 @@ class OnboardingValidation {
     }
 
     clearFieldValidation(field) {
-        const errorEl = field.parentNode.querySelector('.field-error');
-        const successEl = field.parentNode.querySelector('.field-success');
+        // If field is no longer in DOM, skip
+        if (!field || !document.body.contains(field)) {
+            return;
+        }
+
+        // Prefer a stable container to append/remove validation UI
+        const container = field.closest('.form-group') || field.parentElement;
+        if (!container) {
+            return;
+        }
+
+        const errorEl = container.querySelector('.field-error');
+        const successEl = container.querySelector('.field-success');
         
-        if (errorEl) errorEl.remove();
-        if (successEl) successEl.remove();
+        if (errorEl && errorEl.parentNode) errorEl.parentNode.removeChild(errorEl);
+        if (successEl && successEl.parentNode) successEl.parentNode.removeChild(successEl);
         
         field.classList.remove('field-error', 'field-success');
     }
 
     showFieldError(field, message) {
+        if (!field || !document.body.contains(field)) return;
+        const container = field.closest('.form-group') || field.parentElement;
+        if (!container) return;
+
         field.classList.add('field-error');
         field.classList.remove('field-success');
         
@@ -206,10 +221,14 @@ class OnboardingValidation {
         errorEl.className = 'field-error';
         errorEl.textContent = message;
         
-        field.parentNode.appendChild(errorEl);
+        container.appendChild(errorEl);
     }
 
     showFieldSuccess(field) {
+        if (!field || !document.body.contains(field)) return;
+        const container = field.closest('.form-group') || field.parentElement;
+        if (!container) return;
+
         field.classList.add('field-success');
         field.classList.remove('field-error');
         
@@ -217,6 +236,6 @@ class OnboardingValidation {
         successEl.className = 'field-success';
         successEl.textContent = '✓';
         
-        field.parentNode.appendChild(successEl);
+        container.appendChild(successEl);
     }
 }
