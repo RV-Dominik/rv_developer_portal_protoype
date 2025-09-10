@@ -170,11 +170,14 @@ namespace ShowroomBackend.Controllers
                 if (project == null) return NotFound(new { error = "Project not found" });
                 if (project.UserId != userId) return Forbid();
 
-                // Mark onboarding as completed
-                project.OnboardingStep = "done";
-                project.OnboardingCompletedAt = DateTime.UtcNow;
+                // Mark onboarding as completed using specific field updates
+                var fields = new Dictionary<string, object?>
+                {
+                    ["onboarding_step"] = "done",
+                    ["onboarding_completed_at"] = DateTime.UtcNow
+                };
 
-                var updated = await _supabaseService.UpdateProjectAsync(id, project);
+                var updated = await _supabaseService.UpdateProjectFieldsAsync(id, fields);
                 if (updated == null) return StatusCode(500, new { error = "Failed to complete onboarding" });
 
                 _logger.LogInformation("Onboarding completed for project {ProjectId}", id);
