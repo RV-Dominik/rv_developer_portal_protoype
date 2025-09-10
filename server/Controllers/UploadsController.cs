@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using ShowroomBackend.Services;
 using ShowroomBackend.Models;
+using ShowroomBackend.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace ShowroomBackend.Controllers
@@ -72,7 +73,7 @@ namespace ShowroomBackend.Controllers
                 }
 
                 // Additional constraints for teaser video (duration/size)
-                if ((request.Kind?.Equals("trailer", StringComparison.OrdinalIgnoreCase) ?? false) && request.File.ContentType == "video/mp4")
+                if ((request.Kind?.Equals(AssetConstants.AssetTypes.Trailer, StringComparison.OrdinalIgnoreCase) ?? false) && request.File.ContentType == "video/mp4")
                 {
                     // Limit to 15MB; duration check would require probing the container which we skip server-side
                     if (request.File.Length > 15 * 1024 * 1024)
@@ -103,7 +104,7 @@ namespace ShowroomBackend.Controllers
                     FileKey = fileKey,
                     MimeType = request.File.ContentType,
                     FileSize = request.File.Length,
-                    Kind = string.IsNullOrWhiteSpace(request.Kind) ? "screenshot" : request.Kind,
+                    Kind = string.IsNullOrWhiteSpace(request.Kind) ? AssetConstants.AssetTypes.Screenshots : request.Kind,
                     DurationSeconds = request.DurationSeconds,
                     Width = request.Width,
                     Height = request.Height,
@@ -119,23 +120,12 @@ namespace ShowroomBackend.Controllers
                 // Update project fields for primary assets (logo/cover/trailer) using storage keys
                 var bucket = "showrooms";
                 var fields = new Dictionary<string, object?>();
-                switch ((createdAsset.Kind ?? "").ToLowerInvariant())
+                
+                // Map asset kind to project field using constants
+                if (AssetConstants.AssetKindMappings.KindToDatabaseField.TryGetValue((createdAsset.Kind ?? "").ToLowerInvariant(), out string? databaseField))
                 {
-                    case "game_logo":
-                    case "logo":
-                        fields["game_logo_key"] = fileKey;
-                        _logger.LogInformation("Setting game_logo_key to {FileKey} for project {ProjectId}", fileKey, projectId);
-                        break;
-                    case "cover_art":
-                    case "cover":
-                    case "hero_image":
-                        fields["cover_art_key"] = fileKey;
-                        _logger.LogInformation("Setting cover_art_key to {FileKey} for project {ProjectId}", fileKey, projectId);
-                        break;
-                    case "trailer":
-                        fields["trailer_key"] = fileKey;
-                        _logger.LogInformation("Setting trailer_key to {FileKey} for project {ProjectId}", fileKey, projectId);
-                        break;
+                    fields[databaseField] = fileKey;
+                    _logger.LogInformation("Setting {DatabaseField} to {FileKey} for project {ProjectId}", databaseField, fileKey, projectId);
                 }
                 if (fields.Count > 0)
                 {

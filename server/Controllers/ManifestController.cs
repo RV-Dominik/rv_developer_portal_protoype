@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ShowroomBackend.Services;
+using ShowroomBackend.Constants;
 using ShowroomBackend.Models;
 using ShowroomBackend.Models.DTOs;
 
@@ -47,11 +48,11 @@ namespace ShowroomBackend.Controllers
                         var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", asset.FileKey, ttl);
                         if (signedUrl != null)
                         {
-                            if (asset.Kind == "screenshot")
+                            if (asset.Kind == AssetConstants.AssetTypes.Screenshots)
                             {
                                 screenshots.Add(signedUrl);
                             }
-                            else if (asset.Kind == "trailer")
+                            else if (asset.Kind == AssetConstants.AssetTypes.Trailer)
                             {
                                 assetUrls["trailer"] = new
                                 {

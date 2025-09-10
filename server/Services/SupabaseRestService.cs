@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using ShowroomBackend.Models;
 using ShowroomBackend.Models.DTOs;
+using ShowroomBackend.Constants;
 
 namespace ShowroomBackend.Services
 {
@@ -45,7 +46,9 @@ namespace ShowroomBackend.Services
             // Compliance & assets per setup guide
             "age_rating",
             // Storage keys for primary assets
-            "game_logo_key","cover_art_key","trailer_key",
+            AssetConstants.DatabaseFields.GameLogoKey,
+            AssetConstants.DatabaseFields.CoverArtKey,
+            AssetConstants.DatabaseFields.TrailerKey,
             // Optional add-ons and system
             "showroom_interest","wants_surreal_estate","submission_status","intake_submitted_at","technical_integration_submitted_at",
             "compliance_review_submitted_at","game_submission_submitted_at","approved_at","rejection_reason","readyverse_tech_team_notes",
