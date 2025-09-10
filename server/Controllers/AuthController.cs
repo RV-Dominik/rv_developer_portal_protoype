@@ -39,7 +39,25 @@ namespace ShowroomBackend.Controllers
                     return BadRequest(new { error = "Email is required" });
                 }
 
-                var publicBaseUrl = _configuration["PUBLIC_BASE_URL"] ?? "http://localhost:8080";
+                // Prefer the current request origin/host to avoid env mismatch; fallback to PUBLIC_BASE_URL
+                var originHeader = Request.Headers["Origin"].FirstOrDefault();
+                string baseUrlFromRequest;
+                if (!string.IsNullOrWhiteSpace(originHeader))
+                {
+                    baseUrlFromRequest = originHeader.TrimEnd('/');
+                }
+                else
+                {
+                    var scheme = Request.Scheme;
+                    var host = Request.Host.HasValue ? Request.Host.Value : string.Empty;
+                    baseUrlFromRequest = !string.IsNullOrEmpty(host) ? $"{scheme}://{host}" : string.Empty;
+                }
+
+                var configuredBaseUrl = _configuration["PUBLIC_BASE_URL"];
+                var publicBaseUrl = !string.IsNullOrWhiteSpace(baseUrlFromRequest)
+                    ? baseUrlFromRequest
+                    : (configuredBaseUrl ?? "http://localhost:8080");
+
                 var redirectTo = $"{publicBaseUrl}/?auth=callback";
 
                 var result = await _authService.SendMagicLinkAsync(request.Email, redirectTo);

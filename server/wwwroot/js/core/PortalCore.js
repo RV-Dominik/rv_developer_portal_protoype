@@ -114,24 +114,51 @@ class PortalCore {
 
         try {
             this.setButtonLoading(e.target.querySelector('button[type="submit"]'), 'Sending...');
-            
-            const response = await fetch(`${this.apiBaseUrl}/api/auth/magic-link`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ email })
-            });
+            // Add a safety timeout so the UI doesn't hang forever
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-            const result = await response.json();
-            
+            let response;
+            try {
+                response = await fetch(`${this.apiBaseUrl}/api/auth/magic-link`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email }),
+                    signal: controller.signal
+                });
+            } finally {
+                clearTimeout(timeoutId);
+            }
+
+            let result;
+            const text = await response.text();
+            try { result = text ? JSON.parse(text) : {}; } catch (_) { result = { error: text }; }
+
             if (response.ok) {
                 this.showMessage('Magic link sent! Check your email.', 'success');
             } else {
-                this.showMessage(result.error || 'Failed to send magic link', 'error');
+                const message = result?.error || `Failed to send magic link (${response.status})`;
+                console.error('Magic link send failed:', response.status, message);
+                this.showMessage(message, 'error');
+                // Surface retry UI
+                const formEl = document.getElementById('magic-link-form');
+                const retryContainer = document.getElementById('retry-container');
+                if (formEl && retryContainer) {
+                    formEl.classList.add('hidden');
+                    retryContainer.classList.remove('hidden');
+                }
             }
         } catch (error) {
             console.error('Magic link error:', error);
-            this.showMessage('Network error. Please try again.', 'error');
+            const isAbort = error && (error.name === 'AbortError');
+            this.showMessage(isAbort ? 'Request timed out. Please try again.' : 'Network error. Please try again.', 'error');
+            const formEl = document.getElementById('magic-link-form');
+            const retryContainer = document.getElementById('retry-container');
+            if (formEl && retryContainer) {
+                formEl.classList.add('hidden');
+                retryContainer.classList.remove('hidden');
+            }
         } finally {
             this.setButtonLoading(e.target.querySelector('button[type="submit"]'), 'Send Magic Link', false);
         }
