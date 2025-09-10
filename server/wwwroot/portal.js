@@ -234,9 +234,9 @@ class ShowroomPortal {
             const resp = await fetch(`${this.apiBaseUrl}/api/projects`, {
                 method: 'POST',
                 headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.getAuthToken()}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include', // Include cookies for authentication
                 body: JSON.stringify({ 
                     name: name
                 })
@@ -902,9 +902,7 @@ class ShowroomPortal {
             
             const response = await fetch(`${this.apiBaseUrl}/api/uploads/${this.currentOnboardingProject.id}`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`
-                },
+                credentials: 'include', // Include cookies for authentication
                 body: formData
             });
             
@@ -1063,9 +1061,9 @@ class ShowroomPortal {
         const response = await fetch(`${this.apiBaseUrl}/api/projects/${this.currentOnboardingProject.id}/onboarding/step`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.getAuthToken()}`
+                'Content-Type': 'application/json'
             },
+            credentials: 'include', // Include cookies for authentication
             body: JSON.stringify(data)
         });
         
@@ -1136,9 +1134,7 @@ class ShowroomPortal {
     async loadProjects() {
         try {
             const response = await fetch(`${this.apiBaseUrl}/api/projects`, {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`
-                }
+                credentials: 'include' // Include cookies for authentication
             });
             
             if (response.ok) {
@@ -1281,9 +1277,7 @@ class ShowroomPortal {
         // Check if user has an organization set up
         try {
             const response = await fetch(`${this.apiBaseUrl}/api/org/me`, {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`
-                }
+                credentials: 'include' // Include cookies for authentication
             });
             
             if (response.status === 404) {
@@ -1424,9 +1418,9 @@ class ShowroomPortal {
             const response = await fetch(`${this.apiBaseUrl}/api/org`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.getAuthToken()}`
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include', // Include cookies for authentication
                 body: JSON.stringify(formData)
             });
             
