@@ -7,12 +7,34 @@ class OnboardingWizard {
         this.data = onboardingData;
     }
 
-    startOnboarding(project) {
+    startOnboarding(projectOrId) {
         const dashboardSection = document.getElementById('dashboard-section');
         if (!dashboardSection) return;
         
+        // Handle both project object and project ID
+        let project;
+        if (typeof projectOrId === 'string') {
+            // Find project by ID
+            project = this.core.projects.find(p => p.id === projectOrId);
+            if (!project) {
+                console.error('Project not found:', projectOrId);
+                return;
+            }
+        } else {
+            project = projectOrId;
+        }
+        
         this.core.currentOnboardingProject = project;
         this.core.currentOnboardingStep = project.onboardingStep || 'basics';
+        
+        // Debug: Log project data
+        console.log('Starting onboarding with project:', project);
+        console.log('Project name:', project.name);
+        console.log('Project shortDescription:', project.shortDescription);
+        console.log('Project genre:', project.genre);
+        console.log('Project publishingTrack:', project.publishingTrack);
+        console.log('Project buildStatus:', project.buildStatus);
+        console.log('All project keys:', Object.keys(project));
         
         this.core.trackEvent('onboarding_start', {
             projectId: project.id,
@@ -22,9 +44,29 @@ class OnboardingWizard {
         
         this.renderOnboardingWizard();
         
-        setTimeout(() => {
+        // Wait for DOM to be ready, then restore form data
+        this.waitForFormElements().then(() => {
             this.restoreFormData(project);
-        }, 100);
+        });
+    }
+
+    waitForFormElements() {
+        return new Promise((resolve) => {
+            const checkElements = () => {
+                const form = document.getElementById('onboarding-form');
+                const shortDesc = document.getElementById('ob-short-description');
+                const genre = document.getElementById('ob-genre');
+                
+                if (form && shortDesc && genre) {
+                    resolve();
+                } else {
+                    // Use requestAnimationFrame for better performance than setTimeout
+                    requestAnimationFrame(checkElements);
+                }
+            };
+            
+            checkElements();
+        });
     }
 
     renderOnboardingWizard() {
@@ -171,9 +213,9 @@ class OnboardingWizard {
             this.core.trackStepStart(this.core.currentOnboardingStep);
             this.renderOnboardingWizard();
             
-            setTimeout(() => {
+            this.waitForFormElements().then(() => {
                 this.restoreFormData(this.core.currentOnboardingProject);
-            }, 100);
+            });
         }
     }
 
@@ -194,9 +236,9 @@ class OnboardingWizard {
             this.core.trackStepStart(this.core.currentOnboardingStep);
             this.renderOnboardingWizard();
             
-            setTimeout(() => {
+            this.waitForFormElements().then(() => {
                 this.restoreFormData(this.core.currentOnboardingProject);
-            }, 100);
+            });
         }
     }
 
@@ -343,9 +385,10 @@ class OnboardingWizard {
             clearTimeout(this.core.autoSaveTimeout);
         }
 
+        // Debounce auto-save with reasonable delay
         this.core.autoSaveTimeout = setTimeout(() => {
             this.autoSaveProgress();
-        }, 2000);
+        }, 2000); // 2 seconds is reasonable for auto-save debouncing
     }
 
     async autoSaveProgress() {
@@ -607,9 +650,9 @@ class OnboardingWizard {
                     this.core.trackStepStart(this.core.currentOnboardingStep);
                     this.renderOnboardingWizard();
                     
-                    setTimeout(() => {
+                    this.waitForFormElements().then(() => {
                         this.data.restoreFormData(this.core.currentOnboardingProject);
-                    }, 100);
+                    });
                 } else {
                     // Complete onboarding
                     await this.completeOnboarding();

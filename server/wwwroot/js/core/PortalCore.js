@@ -78,12 +78,12 @@ class PortalCore {
             container.insertBefore(messageEl, container.firstChild);
         }
 
-        // Auto-remove after 5 seconds
+        // Auto-remove after 5 seconds (reasonable for user messages)
         setTimeout(() => {
             if (messageEl.parentNode) {
                 messageEl.remove();
             }
-        }, 5000);
+        }, 5000); // 5 seconds is reasonable for message display
     }
 
     async handleMagicLinkSubmit(e) {

@@ -156,9 +156,14 @@ class OnboardingData {
     }
 
     restoreBasicsData(project) {
+        console.log('Restoring basics data for project:', project);
+        
         const shortDescEl = document.getElementById('ob-short-description');
+        console.log('Short description element found:', !!shortDescEl);
+        console.log('Project shortDescription:', project.shortDescription);
         if (shortDescEl && project.shortDescription) {
             shortDescEl.value = project.shortDescription;
+            console.log('Set short description to:', shortDescEl.value);
         }
 
         const fullDescEl = document.getElementById('ob-full-description');
@@ -167,18 +172,27 @@ class OnboardingData {
         }
 
         const genreEl = document.getElementById('ob-genre');
+        console.log('Genre element found:', !!genreEl);
+        console.log('Project genre:', project.genre);
         if (genreEl && project.genre) {
             genreEl.value = project.genre;
+            console.log('Set genre to:', genreEl.value);
         }
 
         const trackEl = document.getElementById('ob-publishing-track');
+        console.log('Track element found:', !!trackEl);
+        console.log('Project publishingTrack:', project.publishingTrack);
         if (trackEl && project.publishingTrack) {
             trackEl.value = project.publishingTrack;
+            console.log('Set track to:', trackEl.value);
         }
 
         const statusEl = document.getElementById('ob-build-status');
+        console.log('Status element found:', !!statusEl);
+        console.log('Project buildStatus:', project.buildStatus);
         if (statusEl && project.buildStatus) {
             statusEl.value = project.buildStatus;
+            console.log('Set status to:', statusEl.value);
         }
 
         if (project.targetPlatforms) {
