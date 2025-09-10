@@ -434,13 +434,32 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var json = JsonSerializer.Serialize(asset, new JsonSerializerOptions
+                // PostgREST expects snake_case column names
+                var payload = new Dictionary<string, object?>
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                    { "id", asset.Id },
+                    { "project_id", asset.ProjectId },
+                    { "file_name", asset.FileName },
+                    { "file_key", asset.FileKey },
+                    { "mime_type", asset.MimeType },
+                    { "file_size", asset.FileSize },
+                    { "kind", asset.Kind },
+                    { "duration_seconds", asset.DurationSeconds },
+                    { "width", asset.Width },
+                    { "height", asset.Height },
+                    { "created_at", asset.CreatedAt }
+                };
+
+                var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("assets", content);
+                var request = new HttpRequestMessage(HttpMethod.Post, "assets")
+                {
+                    Content = content
+                };
+                request.Headers.Add("Prefer", "return=representation");
+
+                var response = await _httpClient.SendAsync(request);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -457,6 +476,7 @@ namespace ShowroomBackend.Services
                     {
                         var assets = JsonSerializer.Deserialize<Asset[]>(responseContent, new JsonSerializerOptions
                         {
+                            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                             PropertyNameCaseInsensitive = true
                         });
                         
@@ -468,7 +488,9 @@ namespace ShowroomBackend.Services
                         return asset;
                     }
                 }
-                
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to create asset. Status: {StatusCode}, Error: {Error}", response.StatusCode, errorContent);
                 return null;
             }
             catch (Exception ex)
