@@ -45,6 +45,16 @@ class PortalCore {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', this.handleLogout.bind(this));
         }
+
+        const getStartedBtn = document.getElementById('get-started-btn');
+        if (getStartedBtn) {
+            getStartedBtn.addEventListener('click', this.showAuthSection.bind(this));
+        }
+
+        const retryBtn = document.getElementById('retry-magic-link');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', this.enableMagicLinkForm.bind(this));
+        }
     }
 
     hideLogoutButton() {
@@ -78,7 +88,7 @@ class PortalCore {
 
     async handleMagicLinkSubmit(e) {
         e.preventDefault();
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email-input').value;
         
         if (!email) {
             this.showMessage('Please enter your email address', 'error');
@@ -142,21 +152,6 @@ class PortalCore {
         }
     }
 
-    showLandingPage() {
-        const landingSection = document.getElementById('landing-section');
-        const dashboardSection = document.getElementById('dashboard-section');
-        
-        if (landingSection) landingSection.style.display = 'block';
-        if (dashboardSection) dashboardSection.style.display = 'none';
-    }
-
-    showDashboard() {
-        const landingSection = document.getElementById('landing-section');
-        const dashboardSection = document.getElementById('dashboard-section');
-        
-        if (landingSection) landingSection.style.display = 'none';
-        if (dashboardSection) dashboardSection.style.display = 'block';
-    }
 
     handleMagicLinkCallback() {
         const hash = window.location.hash;
@@ -319,5 +314,76 @@ class PortalCore {
                 });
             }
         });
+    }
+
+    showAuthSection() {
+        const heroSection = document.getElementById('hero-section');
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const projectDetailSection = document.getElementById('project-detail-section');
+        const logoutButton = document.getElementById('logout-button');
+        const retryContainer = document.getElementById('retry-container');
+        const formEl = document.getElementById('magic-link-form');
+        const messageEl = document.getElementById('auth-message');
+        
+        if (heroSection) heroSection.classList.add('hidden');
+        if (authSection) authSection.classList.remove('hidden');
+        if (dashboardSection) dashboardSection.classList.add('hidden');
+        if (projectDetailSection) projectDetailSection.classList.add('hidden');
+        
+        // Hide logout button when not authenticated
+        if (logoutButton) logoutButton.style.display = 'none';
+
+        // Reset auth UI
+        if (retryContainer) retryContainer.classList.add('hidden');
+        if (formEl) formEl.classList.remove('hidden');
+        if (messageEl) messageEl.textContent = '';
+    }
+
+    enableMagicLinkForm() {
+        const formEl = document.getElementById('magic-link-form');
+        const retryContainer = document.getElementById('retry-container');
+        const messageEl = document.getElementById('auth-message');
+        
+        if (formEl) formEl.classList.remove('hidden');
+        if (retryContainer) retryContainer.classList.add('hidden');
+        if (messageEl) messageEl.textContent = '';
+    }
+
+    async showDashboard() {
+        const heroSection = document.getElementById('hero-section');
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const projectDetailSection = document.getElementById('project-detail-section');
+        const logoutButton = document.getElementById('logout-button');
+        
+        if (heroSection) heroSection.classList.add('hidden');
+        if (authSection) authSection.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.remove('hidden');
+        if (projectDetailSection) projectDetailSection.classList.add('hidden');
+        
+        // Show logout button when authenticated
+        if (logoutButton) logoutButton.style.display = 'block';
+
+        // Load projects if project manager is available
+        if (this.projectManager) {
+            await this.projectManager.loadProjects();
+        }
+    }
+
+    showLandingPage() {
+        const heroSection = document.getElementById('hero-section');
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const projectDetailSection = document.getElementById('project-detail-section');
+        const logoutButton = document.getElementById('logout-button');
+        
+        if (heroSection) heroSection.classList.remove('hidden');
+        if (authSection) authSection.classList.add('hidden');
+        if (dashboardSection) dashboardSection.classList.add('hidden');
+        if (projectDetailSection) projectDetailSection.classList.add('hidden');
+        
+        // Hide logout button when not authenticated
+        if (logoutButton) logoutButton.style.display = 'none';
     }
 }

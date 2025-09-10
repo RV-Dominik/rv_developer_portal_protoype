@@ -221,7 +221,7 @@ class OnboardingWizard {
         });
         
         this.autoSaveProgress();
-        this.core.showProjectsList();
+        this.core.projectManager.showProjectsList();
         this.core.showMessage('Onboarding progress saved. You can continue later.', 'info');
     }
 

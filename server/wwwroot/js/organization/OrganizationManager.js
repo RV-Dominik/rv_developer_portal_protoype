@@ -125,7 +125,7 @@ class OrganizationManager {
 
             if (response.ok) {
                 this.core.showMessage('Organization created successfully!', 'success');
-                this.core.showProjectsList();
+                this.core.projectManager.showProjectsList();
             } else {
                 this.core.showMessage(result.error || 'Failed to create organization', 'error');
             }
