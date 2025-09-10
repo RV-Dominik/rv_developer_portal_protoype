@@ -45,6 +45,12 @@ namespace ShowroomBackend.Controllers
                 if (project == null) return NotFound(new { error = "Project not found" });
                 if (project.UserId != userId) return Forbid();
 
+                // Normalize incoming DTO values (handles minor label variations from UI)
+                dto.Step = dto.Step?.Trim().ToLowerInvariant() ?? string.Empty;
+                dto.PublishingTrack = NormalizePublishingTrack(dto.PublishingTrack);
+                dto.BuildStatus = NormalizeBuildStatus(dto.BuildStatus);
+                dto.Genre = NormalizeGenre(dto.Genre);
+
                 // Validate the DTO
                 var validationResult = ValidateOnboardingStep(dto);
                 if (!validationResult.IsValid)
@@ -368,6 +374,40 @@ namespace ShowroomBackend.Controllers
                 .Replace(".", "-")
                 .Replace("--", "-")
                 .Trim('-') + "-" + Guid.NewGuid().ToString("N")[..8];
+        }
+
+        private static string? NormalizePublishingTrack(string? track)
+        {
+            if (string.IsNullOrWhiteSpace(track)) return track;
+            var value = track.Trim();
+            // Canonical UI values: "Platform Games", "Self-Hosted", "Readyverse Hosted"
+            if (string.Equals(value, "Self Hosted", StringComparison.OrdinalIgnoreCase)) return "Self-Hosted";
+            if (string.Equals(value, "Platform Game", StringComparison.OrdinalIgnoreCase)) return "Platform Games";
+            // Keep others as-is
+            return value;
+        }
+
+        private static string? NormalizeBuildStatus(string? status)
+        {
+            if (string.IsNullOrWhiteSpace(status)) return status;
+            var value = status.Trim();
+            // Canonical: "In Development", "Beta", "Production-Ready"
+            if (string.Equals(value, "Development", StringComparison.OrdinalIgnoreCase)) return "In Development";
+            if (string.Equals(value, "Production Ready", StringComparison.OrdinalIgnoreCase)) return "Production-Ready";
+            return value;
+        }
+
+        private static string? NormalizeGenre(string? genre)
+        {
+            if (string.IsNullOrWhiteSpace(genre)) return genre;
+            // Title-case a few common variants; otherwise pass-through
+            var g = genre.Trim();
+            return g switch
+            {
+                "rpg" => "RPG",
+                "fps" => "FPS",
+                _ => char.ToUpperInvariant(g[0]) + g.Substring(1)
+            };
         }
 
         private ValidationResult ValidateOnboardingStep(ProjectOnboardingStepDto dto)
