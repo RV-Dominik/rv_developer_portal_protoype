@@ -123,15 +123,15 @@ namespace ShowroomBackend.Controllers
                 {
                     case "game_logo":
                     case "logo":
-                        fields["gameLogoKey"] = fileKey;
+                        fields["game_logo_key"] = fileKey;
                         break;
                     case "cover_art":
                     case "cover":
                     case "hero_image":
-                        fields["coverArtKey"] = fileKey;
+                        fields["cover_art_key"] = fileKey;
                         break;
                     case "trailer":
-                        fields["trailerKey"] = fileKey;
+                        fields["trailer_key"] = fileKey;
                         break;
                 }
                 if (fields.Count > 0)
@@ -217,17 +217,17 @@ namespace ShowroomBackend.Controllers
                 var result = new Dictionary<string, string?>();
 
                 // Convert storage keys to signed URLs
-                if (!string.IsNullOrEmpty(project.GameLogoUrl))
+                if (!string.IsNullOrEmpty(project.GameLogoKey))
                 {
-                    result["gameLogoUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.GameLogoUrl, ttl);
+                    result["gameLogoUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.GameLogoKey, ttl);
                 }
-                if (!string.IsNullOrEmpty(project.CoverArtUrl))
+                if (!string.IsNullOrEmpty(project.CoverArtKey))
                 {
-                    result["coverArtUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtUrl, ttl);
+                    result["coverArtUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtKey, ttl);
                 }
-                if (!string.IsNullOrEmpty(project.TrailerUrl))
+                if (!string.IsNullOrEmpty(project.TrailerKey))
                 {
-                    result["trailerUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerUrl, ttl);
+                    result["trailerUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerKey, ttl);
                 }
 
                 return Ok(result);

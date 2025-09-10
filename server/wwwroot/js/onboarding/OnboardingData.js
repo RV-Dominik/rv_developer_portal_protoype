@@ -319,11 +319,13 @@ class OnboardingData {
             coverArtKey: project.coverArtKey,
             trailerKey: project.trailerKey
         });
+        console.log('All project keys:', Object.keys(project));
         
         // Always fetch fresh signed URLs from the server using file keys
         // This prevents issues with expired URLs and ensures we have the latest assets
         console.log('Fetching fresh signed URLs from server...');
         const projectUrls = await this.getProjectAssetUrls(project.id);
+        console.log('Fetched project URLs:', projectUrls);
         
         // Also get individual assets for screenshots
         const assets = await this.getSignedAssets(project.id);

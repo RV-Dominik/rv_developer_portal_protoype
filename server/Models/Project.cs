@@ -75,7 +75,12 @@ namespace ShowroomBackend.Models
         public bool HasNoTestEndpoints { get; set; } = false;
         public bool HasDigicert { get; set; } = false;
         
-        // Assets
+        // Assets - Storage keys (not public URLs)
+        public string? GameLogoKey { get; set; }
+        public string? CoverArtKey { get; set; }
+        public string? TrailerKey { get; set; }
+        
+        // Legacy URL fields (deprecated - use keys instead)
         public string? GameLogoUrl { get; set; }
         public string? CoverArtUrl { get; set; }
         public string? TrailerUrl { get; set; }
