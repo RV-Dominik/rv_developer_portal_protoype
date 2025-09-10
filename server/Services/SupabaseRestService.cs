@@ -31,6 +31,45 @@ namespace ShowroomBackend.Services
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_supabaseServiceKey}");
         }
 
+        private static readonly HashSet<string> AllowedProjectColumns = new HashSet<string>(StringComparer.Ordinal)
+        {
+            // Core descriptive fields
+            "name","slug","company_name","company_logo_url","primary_contact_name","primary_contact_email","primary_contact_phone",
+            "company_website","company_socials","short_description","full_description","genre","publishing_track",
+            // Distribution/tech
+            "platform_type","distribution_method","game_url","build_status",
+            "pass_sso_integration_status","readyverse_sdk_integration_status","requires_launcher",
+            // Readiness flags present in setup guide
+            "is_listed_on_platform","platform_listing_url","has_stable_url","has_https_support","has_uptime_monitoring","has_support_commitment",
+            "has_distribution_rights","build_format","meets_performance_guidelines","has_install_instructions","has_patch_commitment",
+            // Compliance & assets per setup guide
+            "age_rating","game_logo_url","cover_art_url","trailer_url",
+            // Optional add-ons and system
+            "showroom_interest","wants_surreal_estate","submission_status","intake_submitted_at","technical_integration_submitted_at",
+            "compliance_review_submitted_at","game_submission_submitted_at","approved_at","rejection_reason","readyverse_tech_team_notes",
+            "readyverse_ops_notes","is_public","user_id","updated_at","onboarding_step","onboarding_completed_at"
+        };
+
+        private static string ToSnakeCase(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return key;
+            var sb = new StringBuilder();
+            for (int i = 0; i < key.Length; i++)
+            {
+                char c = key[i];
+                if (char.IsUpper(c))
+                {
+                    if (i > 0 && key[i - 1] != '_') sb.Append('_');
+                    sb.Append(char.ToLowerInvariant(c));
+                }
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
+
         public async Task<object?> GetSessionAsync()
         {
             try
@@ -268,7 +307,18 @@ namespace ShowroomBackend.Services
                 var filtered = new Dictionary<string, object?>();
                 foreach (var kv in fields)
                 {
-                    if (kv.Value != null) filtered[kv.Key] = kv.Value;
+                    if (kv.Value == null) continue;
+                    var snake = ToSnakeCase(kv.Key);
+                    if (AllowedProjectColumns.Contains(snake))
+                    {
+                        filtered[snake] = kv.Value;
+                    }
+                }
+
+                if (filtered.Count == 0)
+                {
+                    _logger.LogInformation("No valid columns to update for project {ProjectId}; skipping PATCH", id);
+                    return await GetProjectByIdAsync(id);
                 }
 
                 var json = JsonSerializer.Serialize(filtered, new JsonSerializerOptions
