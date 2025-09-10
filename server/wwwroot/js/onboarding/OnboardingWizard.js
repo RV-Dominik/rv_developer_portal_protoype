@@ -397,7 +397,12 @@ class OnboardingWizard {
         try {
             const formData = this.collectStepData(this.core.currentOnboardingStep);
             
-            if (this.hasFormData(formData)) {
+            // Only attempt to save when current step is valid to avoid 400s
+            const stepIsValid = this.validation
+                ? this.validation.validateStep(this.core.currentOnboardingStep)
+                : true;
+            
+            if (stepIsValid && this.hasFormData(formData)) {
                 console.log('Auto-saving progress for step:', this.core.currentOnboardingStep);
                 
                 this.showSavingIndicator();
