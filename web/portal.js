@@ -95,14 +95,21 @@ class ShowroomPortal {
     }
 
     showCreateProjectForm() {
-        const dashboardSection = document.getElementById('dashboard-section');
-        if (dashboardSection) {
-            dashboardSection.innerHTML = `
-                <div class="section-header">
-                    <h2 class="section-title">Create New Project</h2>
-                    <p class="section-subtitle">Build something amazing in the Readyverse</p>
-                </div>
-                <div class="auth-card" style="max-width: 600px; margin: 0 auto;">
+        // Ensure a single modal instance exists
+        let modal = document.getElementById('create-project-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'create-project-modal';
+            modal.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:10000;';
+            modal.innerHTML = `
+                <div class="auth-card" style="max-width:620px;width:92%;background:#0f1b29;border:1px solid rgba(255,255,255,0.08);">
+                    <div class="section-header" style="margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <h2 class="section-title" style="margin:0">Create New Project</h2>
+                            <p class="section-subtitle" style="margin:0">Build something amazing in the Readyverse</p>
+                        </div>
+                        <button id="create-project-close" class="btn btn-secondary">✕</button>
+                    </div>
                     <form id="project-form" class="auth-form">
                         <div class="form-group">
                             <label class="form-label" for="project-name">Project Name *</label>
@@ -117,19 +124,72 @@ class ShowroomPortal {
                             <input type="text" id="project-version" class="form-input" placeholder="1.0.0" value="1.0.0">
                         </div>
                         <div class="form-group">
-                            <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="project-public" style="margin: 0;">
-                                <span class="form-label" style="margin: 0;">Make this project public</span>
+                            <label style="display:flex;align-items:center;gap:0.5rem;">
+                                <input type="checkbox" id="project-public" style="margin:0;">
+                                <span class="form-label" style="margin:0;">Make this project public</span>
                             </label>
                         </div>
                         <div class="flex gap-20">
                             <button type="submit" class="btn btn-primary">Create Project</button>
-                            <button type="button" class="btn btn-secondary" onclick="portal.showProjectsList()">Cancel</button>
+                            <button type="button" id="create-project-cancel" class="btn btn-secondary">Cancel</button>
                         </div>
                     </form>
-                </div>
-            `;
+                </div>`;
+            document.body.appendChild(modal);
+
+            // Close handlers
+            const hide = () => { modal.style.display = 'none'; };
+            modal.addEventListener('click', (e) => { if (e.target === modal) hide(); });
+            modal.querySelector('#create-project-close').addEventListener('click', hide);
+            modal.querySelector('#create-project-cancel').addEventListener('click', hide);
+
+            // Submit handler
+            const form = modal.querySelector('#project-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = (modal.querySelector('#project-name')?.value || '').trim();
+                const description = modal.querySelector('#project-description')?.value || '';
+                const isPublic = !!modal.querySelector('#project-public')?.checked;
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Creating...';
+                submitBtn.disabled = true;
+
+                try {
+                    if (!name) {
+                        window.portal.showMessage('Project name is required', 'error');
+                        return;
+                    }
+
+                    const res = await fetch(`${this.apiBaseUrl}/api/projects`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name, shortDescription: description, isPublic })
+                    });
+
+                    if (res.ok) {
+                        window.portal.showMessage('Project created successfully', 'success');
+                        hide();
+                        this.showProjectsList();
+                    } else {
+                        let msg = 'Failed to create project';
+                        try { const err = await res.json(); msg = err.error || msg; } catch {}
+                        window.portal.showMessage(msg, 'error');
+                    }
+                } catch (err) {
+                    console.error('Create project error:', err);
+                    window.portal.showMessage('Network error while creating project', 'error');
+                } finally {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
         }
+
+        // Always show existing modal (prevents duplicates)
+        modal.style.display = 'flex';
     }
 
     showProjectsList() {
