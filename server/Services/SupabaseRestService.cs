@@ -201,10 +201,22 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
+                // Only send columns that are guaranteed to exist in the current schema
+                // and use snake_case as required by PostgREST
+                var payload = new Dictionary<string, object?>
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                    ["id"] = project.Id,
+                    ["name"] = project.Name,
+                    ["slug"] = project.Slug,
+                    ["user_id"] = project.UserId,
+                    ["onboarding_step"] = project.OnboardingStep,
+                    ["company_name"] = project.CompanyName,
+                    ["is_public"] = project.IsPublic,
+                    ["created_at"] = project.CreatedAt,
+                    ["updated_at"] = project.UpdatedAt
+                };
+
+                var json = JsonSerializer.Serialize(payload);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 var request = new HttpRequestMessage(HttpMethod.Post, "projects")
@@ -220,6 +232,7 @@ namespace ShowroomBackend.Services
                     var responseContent = await response.Content.ReadAsStringAsync();
                     var projects = JsonSerializer.Deserialize<Project[]>(responseContent, new JsonSerializerOptions
                     {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                         PropertyNameCaseInsensitive = true
                     });
                     return projects?.FirstOrDefault();

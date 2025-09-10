@@ -125,7 +125,11 @@ class OrganizationManager {
 
             if (response.ok) {
                 this.core.showMessage('Organization created successfully!', 'success');
-                this.core.projectManager.showProjectsList();
+                // Navigate back to dashboard and refresh projects
+                if (this.core.showDashboard) this.core.showDashboard();
+                if (this.core.projectManager && this.core.projectManager.loadProjects) {
+                    this.core.projectManager.loadProjects();
+                }
             } else {
                 this.core.showMessage(result.error || 'Failed to create organization', 'error');
             }

@@ -82,25 +82,18 @@ class PortalCore {
     }
 
     showMessage(message, type = 'info') {
-        // Remove existing messages
-        const existingMessages = document.querySelectorAll('.message');
-        existingMessages.forEach(msg => msg.remove());
+        // Red toast banner (non-blocking), allow stacking so multiple server errors are visible
+        const toast = document.createElement('div');
+        toast.className = `rv-toast rv-toast-${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
 
-        const messageEl = document.createElement('div');
-        messageEl.className = `message message-${type}`;
-        messageEl.textContent = message;
-        
-        const container = document.querySelector('.container');
-        if (container) {
-            container.insertBefore(messageEl, container.firstChild);
-        }
-
-        // Auto-remove after 5 seconds (reasonable for user messages)
+        // Animate in/out and auto-remove
+        requestAnimationFrame(() => toast.classList.add('show'));
         setTimeout(() => {
-            if (messageEl.parentNode) {
-                messageEl.remove();
-            }
-        }, 5000); // 5 seconds is reasonable for message display
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 5000);
     }
 
     async handleMagicLinkSubmit(e) {
