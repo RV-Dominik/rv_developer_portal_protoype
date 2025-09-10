@@ -313,7 +313,16 @@ class OnboardingData {
     }
 
     async restoreAssetsData(project) {
-        // Get project asset URLs (storage keys converted to signed URLs)
+        console.log('Restoring assets for project:', project);
+        console.log('Project asset keys:', {
+            gameLogoKey: project.gameLogoKey,
+            coverArtKey: project.coverArtKey,
+            trailerKey: project.trailerKey
+        });
+        
+        // Always fetch fresh signed URLs from the server using file keys
+        // This prevents issues with expired URLs and ensures we have the latest assets
+        console.log('Fetching fresh signed URLs from server...');
         const projectUrls = await this.getProjectAssetUrls(project.id);
         
         // Also get individual assets for screenshots
@@ -321,6 +330,7 @@ class OnboardingData {
         
         // Update single-image upload areas with project URLs
         if (projectUrls.gameLogoUrl) {
+            console.log('Restoring game logo:', projectUrls.gameLogoUrl);
             const logoArea = document.getElementById('appicon-upload');
             if (logoArea) {
                 const background = logoArea.querySelector('.upload-background');
@@ -332,6 +342,7 @@ class OnboardingData {
         }
         
         if (projectUrls.coverArtUrl) {
+            console.log('Restoring cover art:', projectUrls.coverArtUrl);
             const heroArea = document.getElementById('hero-upload');
             if (heroArea) {
                 const background = heroArea.querySelector('.upload-background');
@@ -343,6 +354,7 @@ class OnboardingData {
         }
         
         if (projectUrls.trailerUrl) {
+            console.log('Restoring trailer:', projectUrls.trailerUrl);
             const trailerArea = document.getElementById('trailer-upload');
             if (trailerArea) {
                 const background = trailerArea.querySelector('.upload-background');

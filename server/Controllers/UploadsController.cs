@@ -74,10 +74,10 @@ namespace ShowroomBackend.Controllers
                 // Additional constraints for teaser video (duration/size)
                 if ((request.Kind?.Equals("trailer", StringComparison.OrdinalIgnoreCase) ?? false) && request.File.ContentType == "video/mp4")
                 {
-                    // Limit to 5MB; duration check would require probing the container which we skip server-side
-                    if (request.File.Length > 5 * 1024 * 1024)
+                    // Limit to 15MB; duration check would require probing the container which we skip server-side
+                    if (request.File.Length > 15 * 1024 * 1024)
                     {
-                        return BadRequest(new { error = "Trailer too large. Max 5MB." });
+                        return BadRequest(new { error = "Trailer too large. Max 15MB." });
                     }
                 }
 

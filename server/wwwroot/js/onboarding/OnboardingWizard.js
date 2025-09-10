@@ -633,15 +633,15 @@ class OnboardingWizard {
                     this.core.showMessage('File uploaded successfully!', 'success');
                     this.updateUploadArea(uploadArea, file, displayUrl);
 
-                    // Update project object so preview panes can use new media immediately
+                    // Update project object with file keys for primary assets
                     const kindLower = (uploadArea.getAttribute('data-kind') || '').toLowerCase();
-                    if (displayUrl) {
+                    if (result.fileKey) {
                         if (kindLower === 'game_logo' || kindLower === 'logo' || kindLower === 'app_icon') {
-                            this.core.currentOnboardingProject.gameLogoUrl = displayUrl;
+                            this.core.currentOnboardingProject.gameLogoKey = result.fileKey;
                         } else if (kindLower === 'hero_image') {
-                            this.core.currentOnboardingProject.coverArtUrl = displayUrl;
+                            this.core.currentOnboardingProject.coverArtKey = result.fileKey;
                         } else if (kindLower === 'trailer') {
-                            this.core.currentOnboardingProject.trailerUrl = displayUrl;
+                            this.core.currentOnboardingProject.trailerKey = result.fileKey;
                         }
                         // Update preview pane if visible
                         this.updateLivePreview();
