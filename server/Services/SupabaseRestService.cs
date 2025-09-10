@@ -110,6 +110,7 @@ namespace ShowroomBackend.Services
                     var content = await response.Content.ReadAsStringAsync();
                     var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
                     {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                         PropertyNameCaseInsensitive = true
                     });
                     
@@ -136,6 +137,7 @@ namespace ShowroomBackend.Services
                     var content = await response.Content.ReadAsStringAsync();
                     var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
                     {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                         PropertyNameCaseInsensitive = true
                     });
                     
@@ -223,6 +225,7 @@ namespace ShowroomBackend.Services
                     {
                         var projects = JsonSerializer.Deserialize<Project[]>(responseContent, new JsonSerializerOptions
                         {
+                            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                             PropertyNameCaseInsensitive = true
                         });
                         
@@ -269,6 +272,7 @@ namespace ShowroomBackend.Services
                     var content = await response.Content.ReadAsStringAsync();
                     var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
                     {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                         PropertyNameCaseInsensitive = true
                     });
                     
@@ -473,7 +477,11 @@ namespace ShowroomBackend.Services
                         var userOrg = userOrgs[0];
                         if (userOrg.TryGetProperty("organizations", out var orgData))
                         {
-                            return JsonSerializer.Deserialize<Organization>(orgData.GetRawText());
+                            return JsonSerializer.Deserialize<Organization>(orgData.GetRawText(), new JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                                PropertyNameCaseInsensitive = true
+                            });
                         }
                     }
                 }
