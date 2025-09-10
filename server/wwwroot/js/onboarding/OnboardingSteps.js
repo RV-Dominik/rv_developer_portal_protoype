@@ -119,7 +119,7 @@ class OnboardingSteps {
                 <p>Upload the required assets for your project. All files will be stored securely.</p>
                 
                 <div class="asset-upload-grid">
-                    <div class="asset-upload-item">
+                    <div class="asset-upload-item small">
                         <div class="file-upload-area ratio-1-1" id="appicon-upload" data-kind="app_icon" data-w="1024" data-h="1024">
                             <div class="upload-icon">🧩</div>
                             <div class="upload-text">
@@ -130,7 +130,7 @@ class OnboardingSteps {
                         </div>
                     </div>
                     
-                    <div class="asset-upload-item">
+                    <div class="asset-upload-item wide">
                         <div class="file-upload-area ratio-16-9" id="hero-upload" data-kind="hero_image" data-w="1920" data-h="1080">
                             <div class="upload-icon">🖼️</div>
                             <div class="upload-text">
@@ -141,7 +141,7 @@ class OnboardingSteps {
                         </div>
                     </div>
                     
-                    <div class="asset-upload-item">
+                    <div class="asset-upload-item medium">
                         <div class="file-upload-area ratio-16-9" id="screenshots-upload" data-kind="screenshot" data-w="1920" data-h="1080">
                             <div class="upload-icon">📸</div>
                             <div class="upload-text">
@@ -152,7 +152,7 @@ class OnboardingSteps {
                         </div>
                     </div>
                     
-                    <div class="asset-upload-item">
+                    <div class="asset-upload-item medium">
                         <div class="file-upload-area ratio-16-9" id="trailer-upload" data-kind="trailer" data-w="1920" data-h="1080" data-duration="15" data-maxsize="5242880">
                             <div class="upload-icon">🎬</div>
                             <div class="upload-text">

@@ -1249,6 +1249,21 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--rv-blue-20);
 }
 
+/* Grid sizing modifiers for asset upload items */
+.asset-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+.asset-upload-item.small { grid-column: span 3; }
+.asset-upload-item.medium { grid-column: span 6; }
+.asset-upload-item.wide { grid-column: span 12; }
+
+@media (max-width: 1024px) {
+  .asset-upload-item.small { grid-column: span 4; }
+  .asset-upload-item.medium, .asset-upload-item.wide { grid-column: span 12; }
+}
+
 .upload-placeholder {
   display: flex;
   flex-direction: column;
