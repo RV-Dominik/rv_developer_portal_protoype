@@ -399,8 +399,9 @@ class OnboardingData {
     async getProjectAssetUrls(projectId) {
         try {
             console.log('Calling API for project asset URLs:', projectId);
-            const response = await fetch(`/api/uploads/${projectId}/project-urls`, {
-                headers: { 'Authorization': `Bearer ${this.getAuthToken()}` }
+            const response = await fetch(`${this.core.apiBaseUrl}/api/uploads/${projectId}/project-urls`, {
+                method: 'GET',
+                credentials: 'include'
             });
             console.log('API response status:', response.status);
             if (!response.ok) {
