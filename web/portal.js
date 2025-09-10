@@ -183,6 +183,8 @@ class ShowroomPortal {
     }
 
     showCreateProjectForm() {
+        // Ensure dashboard area is not in a legacy "create" state
+        try { this.showProjectsList(); } catch {}
         // Ensure a single modal instance exists
         let modal = document.getElementById('create-project-modal');
         if (!modal) {
@@ -226,7 +228,7 @@ class ShowroomPortal {
             document.body.appendChild(modal);
 
             // Close handlers
-            const hide = () => { modal.style.display = 'none'; };
+            const hide = () => { modal.style.display = 'none'; document.body.style.overflow = ''; };
             modal.addEventListener('click', (e) => { if (e.target === modal) hide(); });
             modal.querySelector('#create-project-close').addEventListener('click', hide);
             modal.querySelector('#create-project-cancel').addEventListener('click', hide);
@@ -278,6 +280,7 @@ class ShowroomPortal {
 
         // Always show existing modal (prevents duplicates)
         modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
     }
 
     showProjectsList() {
