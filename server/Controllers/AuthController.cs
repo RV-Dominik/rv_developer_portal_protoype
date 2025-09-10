@@ -172,6 +172,7 @@ namespace ShowroomBackend.Controllers
             });
         }
 
+
         [HttpPost("logout")]
         public IActionResult Logout()
         {

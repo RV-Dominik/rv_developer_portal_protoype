@@ -1,4 +1,5 @@
 using ShowroomBackend.Models;
+using ShowroomBackend.Models.DTOs;
 
 namespace ShowroomBackend.Services
 {
@@ -300,6 +301,124 @@ namespace ShowroomBackend.Services
             
             organization.UpdatedAt = DateTime.UtcNow;
             return organization;
+        }
+
+        // Showroom methods (public, no authentication required)
+        public async Task<List<ShowroomGameDto>> GetPublishedGamesAsync()
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting published games");
+            
+            return new List<ShowroomGameDto>
+            {
+                new ShowroomGameDto
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Epic Adventure Game",
+                    Slug = "epic-adventure-game",
+                    CompanyName = "Mock Studios",
+                    CompanyLogoUrl = "https://example.com/logo.png",
+                    ShortDescription = "An epic adventure game with stunning graphics and immersive gameplay.",
+                    FullDescription = "Embark on an epic journey through mystical lands, battle fearsome creatures, and uncover ancient secrets in this action-packed adventure game.",
+                    Genre = "Action",
+                    PublishingTrack = "Platform Games",
+                    BuildStatus = "Production-Ready",
+                    TargetPlatforms = new[] { "PC", "Mac", "Linux" },
+                    GameLogoUrl = "https://example.com/game-logo.png",
+                    CoverArtUrl = "https://example.com/cover-art.jpg",
+                    TrailerUrl = "https://example.com/trailer.mp4",
+                    ScreenshotUrls = new[] { "https://example.com/screenshot1.jpg", "https://example.com/screenshot2.jpg" },
+                    GameUrl = "https://example.com/game",
+                    LauncherUrl = "https://example.com/launcher",
+                    AgeRating = "T",
+                    RatingBoard = "ESRB",
+                    SupportEmail = "support@mockstudios.com",
+                    CreatedAt = DateTime.UtcNow.AddDays(-30),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    OnboardingCompletedAt = DateTime.UtcNow.AddDays(-1),
+                    IsFeatured = true,
+                    ViewCount = 1250,
+                    LikeCount = 89
+                },
+                new ShowroomGameDto
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Space Strategy Sim",
+                    Slug = "space-strategy-sim",
+                    CompanyName = "Galactic Games",
+                    CompanyLogoUrl = "https://example.com/galactic-logo.png",
+                    ShortDescription = "Build and manage your own space empire in this strategic simulation.",
+                    FullDescription = "Command fleets, colonize planets, and engage in epic space battles in this deep strategic simulation game.",
+                    Genre = "Strategy",
+                    PublishingTrack = "Self-Hosted",
+                    BuildStatus = "Beta",
+                    TargetPlatforms = new[] { "PC", "Web" },
+                    GameLogoUrl = "https://example.com/space-logo.png",
+                    CoverArtUrl = "https://example.com/space-cover.jpg",
+                    TrailerUrl = "https://example.com/space-trailer.mp4",
+                    ScreenshotUrls = new[] { "https://example.com/space1.jpg", "https://example.com/space2.jpg" },
+                    GameUrl = "https://space-strategy.example.com",
+                    LauncherUrl = null,
+                    AgeRating = "E",
+                    RatingBoard = "ESRB",
+                    SupportEmail = "help@galacticgames.com",
+                    CreatedAt = DateTime.UtcNow.AddDays(-15),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-2),
+                    OnboardingCompletedAt = DateTime.UtcNow.AddDays(-2),
+                    IsFeatured = false,
+                    ViewCount = 567,
+                    LikeCount = 34
+                }
+            };
+        }
+
+        public async Task<ShowroomGameDto?> GetPublishedGameByIdAsync(Guid id)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting published game {GameId}", id);
+            
+            var games = await GetPublishedGamesAsync();
+            return games.FirstOrDefault(g => g.Id == id);
+        }
+
+        public async Task<List<ShowroomGameDto>> GetPublishedGamesByGenreAsync(string genre)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting games by genre {Genre}", genre);
+            
+            var games = await GetPublishedGamesAsync();
+            return games.Where(g => g.Genre?.Equals(genre, StringComparison.OrdinalIgnoreCase) == true).ToList();
+        }
+
+        public async Task<List<ShowroomGameDto>> GetPublishedGamesByTrackAsync(string track)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting games by track {Track}", track);
+            
+            var games = await GetPublishedGamesAsync();
+            return games.Where(g => g.PublishingTrack?.Equals(track, StringComparison.OrdinalIgnoreCase) == true).ToList();
+        }
+
+        public async Task<List<ShowroomGameDto>> SearchPublishedGamesAsync(string query)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Searching games with query {Query}", query);
+            
+            var games = await GetPublishedGamesAsync();
+            return games.Where(g => 
+                g.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                g.ShortDescription?.Contains(query, StringComparison.OrdinalIgnoreCase) == true ||
+                g.FullDescription?.Contains(query, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+
+        public async Task<List<ShowroomGameDto>> GetFeaturedGamesAsync()
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Getting featured games");
+            
+            var games = await GetPublishedGamesAsync();
+            return games.Where(g => g.IsFeatured).ToList();
         }
     }
 }

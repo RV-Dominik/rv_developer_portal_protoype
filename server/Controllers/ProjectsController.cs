@@ -119,6 +119,41 @@ namespace ShowroomBackend.Controllers
         }
 
         /// <summary>
+        /// Complete onboarding for a project
+        /// </summary>
+        /// <param name="id">Project ID</param>
+        /// <returns>Updated project or error</returns>
+        [HttpPost("{id}/onboarding/complete")]
+        public async Task<IActionResult> CompleteOnboarding(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+
+                var project = await _supabaseService.GetProjectByIdAsync(id);
+                if (project == null) return NotFound(new { error = "Project not found" });
+                if (project.UserId != userId) return Forbid();
+
+                // Mark onboarding as completed
+                project.OnboardingStep = "done";
+                project.OnboardingCompletedAt = DateTime.UtcNow;
+
+                var updated = await _supabaseService.UpdateProjectAsync(id, project);
+                if (updated == null) return StatusCode(500, new { error = "Failed to complete onboarding" });
+
+                _logger.LogInformation("Onboarding completed for project {ProjectId}", id);
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error completing onboarding for project {Id}", id);
+                return StatusCode(500, new { error = "Failed to complete onboarding" });
+            }
+        }
+
+        /// <summary>
         /// Create a new project
         /// </summary>
         /// <param name="dto">Project creation data</param>

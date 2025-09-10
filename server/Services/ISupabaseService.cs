@@ -1,4 +1,5 @@
 using ShowroomBackend.Models;
+using ShowroomBackend.Models.DTOs;
 
 namespace ShowroomBackend.Services
 {
@@ -21,5 +22,13 @@ namespace ShowroomBackend.Services
         Task<Organization?> GetUserOrganizationAsync(string userId);
         Task<Organization?> CreateOrUpdateUserOrganizationAsync(string userId, Organization organization);
         Task<Organization?> UpdateOrganizationAsync(Organization organization);
+        
+        // Showroom methods (public, no authentication required)
+        Task<List<ShowroomGameDto>> GetPublishedGamesAsync();
+        Task<ShowroomGameDto?> GetPublishedGameByIdAsync(Guid id);
+        Task<List<ShowroomGameDto>> GetPublishedGamesByGenreAsync(string genre);
+        Task<List<ShowroomGameDto>> GetPublishedGamesByTrackAsync(string track);
+        Task<List<ShowroomGameDto>> SearchPublishedGamesAsync(string query);
+        Task<List<ShowroomGameDto>> GetFeaturedGamesAsync();
     }
 }

@@ -620,5 +620,220 @@ namespace ShowroomBackend.Services
                 throw;
             }
         }
+
+        // Showroom methods (public, no authentication required)
+        public async Task<List<ShowroomGameDto>> GetPublishedGamesAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("projects?is_public=eq.true&onboarding_step=eq.done&select=*");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                }
+
+                return new List<ShowroomGameDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get published games");
+                throw;
+            }
+        }
+
+        public async Task<ShowroomGameDto?> GetPublishedGameByIdAsync(Guid id)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"projects?id=eq.{id}&is_public=eq.true&onboarding_step=eq.done&select=*");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    var project = projects?.FirstOrDefault();
+                    return project != null ? MapToShowroomGameDto(project) : null;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get published game {GameId}", id);
+                throw;
+            }
+        }
+
+        public async Task<List<ShowroomGameDto>> GetPublishedGamesByGenreAsync(string genre)
+        {
+            try
+            {
+                var encodedGenre = Uri.EscapeDataString(genre);
+                var response = await _httpClient.GetAsync($"projects?is_public=eq.true&onboarding_step=eq.done&genre=eq.{encodedGenre}&select=*");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                }
+
+                return new List<ShowroomGameDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get games by genre {Genre}", genre);
+                throw;
+            }
+        }
+
+        public async Task<List<ShowroomGameDto>> GetPublishedGamesByTrackAsync(string track)
+        {
+            try
+            {
+                var encodedTrack = Uri.EscapeDataString(track);
+                var response = await _httpClient.GetAsync($"projects?is_public=eq.true&onboarding_step=eq.done&publishing_track=eq.{encodedTrack}&select=*");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                }
+
+                return new List<ShowroomGameDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get games by track {Track}", track);
+                throw;
+            }
+        }
+
+        public async Task<List<ShowroomGameDto>> SearchPublishedGamesAsync(string query)
+        {
+            try
+            {
+                var encodedQuery = Uri.EscapeDataString(query);
+                var response = await _httpClient.GetAsync($"projects?is_public=eq.true&onboarding_step=eq.done&or=(name.ilike.*{encodedQuery}*,short_description.ilike.*{encodedQuery}*,full_description.ilike.*{encodedQuery}*)&select=*");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                }
+
+                return new List<ShowroomGameDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to search games with query {Query}", query);
+                throw;
+            }
+        }
+
+        public async Task<List<ShowroomGameDto>> GetFeaturedGamesAsync()
+        {
+            try
+            {
+                // For now, return the most recently completed games as "featured"
+                // In the future, this could be based on a "featured" flag or algorithm
+                var response = await _httpClient.GetAsync("projects?is_public=eq.true&onboarding_step=eq.done&order=onboarding_completed_at.desc&limit=10&select=*");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                }
+
+                return new List<ShowroomGameDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get featured games");
+                throw;
+            }
+        }
+
+        private ShowroomGameDto MapToShowroomGameDto(Project project)
+        {
+            var targetPlatforms = new string[0];
+            if (!string.IsNullOrEmpty(project.TargetPlatforms))
+            {
+                try
+                {
+                    targetPlatforms = JsonSerializer.Deserialize<string[]>(project.TargetPlatforms) ?? new string[0];
+                }
+                catch
+                {
+                    targetPlatforms = new string[0];
+                }
+            }
+
+            return new ShowroomGameDto
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Slug = project.Slug,
+                CompanyName = project.CompanyName ?? "",
+                CompanyLogoUrl = project.CompanyLogoUrl,
+                ShortDescription = project.ShortDescription,
+                FullDescription = project.FullDescription,
+                Genre = project.Genre,
+                PublishingTrack = project.PublishingTrack,
+                BuildStatus = project.BuildStatus,
+                TargetPlatforms = targetPlatforms,
+                GameLogoUrl = project.GameLogoUrl,
+                CoverArtUrl = project.CoverArtUrl,
+                TrailerUrl = project.TrailerUrl,
+                ScreenshotUrls = new string[0], // TODO: Get from assets table
+                GameUrl = project.GameUrl,
+                LauncherUrl = project.LauncherUrl,
+                AgeRating = project.AgeRating,
+                RatingBoard = project.RatingBoard,
+                SupportEmail = project.SupportEmail,
+                CreatedAt = project.CreatedAt,
+                UpdatedAt = project.UpdatedAt,
+                OnboardingCompletedAt = project.OnboardingCompletedAt,
+                IsFeatured = false, // TODO: Add featured flag to Project model
+                ViewCount = 0, // TODO: Add view tracking
+                LikeCount = 0 // TODO: Add like tracking
+            };
+        }
     }
 }

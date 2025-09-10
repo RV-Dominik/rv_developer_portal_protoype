@@ -6,7 +6,7 @@ class OrganizationManager {
 
     async checkOrganizationStatus() {
         try {
-            const response = await fetch(`${this.core.apiBaseUrl}/api/organizations/my`, {
+            const response = await fetch(`${this.core.apiBaseUrl}/api/org/me`, {
                 credentials: 'include'
             });
 
@@ -114,7 +114,7 @@ class OrganizationManager {
         try {
             this.core.setButtonLoading(e.target.querySelector('button[type="submit"]'), 'Creating...');
             
-            const response = await fetch(`${this.core.apiBaseUrl}/api/organizations`, {
+            const response = await fetch(`${this.core.apiBaseUrl}/api/org`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

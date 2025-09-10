@@ -181,7 +181,10 @@ class PortalCore {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ accessToken, refreshToken })
+                body: JSON.stringify({ 
+                    AccessToken: accessToken, 
+                    RefreshToken: refreshToken 
+                })
             });
 
             const result = await response.json();
@@ -209,7 +212,7 @@ class PortalCore {
 
     async checkAuthStatus() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/api/auth/status`, {
+            const response = await fetch(`${this.apiBaseUrl}/api/auth/session`, {
                 credentials: 'include'
             });
 
