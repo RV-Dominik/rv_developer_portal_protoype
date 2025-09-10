@@ -28,8 +28,15 @@ namespace ShowroomBackend.Controllers
         {
             try
             {
+                _logger.LogInformation("Upload request for project {ProjectId}, file: {FileName}, kind: {Kind}", 
+                    projectId, request.File?.FileName, request.Kind);
+                
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+                if (string.IsNullOrEmpty(userId)) 
+                {
+                    _logger.LogWarning("Upload failed: No user ID found in claims");
+                    return Unauthorized(new { error = "Not authenticated" });
+                }
 
                 // Verify project belongs to user
                 var project = await _supabaseService.GetProjectByIdAsync(projectId);
@@ -76,12 +83,16 @@ namespace ShowroomBackend.Controllers
 
                 // Upload file to Supabase Storage (namespaced per project)
                 using var stream = request.File.OpenReadStream();
+                _logger.LogInformation("Uploading file {FileName} to projects/{ProjectId}/", request.File.FileName, projectId);
                 var fileKey = await _supabaseService.UploadFileAsync(stream, request.File.FileName, "showrooms", $"projects/{projectId}");
                 
                 if (string.IsNullOrEmpty(fileKey))
                 {
+                    _logger.LogError("File upload returned empty fileKey for {FileName}", request.File.FileName);
                     return StatusCode(500, new { error = "Failed to upload file" });
                 }
+                
+                _logger.LogInformation("File uploaded successfully with key: {FileKey}", fileKey);
 
                 // Create asset record
                 var asset = new Asset
@@ -133,7 +144,12 @@ namespace ShowroomBackend.Controllers
                 var ttl = 3600;
                 var ttlStr = _configuration["ASSET_URL_TTL"];
                 if (int.TryParse(ttlStr, out var parsed)) ttl = parsed;
-                var signedUrl = await _supabaseService.GetSignedUrlAsync(bucket, createdAsset.FileKey, ttl);
+                
+                _logger.LogInformation("Getting signed URL for fileKey: {FileKey}", fileKey);
+                var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", fileKey, ttl);
+                var assetPublicUrl = $"{_configuration["SUPABASE_URL"]}/storage/v1/object/public/showrooms/{fileKey}";
+                
+                _logger.LogInformation("Generated URLs - Signed: {SignedUrl}, Public: {PublicUrl}", signedUrl, assetPublicUrl);
 
                 return Ok(new
                 {
@@ -149,7 +165,7 @@ namespace ShowroomBackend.Controllers
                     createdAsset.Height,
                     createdAsset.CreatedAt,
                     signedUrl,
-                    publicUrl
+                    publicUrl = assetPublicUrl
                 });
             }
             catch (Exception ex)

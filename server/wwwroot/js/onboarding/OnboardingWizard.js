@@ -536,7 +536,6 @@ class OnboardingWizard {
             for (const file of files) {
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('projectId', projectId);
                 // Derive kind from surface metadata
                 const kind = uploadArea.getAttribute('data-kind') || (uploadArea.id.includes('logo') ? 'game_logo' : uploadArea.id.includes('hero') ? 'hero_image' : uploadArea.id.includes('trailer') ? 'trailer' : 'screenshot');
                 formData.append('kind', kind);
@@ -561,6 +560,7 @@ class OnboardingWizard {
                 if (response.ok) {
                     const result = await response.json();
                     const displayUrl = result.signedUrl || result.publicUrl || null;
+                    console.log(`Upload successful for ${file.name}:`, result);
                     this.core.showMessage('File uploaded successfully!', 'success');
                     this.updateUploadArea(uploadArea, file, displayUrl);
 
@@ -582,7 +582,10 @@ class OnboardingWizard {
                     try {
                         const error = await response.json();
                         if (error && error.error) message = error.error;
-                    } catch (_) {}
+                        console.error(`Upload failed for ${file.name}:`, error);
+                    } catch (_) {
+                        console.error(`Upload failed for ${file.name}:`, response.status, response.statusText);
+                    }
                     this.core.showMessage(message, 'error');
                 }
 

@@ -355,15 +355,26 @@ class OnboardingData {
 
         // Handle screenshots (multiple files)
         const screenshotsArea = document.getElementById('screenshots-upload');
-        for (const a of assets) {
-            if ((a.kind || '').toLowerCase() === 'screenshot') {
-                if (!screenshotsArea) continue;
-                if (a.mimeType && a.mimeType.startsWith('image/')) {
-                    const thumb = document.createElement('div');
-                    thumb.className = 'thumb-item';
-                    const bust = `${a.signedUrl}${a.signedUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
-                    thumb.style.backgroundImage = `url(${bust})`;
-                    screenshotsArea.appendChild(thumb);
+        if (screenshotsArea) {
+            let list = screenshotsArea.querySelector('.thumb-list');
+            if (!list) {
+                list = document.createElement('div');
+                list.className = 'thumb-list';
+                screenshotsArea.appendChild(list);
+            }
+            
+            for (const a of assets) {
+                if ((a.kind || '').toLowerCase() === 'screenshot') {
+                    if (a.mimeType && a.mimeType.startsWith('image/')) {
+                        const item = document.createElement('div');
+                        item.className = 'thumb-item';
+                        const img = document.createElement('img');
+                        const bust = `${a.signedUrl}${a.signedUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+                        img.src = bust;
+                        img.alt = a.fileName || 'screenshot';
+                        item.appendChild(img);
+                        list.appendChild(item);
+                    }
                 }
             }
         }
