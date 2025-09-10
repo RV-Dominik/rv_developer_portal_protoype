@@ -1,5 +1,6 @@
 using ShowroomBackend.Models;
 using ShowroomBackend.Models.DTOs;
+using System.Collections.Generic;
 
 namespace ShowroomBackend.Services
 {
@@ -12,6 +13,7 @@ namespace ShowroomBackend.Services
         Task<List<Project>> GetUserProjectsAsync(string userId);
         Task<Project?> CreateProjectAsync(Project project);
         Task<Project?> UpdateProjectAsync(Guid id, Project project);
+        Task<Project?> UpdateProjectFieldsAsync(Guid id, Dictionary<string, object?> fields);
         Task<bool> DeleteProjectAsync(Guid id);
         Task<Project?> GetProjectByIdAsync(Guid id);
         Task<List<Asset>> GetProjectAssetsAsync(Guid projectId);

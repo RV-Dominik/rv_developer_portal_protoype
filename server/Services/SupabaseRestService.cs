@@ -248,7 +248,7 @@ namespace ShowroomBackend.Services
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("Failed to update project {ProjectId}. Status: {StatusCode}, Error: {Error}", 
+                    _logger.LogError("Failed to update project {ProjectId}. Url=projects?id=eq.{ProjectId} Status: {StatusCode}, Error: {Error}", 
                         id, response.StatusCode, errorContent);
                     throw new Exception($"Supabase update failed: {response.StatusCode} - {errorContent}");
                 }
@@ -256,6 +256,59 @@ namespace ShowroomBackend.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to update project {ProjectId}", id);
+                throw;
+            }
+        }
+
+        public async Task<Project?> UpdateProjectFieldsAsync(Guid id, Dictionary<string, object?> fields)
+        {
+            try
+            {
+                // Remove nulls to avoid overwriting and to minimize payload
+                var filtered = new Dictionary<string, object?>();
+                foreach (var kv in fields)
+                {
+                    if (kv.Value != null) filtered[kv.Key] = kv.Value;
+                }
+
+                var json = JsonSerializer.Serialize(filtered, new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var request = new HttpRequestMessage(HttpMethod.Patch, $"projects?id=eq.{id}")
+                {
+                    Content = content
+                };
+                request.Headers.Add("Prefer", "return=representation");
+
+                _logger.LogInformation("Supabase PATCH fields projects id={Id} Payload={Payload}", id, json);
+                var response = await _httpClient.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    if (string.IsNullOrWhiteSpace(responseContent))
+                    {
+                        return await GetProjectByIdAsync(id);
+                    }
+                    var projects = JsonSerializer.Deserialize<Project[]>(responseContent, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return projects?.FirstOrDefault();
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to update project fields {ProjectId}. Status: {StatusCode}, Error: {Error}",
+                    id, response.StatusCode, errorContent);
+                throw new Exception($"Supabase update failed: {response.StatusCode} - {errorContent}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to update project fields {ProjectId}", id);
                 throw;
             }
         }

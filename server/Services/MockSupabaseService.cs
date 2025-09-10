@@ -187,6 +187,27 @@ namespace ShowroomBackend.Services
             return project;
         }
 
+        public async Task<Project?> UpdateProjectFieldsAsync(Guid id, Dictionary<string, object?> fields)
+        {
+            await Task.Delay(1);
+            _logger.LogInformation("Mock: Updating project fields {ProjectId} with {Count} fields", id, fields.Count);
+            // Return a minimal project reflecting the update intent for testing
+            return new Project
+            {
+                Id = id,
+                Name = "Mock Project",
+                Slug = "mock-project",
+                ShortDescription = fields.ContainsKey("shortDescription") ? fields["shortDescription"] as string : "A mock project for testing",
+                Genre = fields.ContainsKey("genre") ? fields["genre"] as string : "Action",
+                PublishingTrack = fields.ContainsKey("publishingTrack") ? fields["publishingTrack"] as string : "Platform Games",
+                BuildStatus = fields.ContainsKey("buildStatus") ? fields["buildStatus"] as string : "Production-Ready",
+                IsPublic = fields.ContainsKey("isPublic") && fields["isPublic"] is bool b ? b : true,
+                OnboardingStep = fields.ContainsKey("onboardingStep") ? fields["onboardingStep"] as string : "basics",
+                UpdatedAt = DateTime.UtcNow,
+                UserId = "mock-user-id"
+            };
+        }
+
         public async Task<bool> DeleteProjectAsync(Guid id)
         {
             await Task.Delay(1);

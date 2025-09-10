@@ -105,10 +105,39 @@ namespace ShowroomBackend.Controllers
                     project.OnboardingCompletedAt = DateTime.UtcNow;
                 }
 
-                _logger.LogInformation("Project after updates: {Project}", 
-                    System.Text.Json.JsonSerializer.Serialize(project));
+                // Build a fields dictionary to avoid sending columns that may not exist in Supabase
+                var fields = new Dictionary<string, object?>
+                {
+                    { "companyName", project.CompanyName },
+                    { "shortDescription", project.ShortDescription },
+                    { "fullDescription", project.FullDescription },
+                    { "genre", project.Genre },
+                    { "publishingTrack", project.PublishingTrack },
+                    { "buildStatus", project.BuildStatus },
+                    { "targetPlatforms", project.TargetPlatforms },
+                    { "isPublic", project.IsPublic },
+                    { "passSsoIntegrationStatus", project.PassSsoIntegrationStatus },
+                    { "readyverseSdkIntegrationStatus", project.ReadyverseSdkIntegrationStatus },
+                    { "gameUrl", project.GameUrl },
+                    { "launcherUrl", project.LauncherUrl },
+                    { "integrationNotes", project.IntegrationNotes },
+                    { "ratingBoard", project.RatingBoard },
+                    { "legalRequirementsCompleted", project.LegalRequirementsCompleted },
+                    { "privacyPolicyProvided", project.PrivacyPolicyProvided },
+                    { "termsAccepted", project.TermsAccepted },
+                    { "contentGuidelinesAccepted", project.ContentGuidelinesAccepted },
+                    { "distributionRightsConfirmed", project.DistributionRightsConfirmed },
+                    { "supportEmail", project.SupportEmail },
+                    { "reviewCompleted", project.ReviewCompleted },
+                    { "reviewNotes", project.ReviewNotes },
+                    { "assetsCompleted", project.AssetsCompleted },
+                    { "onboardingStep", project.OnboardingStep },
+                    { "onboardingCompletedAt", project.OnboardingCompletedAt }
+                };
 
-                var updated = await _supabaseService.UpdateProjectAsync(id, project);
+                _logger.LogInformation("Project partial update fields: {Fields}", System.Text.Json.JsonSerializer.Serialize(fields));
+
+                var updated = await _supabaseService.UpdateProjectFieldsAsync(id, fields);
                 if (updated == null) return StatusCode(500, new { error = "Failed to save step" });
 
                 // Debug logging
@@ -120,7 +149,7 @@ namespace ShowroomBackend.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving onboarding step for project {Id}", id);
-                return StatusCode(500, new { error = "Failed to save onboarding step" });
+                return StatusCode(500, new { error = "Failed to save onboarding step", details = ex.Message });
             }
         }
 
