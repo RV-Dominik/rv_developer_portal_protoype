@@ -124,19 +124,31 @@ namespace ShowroomBackend.Controllers
                     case "game_logo":
                     case "logo":
                         fields["game_logo_key"] = fileKey;
+                        _logger.LogInformation("Setting game_logo_key to {FileKey} for project {ProjectId}", fileKey, projectId);
                         break;
                     case "cover_art":
                     case "cover":
                     case "hero_image":
                         fields["cover_art_key"] = fileKey;
+                        _logger.LogInformation("Setting cover_art_key to {FileKey} for project {ProjectId}", fileKey, projectId);
                         break;
                     case "trailer":
                         fields["trailer_key"] = fileKey;
+                        _logger.LogInformation("Setting trailer_key to {FileKey} for project {ProjectId}", fileKey, projectId);
                         break;
                 }
                 if (fields.Count > 0)
                 {
-                    try { await _supabaseService.UpdateProjectFieldsAsync(projectId, fields); } catch {}
+                    try 
+                    { 
+                        _logger.LogInformation("Updating project {ProjectId} with fields: {Fields}", projectId, string.Join(", ", fields.Select(kv => $"{kv.Key}={kv.Value}")));
+                        await _supabaseService.UpdateProjectFieldsAsync(projectId, fields);
+                        _logger.LogInformation("Successfully updated project {ProjectId} with asset keys", projectId);
+                    } 
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to update project {ProjectId} with asset keys", projectId);
+                    }
                 }
 
                 // Optionally include a signed URL to display immediately
@@ -216,18 +228,24 @@ namespace ShowroomBackend.Controllers
 
                 var result = new Dictionary<string, string?>();
 
+                _logger.LogInformation("Project {ProjectId} asset keys - GameLogoKey: {GameLogoKey}, CoverArtKey: {CoverArtKey}, TrailerKey: {TrailerKey}", 
+                    projectId, project.GameLogoKey, project.CoverArtKey, project.TrailerKey);
+
                 // Convert storage keys to signed URLs
                 if (!string.IsNullOrEmpty(project.GameLogoKey))
                 {
                     result["gameLogoUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.GameLogoKey, ttl);
+                    _logger.LogInformation("Generated gameLogoUrl for key {GameLogoKey}", project.GameLogoKey);
                 }
                 if (!string.IsNullOrEmpty(project.CoverArtKey))
                 {
                     result["coverArtUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtKey, ttl);
+                    _logger.LogInformation("Generated coverArtUrl for key {CoverArtKey}", project.CoverArtKey);
                 }
                 if (!string.IsNullOrEmpty(project.TrailerKey))
                 {
                     result["trailerUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerKey, ttl);
+                    _logger.LogInformation("Generated trailerUrl for key {TrailerKey}", project.TrailerKey);
                 }
 
                 return Ok(result);
