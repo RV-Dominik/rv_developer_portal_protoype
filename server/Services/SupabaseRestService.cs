@@ -1026,9 +1026,9 @@ namespace ShowroomBackend.Services
                 PublishingTrack = project.PublishingTrack,
                 BuildStatus = project.BuildStatus,
                 TargetPlatforms = targetPlatforms,
-                GameLogoUrl = project.GameLogoUrl,
-                CoverArtUrl = project.CoverArtUrl,
-                TrailerUrl = project.TrailerUrl,
+                GameLogoUrl = project.GameLogoKey, // Using key instead of URL
+                CoverArtUrl = project.CoverArtKey, // Using key instead of URL
+                TrailerUrl = project.TrailerKey, // Using key instead of URL
                 ScreenshotUrls = new string[0], // TODO: Get from assets table
                 GameUrl = project.GameUrl,
                 LauncherUrl = project.LauncherUrl,

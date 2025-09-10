@@ -251,7 +251,7 @@ namespace ShowroomBackend.Controllers
                 if (dto.HasSslTls) project.HasSslTls = dto.HasSslTls;
                 if (dto.HasNoTestEndpoints) project.HasNoTestEndpoints = dto.HasNoTestEndpoints;
                 if (dto.HasDigicert) project.HasDigicert = dto.HasDigicert;
-                if (!string.IsNullOrEmpty(dto.TrailerUrl)) project.TrailerUrl = dto.TrailerUrl;
+                if (!string.IsNullOrEmpty(dto.TrailerKey)) project.TrailerKey = dto.TrailerKey;
                 if (!string.IsNullOrEmpty(dto.ShowroomInterest)) project.ShowroomInterest = dto.ShowroomInterest;
                 if (dto.WantsSurrealEstate) project.WantsSurrealEstate = dto.WantsSurrealEstate;
                 if (dto.IsPublic) project.IsPublic = dto.IsPublic;
@@ -350,7 +350,7 @@ namespace ShowroomBackend.Controllers
                 if (dto.HasSslTls.HasValue) project.HasSslTls = dto.HasSslTls.Value;
                 if (dto.HasNoTestEndpoints.HasValue) project.HasNoTestEndpoints = dto.HasNoTestEndpoints.Value;
                 if (dto.HasDigicert.HasValue) project.HasDigicert = dto.HasDigicert.Value;
-                if (dto.TrailerUrl != null) project.TrailerUrl = dto.TrailerUrl;
+                if (dto.TrailerKey != null) project.TrailerKey = dto.TrailerKey;
                 if (dto.ShowroomInterest != null) project.ShowroomInterest = dto.ShowroomInterest;
                 if (dto.WantsSurrealEstate.HasValue) project.WantsSurrealEstate = dto.WantsSurrealEstate.Value;
                 if (dto.IsPublic.HasValue) project.IsPublic = dto.IsPublic.Value;

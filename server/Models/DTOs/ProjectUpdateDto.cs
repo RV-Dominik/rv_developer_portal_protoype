@@ -72,10 +72,15 @@ namespace ShowroomBackend.Models.DTOs
         public bool? HasNoTestEndpoints { get; set; }
         public bool? HasDigicert { get; set; }
         
-        // Assets
-        [Url]
+        // Assets - Storage keys (not public URLs)
         [StringLength(500)]
-        public string? TrailerUrl { get; set; }
+        public string? GameLogoKey { get; set; }
+        
+        [StringLength(500)]
+        public string? CoverArtKey { get; set; }
+        
+        [StringLength(500)]
+        public string? TrailerKey { get; set; }
         
         // Optional Add-Ons
         [StringLength(50)]
