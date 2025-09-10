@@ -55,6 +55,9 @@ namespace ShowroomBackend.Controllers
                 // Debug logging
                 _logger.LogInformation("Saving onboarding step {Step} for project {ProjectId}. DTO: {Dto}", 
                     dto.Step, id, System.Text.Json.JsonSerializer.Serialize(dto));
+                
+                _logger.LogInformation("Project before update: {Project}", 
+                    System.Text.Json.JsonSerializer.Serialize(project));
 
                 // Apply partial updates depending on step
                 if (!string.IsNullOrEmpty(dto.CompanyName)) project.CompanyName = dto.CompanyName;
@@ -95,6 +98,9 @@ namespace ShowroomBackend.Controllers
                 {
                     project.OnboardingCompletedAt = DateTime.UtcNow;
                 }
+
+                _logger.LogInformation("Project after updates: {Project}", 
+                    System.Text.Json.JsonSerializer.Serialize(project));
 
                 var updated = await _supabaseService.UpdateProjectAsync(id, project);
                 if (updated == null) return StatusCode(500, new { error = "Failed to save step" });

@@ -208,7 +208,18 @@ namespace ShowroomBackend.Services
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PatchAsync($"projects?id=eq.{id}", content);
+                // Create a new request with proper headers for authenticated operations
+                var request = new HttpRequestMessage(HttpMethod.Patch, $"projects?id=eq.{id}")
+                {
+                    Content = content
+                };
+                
+                // Add required headers for Supabase
+                request.Headers.Add("apikey", _supabaseAnonKey);
+                request.Headers.Add("Authorization", $"Bearer {_supabaseServiceKey}");
+                request.Headers.Add("Prefer", "return=representation");
+
+                var response = await _httpClient.SendAsync(request);
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -237,8 +248,13 @@ namespace ShowroomBackend.Services
                         return await GetProjectByIdAsync(id);
                     }
                 }
-                
-                return null;
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to update project {ProjectId}. Status: {StatusCode}, Error: {Error}", 
+                        id, response.StatusCode, errorContent);
+                    return null;
+                }
             }
             catch (Exception ex)
             {
