@@ -13,6 +13,21 @@ class ShowroomPortal {
         this.checkAuthStatus();
     }
 
+    async showServerErrorFromResponse(res, fallback = 'Server error') {
+        try {
+            const data = await res.clone().json();
+            const msg = (data && (data.error || data.message)) || fallback;
+            this.showMessage(msg, 'error');
+        } catch (_) {
+            try {
+                const text = await res.text();
+                this.showMessage(text || fallback, 'error');
+            } catch {
+                this.showMessage(fallback, 'error');
+            }
+        }
+    }
+
     bindEvents() {
         const magicLinkForm = document.getElementById('magic-link-form');
         if (magicLinkForm) {
@@ -123,9 +138,7 @@ class ShowroomPortal {
                         this.showMessage('Organization saved', 'success');
                         modal.style.display = 'none';
                     } else {
-                        let msg = 'Failed to save organization';
-                        try { const e2 = await r.json(); msg = e2.error || msg; } catch {}
-                        this.showMessage(msg, 'error');
+                        await this.showServerErrorFromResponse(r, 'Failed to save organization');
                     }
                 } finally { submit.textContent = original; submit.disabled = false; }
             });
@@ -264,9 +277,7 @@ class ShowroomPortal {
                         hide();
                         this.showProjectsList();
                     } else {
-                        let msg = 'Failed to create project';
-                        try { const err = await res.json(); msg = err.error || msg; } catch {}
-                        window.portal.showMessage(msg, 'error');
+                        await this.showServerErrorFromResponse(res, 'Failed to create project');
                     }
                 } catch (err) {
                     console.error('Create project error:', err);
@@ -291,17 +302,19 @@ class ShowroomPortal {
                     <h2 class="section-title">Your Projects</h2>
                     <p class="section-subtitle">Manage your Readyverse projects and experiences</p>
                 </div>
-                <div class="text-center mb-4">
-                    <button id="create-project-button" class="btn btn-primary" ${this.hasOrganization ? '' : 'disabled title="Add your organization first"'}>
+                <div class="text-center mb-4" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                    <button id="create-project-button" class="btn btn-primary">
                         ${this.hasOrganization ? 'Create New Project' : 'Add Organization to Create Project'}
                     </button>
+                    <button id="manage-org-button" class="btn btn-secondary">Manage Organization</button>
                 </div>
                 <div id="projects-list" class="projects-grid">
                     <div class="text-center">
                         <p class="text-body mb-4">No projects yet. Create your first project to get started!</p>
-                        <button class="btn btn-primary" ${this.hasOrganization ? '' : 'disabled'} onclick="portal.hasOrganization ? portal.showCreateProjectForm() : portal.showOrgModal()">
+                        <button class="btn btn-primary" onclick="portal.hasOrganization ? portal.showCreateProjectForm() : portal.showOrgModal()">
                             ${this.hasOrganization ? 'Create Project' : 'Add Organization'}
                         </button>
+                        <button class="btn btn-secondary" onclick="portal.showOrgModal()">Manage Organization</button>
                     </div>
                 </div>
             `;
