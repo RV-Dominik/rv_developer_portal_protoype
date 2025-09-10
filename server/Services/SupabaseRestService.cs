@@ -520,7 +520,7 @@ namespace ShowroomBackend.Services
             {
                 var fileKey = string.IsNullOrEmpty(folder) ? fileName : $"{folder}/{fileName}";
                 
-                var storageUrl = $"{_supabaseUrl}/storage/v1/object/{bucketName}/{fileKey}";
+                var storageUrl = $"{_supabaseUrl}/storage/v1/object/{bucketName}/{fileKey}?upsert=true";
                 
                 using var content = new StreamContent(fileStream);
                 

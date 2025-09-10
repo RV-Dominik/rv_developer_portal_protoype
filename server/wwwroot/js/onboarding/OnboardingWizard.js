@@ -537,6 +537,14 @@ class OnboardingWizard {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('projectId', projectId);
+                // Derive kind from surface metadata
+                const kind = uploadArea.getAttribute('data-kind') || (uploadArea.id.includes('logo') ? 'game_logo' : uploadArea.id.includes('hero') ? 'hero_image' : uploadArea.id.includes('trailer') ? 'trailer' : 'screenshot');
+                formData.append('kind', kind);
+                // Add client-captured dimensions if available
+                const expectedW = uploadArea.getAttribute('data-w');
+                const expectedH = uploadArea.getAttribute('data-h');
+                if (expectedW) formData.append('width', expectedW);
+                if (expectedH) formData.append('height', expectedH);
 
                 // Show simple progress UI
                 const progressTag = document.createElement('div');

@@ -1240,6 +1240,10 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--card-light);
 }
 
+/* Aspect ratio helpers for upload surfaces */
+.ratio-16-9 { aspect-ratio: 16 / 9; }
+.ratio-1-1 { aspect-ratio: 1 / 1; }
+
 .file-upload-area:hover {
   border-color: var(--rv-blue);
   background: var(--rv-blue-20);

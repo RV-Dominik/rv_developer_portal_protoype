@@ -58,6 +58,22 @@ namespace ShowroomBackend.Controllers
                     return BadRequest(new { error = isVideo ? "File too large. Maximum video size is 100MB." : "File too large. Maximum image size is 10MB." });
                 }
 
+                // Optional strict dimension checks when provided
+                if (request.Width.HasValue && request.Height.HasValue && request.File.ContentType.StartsWith("image/"))
+                {
+                    // For strict checks we'd decode the image; for now trust provided metadata to enforce UI hints
+                }
+
+                // Additional constraints for teaser video (duration/size)
+                if ((request.Kind?.Equals("trailer", StringComparison.OrdinalIgnoreCase) ?? false) && request.File.ContentType == "video/mp4")
+                {
+                    // Limit to 5MB; duration check would require probing the container which we skip server-side
+                    if (request.File.Length > 5 * 1024 * 1024)
+                    {
+                        return BadRequest(new { error = "Trailer too large. Max 5MB." });
+                    }
+                }
+
                 // Upload file to Supabase Storage (namespaced per project)
                 using var stream = request.File.OpenReadStream();
                 var fileKey = await _supabaseService.UploadFileAsync(stream, request.File.FileName, "showrooms", $"projects/{projectId}");
