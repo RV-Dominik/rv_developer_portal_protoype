@@ -560,8 +560,23 @@ class OnboardingWizard {
 
                 if (response.ok) {
                     const result = await response.json();
+                    const displayUrl = result.signedUrl || result.publicUrl || null;
                     this.core.showMessage('File uploaded successfully!', 'success');
-                    this.updateUploadArea(uploadArea, file, result.signedUrl || result.publicUrl || null);
+                    this.updateUploadArea(uploadArea, file, displayUrl);
+
+                    // Update project object so preview panes can use new media immediately
+                    const kindLower = (uploadArea.getAttribute('data-kind') || '').toLowerCase();
+                    if (displayUrl) {
+                        if (kindLower === 'game_logo' || kindLower === 'logo' || kindLower === 'app_icon') {
+                            this.core.currentOnboardingProject.gameLogoUrl = displayUrl;
+                        } else if (kindLower === 'hero_image') {
+                            this.core.currentOnboardingProject.coverArtUrl = displayUrl;
+                        } else if (kindLower === 'trailer') {
+                            this.core.currentOnboardingProject.trailerUrl = displayUrl;
+                        }
+                        // Update preview pane if visible
+                        this.updateLivePreview();
+                    }
                 } else {
                     let message = 'Upload failed';
                     try {
@@ -610,6 +625,16 @@ class OnboardingWizard {
                     <strong>${file.name}</strong>
                     <p>Uploaded successfully</p>
                 `;
+            }
+            // If we have an image URL for logo/hero, replace the surface with an image preview
+            if (url && file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = file.name;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '100%';
+                img.style.marginTop = '8px';
+                uploadArea.appendChild(img);
             }
             uploadArea.classList.add('uploaded');
         }
