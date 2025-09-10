@@ -14,11 +14,13 @@ namespace ShowroomBackend.Controllers
     {
         private readonly ISupabaseService _supabaseService;
         private readonly ILogger<UploadsController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public UploadsController(ISupabaseService supabaseService, ILogger<UploadsController> logger)
+        public UploadsController(ISupabaseService supabaseService, ILogger<UploadsController> logger, IConfiguration configuration)
         {
             _supabaseService = supabaseService;
             _logger = logger;
+            _configuration = configuration;
         }
 
         [HttpPost("{projectId}")]
@@ -54,9 +56,9 @@ namespace ShowroomBackend.Controllers
                     return BadRequest(new { error = "File too large. Maximum size is 10MB." });
                 }
 
-                // Upload file to Supabase Storage
+                // Upload file to Supabase Storage (namespaced per project)
                 using var stream = request.File.OpenReadStream();
-                var fileKey = await _supabaseService.UploadFileAsync(stream, request.File.FileName, "showrooms");
+                var fileKey = await _supabaseService.UploadFileAsync(stream, request.File.FileName, "showrooms", $"projects/{projectId}");
                 
                 if (string.IsNullOrEmpty(fileKey))
                 {
@@ -116,6 +118,52 @@ namespace ShowroomBackend.Controllers
             {
                 _logger.LogError(ex, "Error getting assets for project {ProjectId}", projectId);
                 return StatusCode(500, new { error = "Failed to get assets" });
+            }
+        }
+
+        [HttpGet("{projectId}/signed")]
+        public async Task<IActionResult> GetProjectAssetsWithSignedUrls(Guid projectId)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+
+                // Verify project belongs to user
+                var project = await _supabaseService.GetProjectByIdAsync(projectId);
+                if (project == null)
+                {
+                    return NotFound(new { error = "Project not found" });
+                }
+
+                var assets = await _supabaseService.GetProjectAssetsAsync(projectId);
+                var ttl = 3600;
+                var ttlStr = _configuration["ASSET_URL_TTL"];
+                if (int.TryParse(ttlStr, out var parsed)) ttl = parsed;
+
+                var result = new List<object>();
+                foreach (var a in assets)
+                {
+                    var url = await _supabaseService.GetSignedUrlAsync("showrooms", a.FileKey, ttl);
+                    result.Add(new
+                    {
+                        id = a.Id,
+                        kind = a.Kind,
+                        fileName = a.FileName,
+                        mimeType = a.MimeType,
+                        width = a.Width,
+                        height = a.Height,
+                        durationSeconds = a.DurationSeconds,
+                        signedUrl = url
+                    });
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting signed asset urls for project {ProjectId}", projectId);
+                return StatusCode(500, new { error = "Failed to get signed URLs" });
             }
         }
 
