@@ -574,9 +574,11 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var signedUrlEndpoint = $"{_supabaseUrl}/storage/v1/object/sign/{bucketName}/{fileKey}";
+                // URL-encode each segment of the file key
+                var encodedKey = string.Join("/", fileKey.Split('/', StringSplitOptions.RemoveEmptyEntries).Select(Uri.EscapeDataString));
+                var signedUrlEndpoint = $"{_supabaseUrl}/storage/v1/object/sign/{bucketName}/{encodedKey}";
                 var queryParams = $"?expiresIn={expiresIn}";
-                
+
                 var response = await _httpClient.PostAsync($"{signedUrlEndpoint}{queryParams}", null);
                 
                 if (response.IsSuccessStatusCode)
@@ -589,13 +591,23 @@ namespace ShowroomBackend.Services
                         return signedUrl.GetString() ?? "";
                     }
                 }
-                
+
+                // Fallback: return public URL if bucket is public
+                var publicUrl = $"{_supabaseUrl}/storage/v1/object/public/{bucketName}/{encodedKey}";
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    _logger.LogWarning("Signed URL failed with {Status}, returning public URL for {Key}", response.StatusCode, fileKey);
+                    return publicUrl;
+                }
+
                 throw new Exception($"Failed to get signed URL: {response.StatusCode}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to get signed URL for {FileKey}", fileKey);
-                throw;
+                // Final fallback to public URL to avoid blocking UI
+                var encodedKey = string.Join("/", fileKey.Split('/', StringSplitOptions.RemoveEmptyEntries).Select(Uri.EscapeDataString));
+                return $"{_supabaseUrl}/storage/v1/object/public/{bucketName}/{encodedKey}";
             }
         }
 
