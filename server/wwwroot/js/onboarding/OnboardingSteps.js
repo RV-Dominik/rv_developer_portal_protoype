@@ -120,7 +120,7 @@ class OnboardingSteps {
                 
                 <div class="asset-upload-grid">
                     <div class="asset-upload-item small">
-                        <div class="file-upload-area ratio-1-1" id="appicon-upload" data-kind="app_icon" data-w="1024" data-h="1024">
+                        <div class="file-upload-area ratio-1-1" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON)}" data-kind="${AssetConstants.ASSET_TYPES.APP_ICON}" data-w="1024" data-h="1024">
                             <div class="upload-background"></div>
                             <div class="upload-overlay">
                                 <div class="upload-icon">🧩</div>
@@ -134,7 +134,7 @@ class OnboardingSteps {
                     </div>
                     
                     <div class="asset-upload-item wide">
-                        <div class="file-upload-area ratio-16-9" id="hero-upload" data-kind="hero_image" data-w="1920" data-h="1080">
+                        <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE)}" data-kind="${AssetConstants.ASSET_TYPES.HERO_IMAGE}" data-w="1920" data-h="1080">
                             <div class="upload-background"></div>
                             <div class="upload-overlay">
                                 <div class="upload-icon">🖼️</div>
@@ -148,7 +148,7 @@ class OnboardingSteps {
                     </div>
                     
                     <div class="asset-upload-item medium">
-                        <div class="file-upload-area ratio-16-9" id="screenshots-upload" data-kind="screenshot" data-w="1920" data-h="1080">
+                        <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)}" data-kind="${AssetConstants.ASSET_TYPES.SCREENSHOTS}" data-w="1920" data-h="1080">
                             <div class="upload-background"></div>
                             <div class="upload-overlay">
                                 <div class="upload-icon">📸</div>
@@ -162,7 +162,7 @@ class OnboardingSteps {
                     </div>
                     
                     <div class="asset-upload-item medium">
-                        <div class="file-upload-area ratio-16-9" id="trailer-upload" data-kind="trailer" data-w="1920" data-h="1080" data-duration="15" data-maxsize="5242880">
+                        <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER)}" data-kind="${AssetConstants.ASSET_TYPES.TRAILER}" data-w="1920" data-h="1080" data-duration="15" data-maxsize="5242880">
                             <div class="upload-background"></div>
                             <div class="upload-overlay">
                                 <div class="upload-icon">🎬</div>
@@ -557,8 +557,10 @@ class OnboardingSteps {
     }
 
     hasRequiredAssets(project) {
-        // Check if at least one asset has been uploaded
-        return !!(project.gameLogoUrl || project.coverArtUrl || project.trailerUrl);
+        // Check if at least one asset has been uploaded using asset keys
+        return !!(project[AssetConstants.ASSET_KEYS.GAME_LOGO] || 
+                  project[AssetConstants.ASSET_KEYS.COVER_ART] || 
+                  project[AssetConstants.ASSET_KEYS.TRAILER]);
     }
 
     // Modal functionality for Readyverse warning

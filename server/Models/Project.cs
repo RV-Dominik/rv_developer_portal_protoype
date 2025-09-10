@@ -80,11 +80,6 @@ namespace ShowroomBackend.Models
         public string? CoverArtKey { get; set; }
         public string? TrailerKey { get; set; }
         
-        // Legacy URL fields (deprecated - use keys instead)
-        public string? GameLogoUrl { get; set; }
-        public string? CoverArtUrl { get; set; }
-        public string? TrailerUrl { get; set; }
-        
         // Optional Add-Ons
         public string? ShowroomInterest { get; set; } // Yes with assistance, Yes in-house, No
         public bool WantsSurrealEstate { get; set; } = false;

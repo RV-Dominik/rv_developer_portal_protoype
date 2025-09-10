@@ -315,9 +315,9 @@ class OnboardingData {
     async restoreAssetsData(project) {
         console.log('Restoring assets for project:', project);
         console.log('Project asset keys:', {
-            gameLogoKey: project.gameLogoKey,
-            coverArtKey: project.coverArtKey,
-            trailerKey: project.trailerKey
+            [AssetConstants.ASSET_KEYS.GAME_LOGO]: project[AssetConstants.ASSET_KEYS.GAME_LOGO],
+            [AssetConstants.ASSET_KEYS.COVER_ART]: project[AssetConstants.ASSET_KEYS.COVER_ART],
+            [AssetConstants.ASSET_KEYS.TRAILER]: project[AssetConstants.ASSET_KEYS.TRAILER]
         });
         console.log('All project keys:', Object.keys(project));
         
@@ -333,7 +333,7 @@ class OnboardingData {
         // Update single-image upload areas with project URLs
         if (projectUrls.gameLogoUrl) {
             console.log('Restoring game logo:', projectUrls.gameLogoUrl);
-            const logoArea = document.getElementById('appicon-upload');
+            const logoArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON));
             if (logoArea) {
                 const background = logoArea.querySelector('.upload-background');
                 if (background) {
@@ -345,7 +345,7 @@ class OnboardingData {
         
         if (projectUrls.coverArtUrl) {
             console.log('Restoring cover art:', projectUrls.coverArtUrl);
-            const heroArea = document.getElementById('hero-upload');
+            const heroArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE));
             if (heroArea) {
                 const background = heroArea.querySelector('.upload-background');
                 if (background) {
@@ -357,7 +357,7 @@ class OnboardingData {
         
         if (projectUrls.trailerUrl) {
             console.log('Restoring trailer:', projectUrls.trailerUrl);
-            const trailerArea = document.getElementById('trailer-upload');
+            const trailerArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER));
             if (trailerArea) {
                 const background = trailerArea.querySelector('.upload-background');
                 if (background) {
@@ -368,7 +368,7 @@ class OnboardingData {
         }
 
         // Handle screenshots (multiple files)
-        const screenshotsArea = document.getElementById('screenshots-upload');
+        const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
         if (screenshotsArea) {
             let list = screenshotsArea.querySelector('.thumb-list');
             if (!list) {

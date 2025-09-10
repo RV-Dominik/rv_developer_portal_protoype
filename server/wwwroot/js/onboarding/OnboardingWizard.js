@@ -634,15 +634,12 @@ class OnboardingWizard {
                     this.updateUploadArea(uploadArea, file, displayUrl);
 
                     // Update project object with file keys for primary assets
-                    const kindLower = (uploadArea.getAttribute('data-kind') || '').toLowerCase();
-                    if (result.fileKey) {
-                        if (kindLower === 'game_logo' || kindLower === 'logo' || kindLower === 'app_icon') {
-                            this.core.currentOnboardingProject.gameLogoKey = result.fileKey;
-                        } else if (kindLower === 'hero_image') {
-                            this.core.currentOnboardingProject.coverArtKey = result.fileKey;
-                        } else if (kindLower === 'trailer') {
-                            this.core.currentOnboardingProject.trailerKey = result.fileKey;
-                        }
+                    const projectKey = AssetConstants.getProjectKeyForUploadArea(uploadArea);
+                    console.log('Upload area:', uploadArea.id, 'Data kind:', uploadArea.getAttribute('data-kind'), 'Project key:', projectKey, 'File key:', result.fileKey);
+                    
+                    if (result.fileKey && projectKey) {
+                        this.core.currentOnboardingProject[projectKey] = result.fileKey;
+                        console.log(`Set ${projectKey} to:`, result.fileKey);
                         // Update preview pane if visible
                         this.updateLivePreview();
                     }
@@ -670,7 +667,7 @@ class OnboardingWizard {
 
     updateUploadArea(uploadArea, file, url) {
         // For the screenshots area, append thumbnails for each uploaded file
-        if (uploadArea.id === 'screenshots-upload') {
+        if (uploadArea.id === AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)) {
             let list = uploadArea.querySelector('.thumb-list');
             if (!list) {
                 list = document.createElement('div');
