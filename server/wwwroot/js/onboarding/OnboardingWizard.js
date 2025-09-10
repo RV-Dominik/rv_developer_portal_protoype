@@ -628,13 +628,10 @@ class OnboardingWizard {
             }
             // If we have an image URL for logo/hero, replace the surface with an image preview
             if (url && file.type.startsWith('image/')) {
-                const img = document.createElement('img');
-                img.src = url;
-                img.alt = file.name;
-                img.style.maxWidth = '100%';
-                img.style.maxHeight = '100%';
-                img.style.marginTop = '8px';
-                uploadArea.appendChild(img);
+                uploadArea.classList.add('has-image');
+                // Cache-bust to avoid stale previews
+                const bust = `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+                uploadArea.style.backgroundImage = `url('${bust}')`;
             }
             uploadArea.classList.add('uploaded');
         }
