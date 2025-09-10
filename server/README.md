@@ -22,7 +22,7 @@ An ASP.NET Core 8.0 backend running in Docker on Render, with Supabase for Auth,
   - `SUPABASE_BUCKET` = `showrooms`
   - `PUBLIC_BASE_URL` = deployed app URL (e.g. `https://<your-service>.onrender.com`)
   - `JWT_SECRET` = a strong, random string (64+ chars)
-  - `USE_MOCK_SUPABASE` = `false` for production, `true` for local/dev if desired
+  - (deprecated) `USE_MOCK_SUPABASE` — no longer used
 
 - **Supabase → Authentication → URL Configuration**
   - Site URL: `https://<your-service>.onrender.com`
@@ -62,15 +62,11 @@ Required:
 Optional:
 - `ASSET_URL_TTL` — signed URL TTL in seconds (default: `3600`)
 - `SESSION_COOKIE` — cookie name (default: `dev_portal_session`)
-- `USE_MOCK_SUPABASE` — `true` to use mock data locally, `false` to use real Supabase
+  (deprecated) `USE_MOCK_SUPABASE` — no longer used
 
 ### Service Selection
 
-The backend switches services via `USE_MOCK_SUPABASE`:
-- `USE_MOCK_SUPABASE=true` → MockSupabaseService (dev/testing)
-- `USE_MOCK_SUPABASE=false` → SupabaseRestService (real Supabase)
-
-No code edits required.
+The backend now always uses the REST service (`SupabaseRestService`). Mock services have been removed.
 
 ### 3) Supabase Setup
 - Follow `SUPABASE_SETUP.md` (schema, storage bucket, RLS policies)
@@ -132,9 +128,8 @@ server/
 ├── Models/                  # C# models and DTOs
 │   ├── Project.cs, Asset.cs, User.cs
 │   └── DTOs/
-├── Services/                # Supabase services (Mock + REST)
+├── Services/                # Supabase services (REST)
 │   ├── ISupabaseService.cs
-│   ├── MockSupabaseService.cs
 │   ├── SupabaseRestService.cs
 │   └── AuthenticationService.cs
 ├── wwwroot/                 # Static portal (served)

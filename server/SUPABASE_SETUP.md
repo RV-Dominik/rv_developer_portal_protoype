@@ -12,19 +12,9 @@ SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-### **Step 2: Set Environment Variable**
+### **Step 2: Service Selection**
 
-Add this environment variable to switch between mock and real Supabase:
-
-```bash
-# For development (mock service):
-USE_MOCK_SUPABASE=true
-
-# For production (real Supabase):
-USE_MOCK_SUPABASE=false
-```
-
-**No code changes needed!** The service is automatically selected based on the environment variable.
+The backend always uses the REST integration with Supabase. No mock toggle is required anymore.
 
 ### **Step 3: Database Schema**
 
@@ -285,9 +275,8 @@ CREATE POLICY "Users can delete their user_organizations" ON user_organizations
 
 ## 🔧 **Current Status**
 
-- ✅ **MockSupabaseService** - Working (default)
-- ✅ **SupabaseRestService** - Ready to use
-- ✅ **Interface-based** - Easy to switch between services
+- ✅ **SupabaseRestService** - In use
+- ✅ **Interface-based** - Clean separation for REST calls
 - ✅ **REST API calls** - No SDK dependency issues
 
 ## 🎯 **Benefits of REST Approach**
@@ -303,7 +292,7 @@ CREATE POLICY "Users can delete their user_organizations" ON user_organizations
 1. Set up your Supabase project
 2. Add the environment variables
 3. Run the database schema
-4. Switch the service in Program.cs
+4. Ensure environment variables are set
 5. Deploy and test!
 
 The REST service handles all the same functionality as the mock service, but with real Supabase integration.
