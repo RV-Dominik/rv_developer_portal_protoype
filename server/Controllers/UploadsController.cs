@@ -76,7 +76,7 @@ namespace ShowroomBackend.Controllers
                     FileKey = fileKey,
                     MimeType = request.File.ContentType,
                     FileSize = request.File.Length,
-                    Kind = request.Kind ?? "screenshot",
+                    Kind = string.IsNullOrWhiteSpace(request.Kind) ? "screenshot" : request.Kind,
                     DurationSeconds = request.DurationSeconds,
                     Width = request.Width,
                     Height = request.Height,
@@ -89,11 +89,34 @@ namespace ShowroomBackend.Controllers
                     return StatusCode(500, new { error = "Failed to create asset record" });
                 }
 
+                // Update project fields for primary assets (logo/cover/trailer)
+                var bucket = "showrooms";
+                var publicUrl = $"{_configuration["SUPABASE_URL"]}/storage/v1/object/public/{bucket}/{createdAsset.FileKey}";
+                var fields = new Dictionary<string, object?>();
+                switch ((createdAsset.Kind ?? "").ToLowerInvariant())
+                {
+                    case "game_logo":
+                    case "logo":
+                        fields["gameLogoUrl"] = publicUrl;
+                        break;
+                    case "cover_art":
+                    case "cover":
+                        fields["coverArtUrl"] = publicUrl;
+                        break;
+                    case "trailer":
+                        fields["trailerUrl"] = publicUrl;
+                        break;
+                }
+                if (fields.Count > 0)
+                {
+                    try { await _supabaseService.UpdateProjectFieldsAsync(projectId, fields); } catch {}
+                }
+
                 // Optionally include a signed URL to display immediately
                 var ttl = 3600;
                 var ttlStr = _configuration["ASSET_URL_TTL"];
                 if (int.TryParse(ttlStr, out var parsed)) ttl = parsed;
-                var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", createdAsset.FileKey, ttl);
+                var signedUrl = await _supabaseService.GetSignedUrlAsync(bucket, createdAsset.FileKey, ttl);
 
                 return Ok(new
                 {
@@ -108,7 +131,8 @@ namespace ShowroomBackend.Controllers
                     createdAsset.Width,
                     createdAsset.Height,
                     createdAsset.CreatedAt,
-                    signedUrl
+                    signedUrl,
+                    publicUrl
                 });
             }
             catch (Exception ex)

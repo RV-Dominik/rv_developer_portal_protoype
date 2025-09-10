@@ -538,6 +538,12 @@ class OnboardingWizard {
                 formData.append('file', file);
                 formData.append('projectId', projectId);
 
+                // Show simple progress UI
+                const progressTag = document.createElement('div');
+                progressTag.className = 'upload-hint';
+                progressTag.textContent = `Uploading ${file.name}...`;
+                uploadArea.appendChild(progressTag);
+
                 const response = await fetch(`${this.core.apiBaseUrl}/api/uploads/${projectId}`, {
                     method: 'POST',
                     credentials: 'include',
@@ -547,7 +553,7 @@ class OnboardingWizard {
                 if (response.ok) {
                     const result = await response.json();
                     this.core.showMessage('File uploaded successfully!', 'success');
-                    this.updateUploadArea(uploadArea, file, result.signedUrl || null);
+                    this.updateUploadArea(uploadArea, file, result.signedUrl || result.publicUrl || null);
                 } else {
                     let message = 'Upload failed';
                     try {
@@ -556,6 +562,8 @@ class OnboardingWizard {
                     } catch (_) {}
                     this.core.showMessage(message, 'error');
                 }
+
+                if (progressTag && progressTag.parentNode) progressTag.parentNode.removeChild(progressTag);
             }
         } catch (error) {
             console.error('Upload error:', error);
