@@ -378,19 +378,19 @@ class ShowroomPortal {
         switch (step) {
             case 'basics':
                 return `
-                    <div class="form-group">
+                        <div class="form-group">
                         <label class="form-label" for="ob-short-description">Short Description *</label>
                         <textarea id="ob-short-description" class="form-input" rows="3" placeholder="A brief description of your game (2-3 sentences)..." required maxlength="500">${project.shortDescription || ''}</textarea>
                         <div class="form-hint">Brief description that will appear in the Readyverse launcher</div>
-                    </div>
+                        </div>
                     
-                    <div class="form-group">
+                        <div class="form-group">
                         <label class="form-label" for="ob-full-description">Full Description</label>
                         <textarea id="ob-full-description" class="form-input" rows="4" placeholder="Detailed description of your game, features, and gameplay..." maxlength="2000">${project.fullDescription || ''}</textarea>
                         <div class="form-hint">Optional detailed description for internal review</div>
-                    </div>
+                        </div>
                     
-                    <div class="form-group">
+                        <div class="form-group">
                         <label class="form-label" for="ob-genre">Genre *</label>
                         <select id="ob-genre" class="form-input" required>
                             <option value="">Select Genre</option>
@@ -454,7 +454,7 @@ class ShowroomPortal {
                                 Web Browser
                             </label>
                         </div>
-                    </div>
+                        </div>
                 `;
                 
             case 'assets':
@@ -509,8 +509,8 @@ class ShowroomPortal {
                             <input type="file" id="ob-trailer" accept="video/mp4" style="display: none;">
                         </div>
                         <div class="form-hint">Optional gameplay trailer or promotional video</div>
-                    </div>
-                `;
+                </div>
+            `;
                 
             case 'integration':
                 return `
@@ -1169,7 +1169,7 @@ class ShowroomPortal {
                         <button class="btn btn-primary" onclick="portal.showCreateProjectForm()">
                             Create Project
                         </button>
-                    </div>
+                </div>
             `;
             return;
         }
@@ -1187,10 +1187,10 @@ class ShowroomPortal {
                     <span class="project-status ${project.onboardingStep || 'basics'}">${this.getStatusText(project.onboardingStep)}</span>
                 </div>
                 <div class="project-content">
-                    <p class="project-description">${project.shortDescription || project.ShortDescription || 'No description provided'}</p>
+                    <p class="project-description">${project.shortDescription || 'No description provided'}</p>
                     <div class="project-meta">
-                        <span class="project-genre">${project.genre || project.Genre || 'No genre'}</span>
-                        <span class="project-track">${project.publishingTrack || project.PublishingTrack || 'No track'}</span>
+                        <span class="project-genre">${project.genre || 'No genre'}</span>
+                        <span class="project-track">${project.publishingTrack || 'No track'}</span>
                     </div>
                 </div>
                 <div class="project-actions">
@@ -1295,7 +1295,7 @@ class ShowroomPortal {
             }
             
             // Organization exists, show normal dashboard
-            this.showProjectsList();
+        this.showProjectsList();
         } catch (error) {
             console.error('Error checking organization:', error);
             this.showMessage('Error checking organization status', 'error');

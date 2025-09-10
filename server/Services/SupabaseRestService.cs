@@ -160,7 +160,7 @@ namespace ShowroomBackend.Services
             {
                 var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -202,7 +202,7 @@ namespace ShowroomBackend.Services
             {
                 var json = JsonSerializer.Serialize(project, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -316,7 +316,7 @@ namespace ShowroomBackend.Services
             {
                 var json = JsonSerializer.Serialize(asset, new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
