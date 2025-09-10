@@ -213,10 +213,7 @@ namespace ShowroomBackend.Services
                 {
                     Content = content
                 };
-                
-                // Add required headers for Supabase
-                request.Headers.Add("apikey", _supabaseAnonKey);
-                request.Headers.Add("Authorization", $"Bearer {_supabaseServiceKey}");
+                // Avoid duplicating default auth headers set on HttpClient; only add Prefer here
                 request.Headers.Add("Prefer", "return=representation");
 
                 var response = await _httpClient.SendAsync(request);
@@ -253,7 +250,7 @@ namespace ShowroomBackend.Services
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("Failed to update project {ProjectId}. Status: {StatusCode}, Error: {Error}", 
                         id, response.StatusCode, errorContent);
-                    return null;
+                    throw new Exception($"Supabase update failed: {response.StatusCode} - {errorContent}");
                 }
             }
             catch (Exception ex)
