@@ -103,6 +103,8 @@ class OnboardingData {
 
     async saveOnboardingStep(data) {
         try {
+            // Debug: log payload before sending
+            console.log('Saving onboarding step payload:', data);
             const response = await fetch(`${this.core.apiBaseUrl}/api/projects/${this.core.currentOnboardingProject.id}/onboarding/step`, {
                 method: 'POST',
                 headers: {
@@ -116,8 +118,16 @@ class OnboardingData {
                 const result = await response.json();
                 return result;
             } else {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to save step');
+                let message = 'Failed to save step';
+                try {
+                    const error = await response.json();
+                    if (error && error.error) message = error.error;
+                    if (error && error.details) {
+                        console.warn('Server validation errors:', error.details);
+                        message = `${message}`;
+                    }
+                } catch (_) {}
+                throw new Error(message);
             }
         } catch (error) {
             console.error('Error saving onboarding step:', error);

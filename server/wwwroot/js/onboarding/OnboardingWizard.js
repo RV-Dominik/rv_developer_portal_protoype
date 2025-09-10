@@ -401,6 +401,11 @@ class OnboardingWizard {
             const stepIsValid = this.validation
                 ? this.validation.validateStep(this.core.currentOnboardingStep)
                 : true;
+
+            // Skip autosave during file uploads to avoid server 500s mid-transfer
+            if (this.core.currentOnboardingStep === 'assets' && this.isUploadInFlight) {
+                return;
+            }
             
             if (stepIsValid && this.hasFormData(formData)) {
                 console.log('Auto-saving progress for step:', this.core.currentOnboardingStep);
@@ -527,6 +532,7 @@ class OnboardingWizard {
         if (!projectId) return;
 
         try {
+            this.isUploadInFlight = true;
             const formData = new FormData();
             formData.append('file', file);
             formData.append('projectId', projectId);
@@ -542,12 +548,18 @@ class OnboardingWizard {
                 this.core.showMessage('File uploaded successfully!', 'success');
                 this.updateUploadArea(uploadArea, file, result.url);
             } else {
-                const error = await response.json();
-                this.core.showMessage(error.error || 'Upload failed', 'error');
+                let message = 'Upload failed';
+                try {
+                    const error = await response.json();
+                    if (error && error.error) message = error.error;
+                } catch (_) {}
+                this.core.showMessage(message, 'error');
             }
         } catch (error) {
             console.error('Upload error:', error);
             this.core.showMessage('Upload failed', 'error');
+        } finally {
+            this.isUploadInFlight = false;
         }
     }
 
