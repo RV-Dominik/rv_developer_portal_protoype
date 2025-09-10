@@ -520,7 +520,7 @@ namespace ShowroomBackend.Services
             {
                 var fileKey = string.IsNullOrEmpty(folder) ? fileName : $"{folder}/{fileName}";
                 
-                var storageUrl = $"{_supabaseUrl}/storage/v1/object/{bucketName}/{fileKey}?upsert=true";
+                var storageUrl = $"{_supabaseUrl}/storage/v1/object/{bucketName}/{fileKey}";
                 
                 using var content = new StreamContent(fileStream);
                 
@@ -534,6 +534,7 @@ namespace ShowroomBackend.Services
                     Content = content
                 };
                 request.Headers.Add("Authorization", $"Bearer {_supabaseServiceKey}");
+                request.Headers.Add("x-upsert", "true");
                 
                 var response = await _httpClient.SendAsync(request);
                 
