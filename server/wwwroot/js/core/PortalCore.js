@@ -34,9 +34,26 @@ class PortalCore {
 
         const createProjectBtn = document.getElementById('create-project-button');
         if (createProjectBtn) {
-            createProjectBtn.addEventListener('click', () => {
-                if (this.projectManager) {
-                    this.projectManager.showCreateProjectForm();
+            createProjectBtn.addEventListener('click', async () => {
+                if (!this.projectManager) return;
+                // Ensure organization exists before allowing project creation
+                if (this.organizationManager) {
+                    const org = await this.organizationManager.checkOrganizationStatus();
+                    if (!org) {
+                        this.showMessage('Please set up your organization first before creating projects.', 'error');
+                        this.organizationManager.showOrganizationSetup();
+                        return;
+                    }
+                }
+                this.projectManager.showCreateProjectForm();
+            });
+        }
+
+        const manageOrgBtn = document.getElementById('manage-org-button');
+        if (manageOrgBtn) {
+            manageOrgBtn.addEventListener('click', () => {
+                if (this.organizationManager) {
+                    this.organizationManager.showOrganizationSetup();
                 }
             });
         }

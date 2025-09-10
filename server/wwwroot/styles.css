@@ -437,6 +437,41 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(135deg, var(--rv-black) 0%, var(--card-dark) 100%);
 }
 
+/* Simple modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z25);
+}
+
+.modal-content {
+  background: var(--card-light);
+  border: 1px solid var(--rv-blue-50);
+  width: min(520px, 92vw);
+  padding: 1.5rem;
+  clip-path: polygon(20px 0%, calc(100% - 20px) 0%, 100% 20px, 100% calc(100% - 20px), calc(100% - 20px) 100%, 20px 100%, 0% calc(100% - 20px), 0% 20px);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.modal-close {
+  background: transparent;
+  color: var(--rv-white);
+  border: 1px solid var(--rv-white);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+}
+
 .section-header {
   text-align: center;
   margin-bottom: 4rem;
