@@ -873,19 +873,56 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"projects?id=eq.{id}&onboarding_step=eq.done&select=*");
+                // First check if project exists at all
+                var basicQueryUrl = $"projects?id=eq.{id.ToString()}&select=*";
+                _logger.LogInformation("Basic query URL: {QueryUrl}", basicQueryUrl);
+                
+                var basicResponse = await _httpClient.GetAsync(basicQueryUrl);
+                _logger.LogInformation("Basic response status: {StatusCode}", basicResponse.StatusCode);
+                
+                if (basicResponse.IsSuccessStatusCode)
+                {
+                    var basicContent = await basicResponse.Content.ReadAsStringAsync();
+                    _logger.LogInformation("Basic response content: {Content}", basicContent);
+                }
+                
+                // Now check with onboarding step filter
+                var queryUrl = $"projects?id=eq.{id.ToString()}&onboarding_step=eq.done&select=*";
+                _logger.LogInformation("Querying for game with ID: {GameId}, URL: {QueryUrl}", id, queryUrl);
+                
+                var response = await _httpClient.GetAsync(queryUrl);
+                
+                _logger.LogInformation("Response status: {StatusCode}", response.StatusCode);
                 
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation("Response content: {Content}", content);
+                    
                     var projects = JsonSerializer.Deserialize<Project[]>(content, new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                         PropertyNameCaseInsensitive = true
                     });
 
+                    _logger.LogInformation("Deserialized projects count: {Count}", projects?.Length ?? 0);
+
                     var project = projects?.FirstOrDefault();
-                    return project != null ? await MapToShowroomGameDtoAsync(project) : null;
+                    if (project != null)
+                    {
+                        _logger.LogInformation("Found project: {ProjectId}, Name: {ProjectName}", project.Id, project.Name);
+                        return await MapToShowroomGameDtoAsync(project);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("No project found with ID: {GameId}", id);
+                        return null;
+                    }
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Failed to get project. Status: {StatusCode}, Content: {Content}", response.StatusCode, errorContent);
                 }
 
                 return null;
