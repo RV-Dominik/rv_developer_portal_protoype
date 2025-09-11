@@ -10,6 +10,8 @@ class OnboardingSteps {
                 return this.getBasicsContent(project);
             case 'assets':
                 return this.getAssetsContent(project);
+            case 'showroom':
+                return this.getShowroomContent(project);
             case 'integration':
                 return this.getIntegrationContent(project);
             case 'compliance':
@@ -172,6 +174,83 @@ class OnboardingSteps {
                                 </div>
                             </div>
                             <input type="file" id="trailer-file" accept="video/mp4" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getShowroomContent(project) {
+        return `
+            <div class="showroom-section">
+                <h4>Showroom Setup</h4>
+                <p>Configure your showroom experience for players to explore your game.</p>
+                
+                <div class="form-group">
+                    <label>Showroom Tier *</label>
+                    <div class="tier-selection">
+                        <div class="tier-option">
+                            <input type="radio" id="tier-standard" name="showroomTier" value="standard" 
+                                   ${project.showroomTier === 'standard' ? 'checked' : ''} required>
+                            <label for="tier-standard" class="tier-card">
+                                <div class="tier-header">
+                                    <h5>Standard</h5>
+                                    <div class="tier-badge">Self-Service</div>
+                                </div>
+                                <div class="tier-content">
+                                    <p>Create your own showroom with customizable lighting and basic features.</p>
+                                    <ul>
+                                        <li>Custom lighting colors</li>
+                                        <li>Basic showroom templates</li>
+                                        <li>Standard support</li>
+                                    </ul>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div class="tier-option">
+                            <input type="radio" id="tier-bespoke" name="showroomTier" value="bespoke" 
+                                   ${project.showroomTier === 'bespoke' ? 'checked' : ''} required>
+                            <label for="tier-bespoke" class="tier-card">
+                                <div class="tier-header">
+                                    <h5>Bespoke</h5>
+                                    <div class="tier-badge premium">Premium</div>
+                                </div>
+                                <div class="tier-content">
+                                    <p>Readyverse will build a custom showroom for and with you.</p>
+                                    <ul>
+                                        <li>Custom showroom design</li>
+                                        <li>Dedicated support team</li>
+                                        <li>Advanced features</li>
+                                        <li>Personal consultation</li>
+                                    </ul>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" id="lighting-config" style="display: none;">
+                    <label for="showroom-lighting-color">Showroom Lighting Color</label>
+                    <div class="color-picker-container">
+                        <input type="color" id="showroom-lighting-color" name="showroomLightingColor" 
+                               value="${project.showroomLightingColor || '#4A90E2'}" class="color-picker">
+                        <div class="color-preview">
+                            <div class="color-swatch" style="background-color: ${project.showroomLightingColor || '#4A90E2'}"></div>
+                            <span class="color-value">${project.showroomLightingColor || '#4A90E2'}</span>
+                        </div>
+                    </div>
+                    <p class="form-hint">Choose the primary lighting color for your showroom environment.</p>
+                </div>
+                
+                <div class="form-group" id="bespoke-info" style="display: none;">
+                    <div class="info-card">
+                        <div class="info-icon">🎨</div>
+                        <div class="info-content">
+                            <h5>Custom Showroom Development</h5>
+                            <p>Our team will work with you to create a unique showroom experience tailored to your game's vision and requirements.</p>
+                            <p><strong>Next steps:</strong> After completing onboarding, our team will contact you to discuss your showroom needs and timeline.</p>
                         </div>
                     </div>
                 </div>

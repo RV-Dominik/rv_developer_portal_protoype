@@ -132,6 +132,11 @@ class OnboardingValidation {
     }
 
     validateStep(step) {
+        // Special handling for showroom step
+        if (step === 'showroom') {
+            return this.validateShowroomStep();
+        }
+
         const requiredFields = this.getRequiredFieldsForStep(step);
         let isValid = true;
 
@@ -225,6 +230,8 @@ class OnboardingValidation {
         switch (step) {
             case 'basics':
                 return ['ob-short-description', 'ob-genre', 'ob-publishing-track', 'ob-build-status'];
+            case 'showroom':
+                return ['tier-standard', 'tier-bespoke']; // Radio button validation
             case 'integration':
                 return ['ob-pass-sso', 'ob-sdk-status'];
             case 'compliance':
@@ -362,5 +369,75 @@ class OnboardingValidation {
         if (document.body.contains(container)) {
             container.appendChild(successEl);
         }
+    }
+
+    validateShowroomStep() {
+        const standardTier = document.getElementById('tier-standard');
+        const bespokeTier = document.getElementById('tier-bespoke');
+        
+        // Check if at least one tier is selected
+        const isTierSelected = (standardTier && standardTier.checked) || (bespokeTier && bespokeTier.checked);
+        
+        if (!isTierSelected) {
+            // Show error message
+            const tierSelection = document.querySelector('.tier-selection');
+            if (tierSelection) {
+                this.showTierSelectionError(tierSelection, 'Please select a showroom tier');
+            }
+            return false;
+        }
+        
+        // Clear any existing errors
+        this.clearTierSelectionError();
+        
+        // If standard tier is selected, validate color picker
+        if (standardTier && standardTier.checked) {
+            const colorPicker = document.getElementById('showroom-lighting-color');
+            if (colorPicker && !colorPicker.value) {
+                this.showColorPickerError(colorPicker, 'Please select a lighting color');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    showTierSelectionError(container, message) {
+        this.clearTierSelectionError();
+        
+        const errorEl = document.createElement('div');
+        errorEl.className = 'field-error tier-error';
+        errorEl.textContent = message;
+        
+        if (document.body.contains(container)) {
+            container.appendChild(errorEl);
+        }
+    }
+
+    clearTierSelectionError() {
+        const errorEl = document.querySelector('.tier-error');
+        if (errorEl && errorEl.parentNode) {
+            errorEl.parentNode.removeChild(errorEl);
+        }
+    }
+
+    showColorPickerError(field, message) {
+        this.clearFieldValidation(field);
+        
+        const container = field.closest('.form-group') || field.parentElement;
+        if (!container || !document.body.contains(container)) {
+            return;
+        }
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'field-error';
+        errorEl.textContent = message;
+        
+        if (document.body.contains(container)) {
+            container.appendChild(errorEl);
+        }
+        
+        field.classList.add('field-error');
+        field.classList.remove('field-success');
     }
 }

@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS projects (
     
     -- Optional Add-Ons
     showroom_interest TEXT, -- Yes with assistance, Yes in-house, No
+    showroom_tier TEXT, -- standard, bespoke
+    showroom_lighting_color TEXT, -- Hex color code for standard tier
     wants_surreal_estate BOOLEAN DEFAULT false,
     
     -- Submission Process Tracking

@@ -83,6 +83,8 @@ namespace ShowroomBackend.Models
         
         // Optional Add-Ons
         public string? ShowroomInterest { get; set; } // Yes with assistance, Yes in-house, No
+        public string? ShowroomTier { get; set; } // standard, bespoke
+        public string? ShowroomLightingColor { get; set; } // Hex color code for standard tier
         public bool WantsSurrealEstate { get; set; } = false;
         
         // Submission Process Tracking

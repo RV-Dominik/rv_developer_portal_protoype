@@ -110,6 +110,12 @@ namespace ShowroomBackend.Models.DTOs
         [StringLength(50)]
         public string? ShowroomInterest { get; set; }
         
+        [StringLength(20)]
+        public string? ShowroomTier { get; set; }
+        
+        [StringLength(7)] // Hex color code
+        public string? ShowroomLightingColor { get; set; }
+        
         public bool WantsSurrealEstate { get; set; } = false;
         
         public bool IsPublic { get; set; } = false;

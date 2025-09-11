@@ -213,6 +213,7 @@ class OnboardingWizard {
         this.bindLivePreviewEvents();
         this.bindStepperEvents();
         this.bindReadyverseButtons();
+        this.bindShowroomEvents();
     }
 
     bindLivePreviewEvents() {
@@ -1036,5 +1037,59 @@ class OnboardingWizard {
         }
         
         console.log('✅ Hid upload loading');
+    }
+
+    bindShowroomEvents() {
+        // Handle tier selection changes
+        const tierRadios = document.querySelectorAll('input[name="showroomTier"]');
+        tierRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.handleTierSelection(e.target.value);
+            });
+        });
+
+        // Handle color picker changes
+        const colorPicker = document.getElementById('showroom-lighting-color');
+        if (colorPicker) {
+            colorPicker.addEventListener('change', (e) => {
+                this.handleColorChange(e.target.value);
+            });
+        }
+    }
+
+    handleTierSelection(tier) {
+        console.log('Tier selected:', tier);
+        
+        const lightingConfig = document.getElementById('lighting-config');
+        const bespokeInfo = document.getElementById('bespoke-info');
+        
+        if (tier === 'standard') {
+            if (lightingConfig) lightingConfig.style.display = 'block';
+            if (bespokeInfo) bespokeInfo.style.display = 'none';
+        } else if (tier === 'bespoke') {
+            if (lightingConfig) lightingConfig.style.display = 'none';
+            if (bespokeInfo) bespokeInfo.style.display = 'block';
+        }
+        
+        // Update project data
+        if (this.core.currentOnboardingProject) {
+            this.core.currentOnboardingProject.showroomTier = tier;
+        }
+    }
+
+    handleColorChange(color) {
+        console.log('Color changed:', color);
+        
+        // Update color preview
+        const colorSwatch = document.querySelector('.color-swatch');
+        const colorValue = document.querySelector('.color-value');
+        
+        if (colorSwatch) colorSwatch.style.backgroundColor = color;
+        if (colorValue) colorValue.textContent = color;
+        
+        // Update project data
+        if (this.core.currentOnboardingProject) {
+            this.core.currentOnboardingProject.showroomLightingColor = color;
+        }
     }
 }
