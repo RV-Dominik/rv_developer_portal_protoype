@@ -625,9 +625,17 @@ class OnboardingWizard {
             const fileInput = area.querySelector('input[type="file"]');
             if (fileInput) {
                 fileInput.addEventListener('change', (e) => {
-                    // Clear any existing error when new file is selected
+                    console.log('📁 File input changed for:', area.id);
+                    console.log('Files selected:', e.target.files.length);
+                    
+                    // Clear any existing states when new file is selected
                     this.clearUploadAreaError(area);
-                    this.handleFileUpload(e, area);
+                    this.hideUploadLoading(area);
+                    
+                    // Use requestAnimationFrame to ensure DOM updates are processed
+                    requestAnimationFrame(() => {
+                        this.handleFileUpload(e, area);
+                    });
                 });
             }
         });
@@ -639,6 +647,10 @@ class OnboardingWizard {
 
         const projectId = this.core.currentOnboardingProject?.id;
         if (!projectId) return;
+
+        // Ensure any existing error state is cleared at the start of upload
+        this.clearUploadAreaError(uploadArea);
+        this.hideUploadLoading(uploadArea);
 
         try {
             this.isUploadInFlight = true;
@@ -656,11 +668,8 @@ class OnboardingWizard {
                 if (expectedW) formData.append('width', expectedW);
                 if (expectedH) formData.append('height', expectedH);
 
-                // Show simple progress UI
-                const progressTag = document.createElement('div');
-                progressTag.className = 'upload-hint';
-                progressTag.textContent = `Uploading ${file.name}...`;
-                uploadArea.appendChild(progressTag);
+                // Show loading state
+                this.showUploadLoading(uploadArea, file.name);
 
                 const response = await fetch(`${this.core.apiBaseUrl}/api/uploads/${projectId}`, {
                     method: 'POST',
@@ -674,6 +683,7 @@ class OnboardingWizard {
                     console.log(`Upload successful for ${file.name}:`, result);
                     this.core.showMessage('File uploaded successfully!', 'success');
                     this.clearUploadAreaError(uploadArea);
+                    this.hideUploadLoading(uploadArea);
                     this.updateUploadArea(uploadArea, file, displayUrl);
 
                     // Update project object with file keys for primary assets
@@ -764,7 +774,8 @@ class OnboardingWizard {
                     }
                 }
 
-                if (progressTag && progressTag.parentNode) progressTag.parentNode.removeChild(progressTag);
+                // Always hide loading state
+                this.hideUploadLoading(uploadArea);
             }
         } catch (error) {
             console.error('Upload error:', error);
@@ -983,6 +994,47 @@ class OnboardingWizard {
             errorDiv.remove();
         }
         
-        console.log('✅ Cleared upload area error');
+        console.log('✅ Cleared upload area error for:', uploadArea.id);
+        console.log('Upload area classes after clear:', uploadArea.className);
+    }
+
+    showUploadLoading(uploadArea, fileName) {
+        // Clear any existing states
+        this.clearUploadAreaError(uploadArea);
+        this.hideUploadLoading(uploadArea);
+        
+        // Add loading styling
+        uploadArea.classList.add('is-uploading');
+        
+        // Create loading progress element
+        const progressDiv = document.createElement('div');
+        progressDiv.className = 'upload-progress';
+        progressDiv.innerHTML = `
+            <div class="progress-icon">⏳</div>
+            <div class="progress-text">Uploading ${fileName}...</div>
+        `;
+        
+        // Insert progress element after the upload overlay
+        const overlay = uploadArea.querySelector('.upload-overlay');
+        if (overlay) {
+            overlay.parentNode.insertBefore(progressDiv, overlay.nextSibling);
+        } else {
+            uploadArea.appendChild(progressDiv);
+        }
+        
+        console.log('✅ Showed upload loading for:', fileName);
+    }
+
+    hideUploadLoading(uploadArea) {
+        // Remove loading styling
+        uploadArea.classList.remove('is-uploading');
+        
+        // Remove progress element
+        const progressDiv = uploadArea.querySelector('.upload-progress');
+        if (progressDiv) {
+            progressDiv.remove();
+        }
+        
+        console.log('✅ Hid upload loading');
     }
 }

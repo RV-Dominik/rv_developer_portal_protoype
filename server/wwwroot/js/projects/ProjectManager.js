@@ -6,6 +6,9 @@ class ProjectManager {
 
     async loadProjects() {
         try {
+            // Show loading state
+            this.showProjectsLoading();
+            
             const response = await fetch(`${this.core.apiBaseUrl}/api/projects`, {
                 credentials: 'include'
             });
@@ -15,16 +18,21 @@ class ProjectManager {
                 this.displayProjects();
             } else {
                 this.core.showMessage('Failed to load projects', 'error');
+                this.hideProjectsLoading();
             }
         } catch (error) {
             console.error('Error loading projects:', error);
             this.core.showMessage('Failed to load projects', 'error');
+            this.hideProjectsLoading();
         }
     }
 
     displayProjects() {
         const projectsList = document.getElementById('projects-list');
         if (!projectsList) return;
+
+        // Hide loading state
+        this.hideProjectsLoading();
 
         if (this.core.projects.length === 0) {
             projectsList.innerHTML = `
@@ -177,5 +185,43 @@ class ProjectManager {
     showProjectsList() {
         this.core.showDashboard();
         this.loadProjects();
+    }
+
+    showProjectsLoading() {
+        const projectsList = document.getElementById('projects-list');
+        if (!projectsList) return;
+
+        // Add loading class to container
+        projectsList.classList.add('loading');
+
+        // Create loading element
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'dashboard-loading';
+        loadingDiv.innerHTML = `
+            <div class="loading-icon">⏳</div>
+            <div class="loading-text">Loading projects...</div>
+        `;
+
+        // Clear existing content and show loading
+        projectsList.innerHTML = '';
+        projectsList.appendChild(loadingDiv);
+
+        console.log('✅ Showed projects loading state');
+    }
+
+    hideProjectsLoading() {
+        const projectsList = document.getElementById('projects-list');
+        if (!projectsList) return;
+
+        // Remove loading class
+        projectsList.classList.remove('loading');
+
+        // Remove loading element
+        const loadingDiv = projectsList.querySelector('.dashboard-loading');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+
+        console.log('✅ Hid projects loading state');
     }
 }
