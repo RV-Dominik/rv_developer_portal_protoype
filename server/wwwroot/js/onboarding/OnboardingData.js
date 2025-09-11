@@ -358,7 +358,7 @@ class OnboardingData {
                 if (background) {
                     const img = new Image();
                     img.onload = () => {
-                        background.style.backgroundImage = `url(${projectUrls.gameLogoUrl})`;
+                    background.style.backgroundImage = `url(${projectUrls.gameLogoUrl})`;
                         logoArea.classList.add('has-image');
                         this.hideAssetLoading(logoArea);
                     };
@@ -380,7 +380,7 @@ class OnboardingData {
                 if (background) {
                     const img = new Image();
                     img.onload = () => {
-                        background.style.backgroundImage = `url(${projectUrls.coverArtUrl})`;
+                    background.style.backgroundImage = `url(${projectUrls.coverArtUrl})`;
                         heroArea.classList.add('has-image');
                         this.hideAssetLoading(heroArea);
                     };
@@ -400,17 +400,28 @@ class OnboardingData {
                 this.showAssetLoading(trailerArea);
                 const background = trailerArea.querySelector('.upload-background');
                 if (background) {
-                    const img = new Image();
-                    img.onload = () => {
-                        background.style.backgroundImage = `url(${projectUrls.trailerUrl})`;
-                        trailerArea.classList.add('has-image');
+                    // Check if it's a video file
+                    if (projectUrls.trailerUrl.toLowerCase().includes('.mp4') || 
+                        projectUrls.trailerUrl.toLowerCase().includes('.webm') ||
+                        projectUrls.trailerUrl.toLowerCase().includes('.mov')) {
+                        // Handle as video
+                        background.innerHTML = `<video controls><source src="${projectUrls.trailerUrl}" type="video/mp4"></video>`;
+                        trailerArea.classList.add('has-video');
                         this.hideAssetLoading(trailerArea);
-                    };
-                    img.onerror = () => {
-                        console.error('Failed to load trailer image');
-                        this.hideAssetLoading(trailerArea);
-                    };
-                    img.src = projectUrls.trailerUrl;
+                    } else {
+                        // Handle as image (thumbnail)
+                        const img = new Image();
+                        img.onload = () => {
+                    background.style.backgroundImage = `url(${projectUrls.trailerUrl})`;
+                            trailerArea.classList.add('has-image');
+                            this.hideAssetLoading(trailerArea);
+                        };
+                        img.onerror = () => {
+                            console.error('❌ Failed to load trailer thumbnail');
+                            this.hideAssetLoading(trailerArea);
+                        };
+                        img.src = projectUrls.trailerUrl;
+                    }
                 }
             }
         }
@@ -441,62 +452,54 @@ class OnboardingData {
                 let loadedCount = 0;
                 const totalScreenshots = screenshotKeys.length;
                 
-                for (const key of screenshotKeys) {
-                    if (key) {
-                        console.log('Processing screenshot key:', key);
-                        const thumb = document.createElement('div');
-                        thumb.className = 'thumb-item';
+                // Get screenshot URLs from the project asset URLs API
+                this.core.apiCall(`/api/uploads/project-asset-urls/${project.id}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                }).then(async response => {
+                    if (response.ok) {
+                        const data = await response.json();
+                        const screenshotUrls = data.screenshotUrls || [];
+                        console.log('Received screenshot URLs:', screenshotUrls.length);
                         
-                        // Generate signed URL for this screenshot key
-                        this.core.apiCall(`/api/uploads/project-asset-urls/${project.id}`, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' }
-                        }).then(async response => {
-                            if (response.ok) {
-                                const data = await response.json();
-                                const screenshotUrl = data.screenshotUrls?.find(url => url.includes(key));
-                                
-                                if (screenshotUrl) {
-                                    const img = new Image();
-                                    img.onload = () => {
-                                        thumb.innerHTML = `<img src="${screenshotUrl}" alt="Screenshot">`;
-                                        list.appendChild(thumb);
-                                        loadedCount++;
-                                        if (loadedCount === totalScreenshots) {
-                                            this.hideScreenshotsLoading(screenshotsArea);
-                                        }
-                                    };
-                                    img.onerror = () => {
-                                        console.error('Failed to load screenshot for key:', key);
-                                        loadedCount++;
-                                        if (loadedCount === totalScreenshots) {
-                                            this.hideScreenshotsLoading(screenshotsArea);
-                                        }
-                                    };
-                                    img.src = screenshotUrl;
-                                } else {
-                                    console.warn('No URL found for screenshot key:', key);
-                                    loadedCount++;
-                                    if (loadedCount === totalScreenshots) {
-                                        this.hideScreenshotsLoading(screenshotsArea);
-                                    }
-                                }
-                            } else {
-                                console.error('Failed to get screenshot URLs');
+                        for (let i = 0; i < screenshotUrls.length; i++) {
+                            const screenshotUrl = screenshotUrls[i];
+                            console.log('Processing screenshot URL:', screenshotUrl);
+                            
+                            const thumb = document.createElement('div');
+                            thumb.className = 'thumb-item';
+                            
+                            const img = new Image();
+                            img.onload = () => {
+                                thumb.innerHTML = `<img src="${screenshotUrl}" alt="Screenshot">`;
+                                list.appendChild(thumb);
                                 loadedCount++;
-                                if (loadedCount === totalScreenshots) {
+                                if (loadedCount === screenshotUrls.length) {
                                     this.hideScreenshotsLoading(screenshotsArea);
                                 }
-                            }
-                        }).catch(error => {
-                            console.error('Error fetching screenshot URLs:', error);
-                            loadedCount++;
-                            if (loadedCount === totalScreenshots) {
-                                this.hideScreenshotsLoading(screenshotsArea);
-                            }
-                        });
+                            };
+                            img.onerror = () => {
+                                console.error('❌ Failed to load screenshot:', screenshotUrl);
+                                loadedCount++;
+                                if (loadedCount === screenshotUrls.length) {
+                                    this.hideScreenshotsLoading(screenshotsArea);
+                                }
+                            };
+                            img.src = screenshotUrl;
+                        }
+                        
+                        // If no screenshots to load, hide loading immediately
+                        if (screenshotUrls.length === 0) {
+                            this.hideScreenshotsLoading(screenshotsArea);
+                        }
+                    } else {
+                        console.error('❌ Failed to get screenshot URLs');
+                        this.hideScreenshotsLoading(screenshotsArea);
                     }
-                }
+                }).catch(error => {
+                    console.error('❌ Error fetching screenshot URLs:', error);
+                    this.hideScreenshotsLoading(screenshotsArea);
+                });
             } catch (e) {
                 console.error('Failed to parse screenshots key:', e);
                 this.hideScreenshotsLoading(screenshotsArea);

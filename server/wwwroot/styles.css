@@ -1316,6 +1316,19 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(2px);
 }
 
+/* When video is uploaded, hide the overlay text */
+.file-upload-area.has-video .upload-overlay {
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
+}
+
+.file-upload-area.has-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 .file-upload-area.has-image .upload-text {
   background: rgba(0,0,0,0.5);
   display: inline-block;

@@ -639,9 +639,10 @@ class OnboardingWizard {
                 }
             };
             
-            img.onerror = () => {
-                console.error('❌ Failed to load image for dimension validation');
-                this.core.showMessage('Failed to load image for validation', 'error');
+            img.onerror = (error) => {
+                console.error('❌ Failed to load image for dimension validation:', error);
+                console.error('Image source:', img.src);
+                this.core.showMessage('Failed to load image for validation. Please try a different image.', 'error');
                 resolve(false);
             };
             
