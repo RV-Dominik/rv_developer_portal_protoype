@@ -46,8 +46,15 @@ class OnboardingWizard {
         this.renderOnboardingWizard();
         
         // Wait for DOM to be ready, then restore form data
+        console.log('=== STARTING ONBOARDING ===');
+        console.log('Project:', project);
+        console.log('Current step:', this.core.currentOnboardingStep);
+        
         this.waitForFormElements().then(() => {
+            console.log('✅ Form elements ready, calling restoreFormData...');
             this.restoreFormData(project);
+        }).catch(error => {
+            console.error('❌ Error waiting for form elements:', error);
         });
     }
 
@@ -58,9 +65,17 @@ class OnboardingWizard {
                 const shortDesc = document.getElementById('ob-short-description');
                 const genre = document.getElementById('ob-genre');
                 
+                console.log('=== WAIT FOR FORM ELEMENTS ===');
+                console.log('Form found:', !!form);
+                console.log('Short desc found:', !!shortDesc);
+                console.log('Genre found:', !!genre);
+                console.log('Current step:', this.core.currentOnboardingStep);
+                
                 if (form && shortDesc && genre) {
+                    console.log('✅ All basic form elements found, resolving...');
                     resolve();
                 } else {
+                    console.log('⏳ Still waiting for form elements...');
                     // Use requestAnimationFrame for better performance than setTimeout
                     requestAnimationFrame(checkElements);
                 }
