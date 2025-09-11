@@ -321,6 +321,9 @@ class OnboardingData {
         });
         console.log('All project keys:', Object.keys(project));
         
+        // Show loading state for all asset areas
+        this.showAllAssetLoading();
+        
         // Always fetch fresh signed URLs from the server using file keys
         // This prevents issues with expired URLs and ensures we have the latest assets
         console.log('Fetching fresh signed URLs from server...');
@@ -338,11 +341,21 @@ class OnboardingData {
             console.log('Restoring game logo:', projectUrls.gameLogoUrl);
             const logoArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON));
             if (logoArea) {
+                this.showAssetLoading(logoArea);
                 const background = logoArea.querySelector('.upload-background');
                 if (background) {
-                    background.style.backgroundImage = `url(${projectUrls.gameLogoUrl})`;
+                    const img = new Image();
+                    img.onload = () => {
+                        background.style.backgroundImage = `url(${projectUrls.gameLogoUrl})`;
+                        logoArea.classList.add('has-image');
+                        this.hideAssetLoading(logoArea);
+                    };
+                    img.onerror = () => {
+                        console.error('Failed to load game logo image');
+                        this.hideAssetLoading(logoArea);
+                    };
+                    img.src = projectUrls.gameLogoUrl;
                 }
-                logoArea.classList.add('has-image');
             }
         }
         
@@ -350,11 +363,21 @@ class OnboardingData {
             console.log('Restoring cover art:', projectUrls.coverArtUrl);
             const heroArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE));
             if (heroArea) {
+                this.showAssetLoading(heroArea);
                 const background = heroArea.querySelector('.upload-background');
                 if (background) {
-                    background.style.backgroundImage = `url(${projectUrls.coverArtUrl})`;
+                    const img = new Image();
+                    img.onload = () => {
+                        background.style.backgroundImage = `url(${projectUrls.coverArtUrl})`;
+                        heroArea.classList.add('has-image');
+                        this.hideAssetLoading(heroArea);
+                    };
+                    img.onerror = () => {
+                        console.error('Failed to load cover art image');
+                        this.hideAssetLoading(heroArea);
+                    };
+                    img.src = projectUrls.coverArtUrl;
                 }
-                heroArea.classList.add('has-image');
             }
         }
         
@@ -362,11 +385,21 @@ class OnboardingData {
             console.log('Restoring trailer:', projectUrls.trailerUrl);
             const trailerArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER));
             if (trailerArea) {
+                this.showAssetLoading(trailerArea);
                 const background = trailerArea.querySelector('.upload-background');
                 if (background) {
-                    background.style.backgroundImage = `url(${projectUrls.trailerUrl})`;
+                    const img = new Image();
+                    img.onload = () => {
+                        background.style.backgroundImage = `url(${projectUrls.trailerUrl})`;
+                        trailerArea.classList.add('has-image');
+                        this.hideAssetLoading(trailerArea);
+                    };
+                    img.onerror = () => {
+                        console.error('Failed to load trailer image');
+                        this.hideAssetLoading(trailerArea);
+                    };
+                    img.src = projectUrls.trailerUrl;
                 }
-                trailerArea.classList.add('has-image');
             }
         }
 
@@ -374,6 +407,9 @@ class OnboardingData {
         const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
         console.log('Screenshots area found:', !!screenshotsArea);
         if (screenshotsArea) {
+            // Show loading state for screenshots
+            this.showScreenshotsLoading(screenshotsArea);
+            
             let list = screenshotsArea.querySelector('.thumb-list');
             if (!list) {
                 list = document.createElement('div');
@@ -383,6 +419,8 @@ class OnboardingData {
             
             console.log('Processing assets for screenshots:', assets.length, 'assets');
             let screenshotCount = 0;
+            let loadedCount = 0;
+            
             for (const a of assets) {
                 console.log('Processing asset:', a.kind, a.mimeType, a.fileName);
                 if ((a.kind || '').toLowerCase() === 'screenshot') {
@@ -391,6 +429,21 @@ class OnboardingData {
                         item.className = 'thumb-item';
                         const img = document.createElement('img');
                         const bust = `${a.signedUrl}${a.signedUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+                        
+                        img.onload = () => {
+                            loadedCount++;
+                            if (loadedCount === screenshotCount) {
+                                this.hideScreenshotsLoading(screenshotsArea);
+                            }
+                        };
+                        img.onerror = () => {
+                            console.error('Failed to load screenshot:', a.fileName);
+                            loadedCount++;
+                            if (loadedCount === screenshotCount) {
+                                this.hideScreenshotsLoading(screenshotsArea);
+                            }
+                        };
+                        
                         img.src = bust;
                         img.alt = a.fileName || 'screenshot';
                         item.appendChild(img);
@@ -400,6 +453,12 @@ class OnboardingData {
                     }
                 }
             }
+            
+            // If no screenshots to load, hide loading immediately
+            if (screenshotCount === 0) {
+                this.hideScreenshotsLoading(screenshotsArea);
+            }
+            
             console.log('Total screenshots added:', screenshotCount);
         }
     }
@@ -424,5 +483,102 @@ class OnboardingData {
             console.error('Failed to get project asset URLs:', error);
             return {};
         }
+    }
+
+    // Show loading state for asset upload area
+    showAssetLoading(uploadArea) {
+        const overlay = uploadArea.querySelector('.upload-overlay');
+        if (overlay) {
+            overlay.innerHTML = `
+                <div class="upload-icon">⏳</div>
+                <div class="upload-text">
+                    <strong>Loading...</strong>
+                    <p>Fetching asset preview</p>
+                </div>
+            `;
+            overlay.style.opacity = '0.8';
+        }
+    }
+
+    // Hide loading state for asset upload area
+    hideAssetLoading(uploadArea) {
+        const overlay = uploadArea.querySelector('.upload-overlay');
+        if (overlay) {
+            // Reset to original content based on upload area type
+            const areaId = uploadArea.id;
+            if (areaId.includes('appicon')) {
+                overlay.innerHTML = `
+                    <div class="upload-icon">🧩</div>
+                    <div class="upload-text">
+                        <strong>App Icon</strong>
+                        <p>PNG 1024x1024 px</p>
+                    </div>
+                `;
+            } else if (areaId.includes('hero')) {
+                overlay.innerHTML = `
+                    <div class="upload-icon">🖼️</div>
+                    <div class="upload-text">
+                        <strong>Thumbnail / Hero Image</strong>
+                        <p>PNG 1920x1080 px</p>
+                    </div>
+                `;
+            } else if (areaId.includes('trailer')) {
+                overlay.innerHTML = `
+                    <div class="upload-icon">🎬</div>
+                    <div class="upload-text">
+                        <strong>Trailer</strong>
+                        <p>MP4 Full HD 1920x1080, 15s max, 5MB max</p>
+                    </div>
+                `;
+            }
+            overlay.style.opacity = '1';
+        }
+    }
+
+    // Show loading state for screenshots area
+    showScreenshotsLoading(screenshotsArea) {
+        const overlay = screenshotsArea.querySelector('.upload-overlay');
+        if (overlay) {
+            overlay.innerHTML = `
+                <div class="upload-icon">⏳</div>
+                <div class="upload-text">
+                    <strong>Loading Screenshots...</strong>
+                    <p>Fetching screenshot previews</p>
+                </div>
+            `;
+            overlay.style.opacity = '0.8';
+        }
+    }
+
+    // Hide loading state for screenshots area
+    hideScreenshotsLoading(screenshotsArea) {
+        const overlay = screenshotsArea.querySelector('.upload-overlay');
+        if (overlay) {
+            overlay.innerHTML = `
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">
+                    <strong>Screenshots</strong>
+                    <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
+                </div>
+            `;
+            overlay.style.opacity = '1';
+        }
+    }
+
+    // Show loading state for all asset areas
+    showAllAssetLoading() {
+        const assetAreas = [
+            AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON),
+            AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE),
+            AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER),
+            AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)
+        ];
+
+        assetAreas.forEach(areaId => {
+            const area = document.getElementById(areaId);
+            if (area) {
+                this.showAssetLoading(area);
+            }
+        });
     }
 }
