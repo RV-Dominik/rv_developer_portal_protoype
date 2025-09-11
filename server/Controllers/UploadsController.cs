@@ -5,6 +5,7 @@ using ShowroomBackend.Services;
 using ShowroomBackend.Models;
 using ShowroomBackend.Constants;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace ShowroomBackend.Controllers
 {
@@ -120,6 +121,9 @@ namespace ShowroomBackend.Controllers
                     return StatusCode(500, new { error = "Failed to create asset record" });
                 }
 
+                _logger.LogInformation("✅ Created asset: Kind={Kind}, FileKey={FileKey}, ProjectId={ProjectId}", 
+                    createdAsset.Kind, createdAsset.FileKey, createdAsset.ProjectId);
+
                 // Update project fields for primary assets (logo/cover/trailer) using storage keys
                 var bucket = "showrooms";
                 var fields = new Dictionary<string, object?>();
@@ -130,8 +134,35 @@ namespace ShowroomBackend.Controllers
                 
                 if (AssetConstants.AssetKindMappings.KindToDatabaseField.TryGetValue(assetKind, out string? databaseField))
                 {
-                    fields[databaseField] = fileKey;
-                    _logger.LogInformation("✅ Setting {DatabaseField} to {FileKey} for project {ProjectId}", databaseField, fileKey, projectId);
+                    if (databaseField == AssetConstants.DatabaseFields.ScreenshotsKeys)
+                    {
+                        // Handle screenshots as JSON array
+                        var existingProject = await _supabaseService.GetProjectByIdAsync(projectId);
+                        var existingScreenshots = new List<string>();
+                        
+                        if (!string.IsNullOrEmpty(existingProject?.ScreenshotsKeys))
+                        {
+                            try
+                            {
+                                existingScreenshots = JsonSerializer.Deserialize<List<string>>(existingProject.ScreenshotsKeys) ?? new List<string>();
+                            }
+                            catch (JsonException ex)
+                            {
+                                _logger.LogWarning("Failed to parse existing screenshots: {Error}", ex.Message);
+                            }
+                        }
+                        
+                        // Add new screenshot key to array
+                        existingScreenshots.Add(fileKey);
+                        fields[databaseField] = JsonSerializer.Serialize(existingScreenshots);
+                        _logger.LogInformation("✅ Added screenshot to array: {FileKey} for project {ProjectId}", fileKey, projectId);
+                    }
+                    else
+                    {
+                        // Handle single-value fields (logo, cover, trailer)
+                        fields[databaseField] = fileKey;
+                        _logger.LogInformation("✅ Setting {DatabaseField} to {FileKey} for project {ProjectId}", databaseField, fileKey, projectId);
+                    }
                 }
                 else
                 {

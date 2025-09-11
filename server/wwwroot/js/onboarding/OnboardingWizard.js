@@ -718,9 +718,12 @@ class OnboardingWizard {
 
                     // Update project object with file keys for primary assets
                     const projectKey = AssetConstants.getProjectKeyForUploadArea(uploadArea);
+                    const isScreenshot = uploadArea.getAttribute('data-kind') === AssetConstants.ASSET_TYPES.SCREENSHOTS;
+                    
                     console.log('=== UPLOAD DEBUG ===');
                     console.log('Upload area ID:', uploadArea.id);
                     console.log('Upload area data-kind:', uploadArea.getAttribute('data-kind'));
+                    console.log('Is screenshot upload:', isScreenshot);
                     console.log('Detected project key:', projectKey);
                     console.log('File key from server:', result.fileKey);
                     console.log('Current project keys before update:', {
@@ -730,6 +733,7 @@ class OnboardingWizard {
                     });
                     
                     if (result.fileKey && projectKey) {
+                        // Handle primary assets (logo, cover, trailer)
                         this.core.currentOnboardingProject[projectKey] = result.fileKey;
                         console.log(`✅ Set ${projectKey} to:`, result.fileKey);
                         console.log('Current project keys after update:', {
@@ -739,10 +743,41 @@ class OnboardingWizard {
                         });
                         // Update preview pane if visible
                         this.updateLivePreview();
+                    } else if (result.fileKey && isScreenshot) {
+                        // Handle screenshots - store as JSON array in screenshotsKeys
+                        console.log('✅ Screenshot uploaded successfully:', result.fileName);
+                        console.log('Screenshot file key:', result.fileKey);
+                        
+                        // Get current screenshots array or create new one
+                        let screenshots = [];
+                        if (this.core.currentOnboardingProject.screenshotsKeys) {
+                            try {
+                                screenshots = JSON.parse(this.core.currentOnboardingProject.screenshotsKeys);
+                            } catch (e) {
+                                console.warn('Failed to parse existing screenshots:', e);
+                                screenshots = [];
+                            }
+                        }
+                        
+                        // Add new screenshot key to array
+                        screenshots.push(result.fileKey);
+                        this.core.currentOnboardingProject.screenshotsKeys = JSON.stringify(screenshots);
+                        
+                        console.log('Updated screenshots array:', screenshots);
+                        console.log('Current project keys after screenshot update:', {
+                            gameLogoKey: this.core.currentOnboardingProject.gameLogoKey,
+                            coverArtKey: this.core.currentOnboardingProject.coverArtKey,
+                            trailerKey: this.core.currentOnboardingProject.trailerKey,
+                            screenshotsKeys: this.core.currentOnboardingProject.screenshotsKeys
+                        });
+                        
+                        // Update preview to show the uploaded file
+                        this.updateScreenshotPreview(uploadArea, result.fileName, result.fileKey);
                     } else {
                         console.log('❌ No project key detected or no file key received');
                         console.log('Project key detected:', !!projectKey);
                         console.log('File key received:', !!result.fileKey);
+                        console.log('Is screenshot:', isScreenshot);
                     }
                 } else {
                     let message = 'Upload failed';

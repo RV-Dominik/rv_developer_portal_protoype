@@ -11,15 +11,17 @@ class AssetConstants {
     // Project asset key field names
     static ASSET_KEYS = {
         GAME_LOGO: 'gameLogoKey',
-        COVER_ART: 'coverArtKey', 
-        TRAILER: 'trailerKey'
+        COVER_ART: 'coverArtKey',
+        TRAILER: 'trailerKey',
+        SCREENSHOTS: 'screenshotsKeys'
     };
 
     // Asset type to project key mapping
     static ASSET_TYPE_TO_KEY = {
         [this.ASSET_TYPES.APP_ICON]: this.ASSET_KEYS.GAME_LOGO,
         [this.ASSET_TYPES.HERO_IMAGE]: this.ASSET_KEYS.COVER_ART,
-        [this.ASSET_TYPES.TRAILER]: this.ASSET_KEYS.TRAILER
+        [this.ASSET_TYPES.TRAILER]: this.ASSET_KEYS.TRAILER,
+        [this.ASSET_TYPES.SCREENSHOTS]: this.ASSET_KEYS.SCREENSHOTS
     };
 
     // Helper method to get project key for an upload area

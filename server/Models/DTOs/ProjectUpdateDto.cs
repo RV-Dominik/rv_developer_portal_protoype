@@ -82,6 +82,9 @@ namespace ShowroomBackend.Models.DTOs
         [StringLength(500)]
         public string? TrailerKey { get; set; }
         
+        [StringLength(2000)] // JSON array can be longer
+        public string? ScreenshotsKeys { get; set; }
+        
         // Optional Add-Ons
         [StringLength(50)]
         public string? ShowroomInterest { get; set; }

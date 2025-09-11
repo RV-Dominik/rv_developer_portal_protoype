@@ -49,6 +49,7 @@ namespace ShowroomBackend.Services
             AssetConstants.DatabaseFields.GameLogoKey,
             AssetConstants.DatabaseFields.CoverArtKey,
             AssetConstants.DatabaseFields.TrailerKey,
+            AssetConstants.DatabaseFields.ScreenshotsKeys,
             // Optional add-ons and system
             "showroom_interest","wants_surreal_estate","submission_status","intake_submitted_at","technical_integration_submitted_at",
             "compliance_review_submitted_at","game_submission_submitted_at","approved_at","rejection_reason","readyverse_tech_team_notes",
@@ -1041,30 +1042,50 @@ namespace ShowroomBackend.Services
             }
         }
 
-        private async Task<string[]> GetProjectScreenshotUrlsAsync(Guid projectId)
+        private async Task<string[]> GetScreenshotUrlsFromProjectKey(string? screenshotsKey)
         {
             try
             {
-                var assets = await GetProjectAssetsAsync(projectId);
+                if (string.IsNullOrEmpty(screenshotsKey))
+                {
+                    _logger.LogInformation("No screenshots key provided");
+                    return new string[0];
+                }
+
+                var screenshotKeys = JsonSerializer.Deserialize<string[]>(screenshotsKey);
+                if (screenshotKeys == null || screenshotKeys.Length == 0)
+                {
+                    _logger.LogInformation("No screenshot keys found in JSON");
+                    return new string[0];
+                }
+
+                _logger.LogInformation("Found {Count} screenshot keys in project", screenshotKeys.Length);
+                
                 var screenshotUrls = new List<string>();
                 
-                foreach (var asset in assets)
+                foreach (var key in screenshotKeys)
                 {
-                    if (asset.Kind?.Equals(AssetConstants.AssetTypes.Screenshots, StringComparison.OrdinalIgnoreCase) == true)
+                    if (!string.IsNullOrEmpty(key))
                     {
-                        var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", asset.FileKey, 3600);
+                        var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", key, 3600);
                         if (!string.IsNullOrEmpty(signedUrl))
                         {
                             screenshotUrls.Add(signedUrl);
+                            _logger.LogInformation("Generated signed URL for screenshot: {Url}", signedUrl);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Failed to generate signed URL for screenshot key: {Key}", key);
                         }
                     }
                 }
                 
+                _logger.LogInformation("Returning {Count} screenshot URLs", screenshotUrls.Count);
                 return screenshotUrls.ToArray();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get screenshot URLs for project {ProjectId}", projectId);
+                _logger.LogError(ex, "Failed to get screenshot URLs from project key: {ScreenshotsKey}", screenshotsKey);
                 return new string[0];
             }
         }
@@ -1103,7 +1124,7 @@ namespace ShowroomBackend.Services
                     await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtKey, 3600) : null,
                 TrailerUrl = !string.IsNullOrEmpty(project.TrailerKey) ? 
                     await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerKey, 3600) : null,
-                ScreenshotUrls = await GetProjectScreenshotUrlsAsync(project.Id),
+                ScreenshotUrls = await GetScreenshotUrlsFromProjectKey(project.ScreenshotsKeys),
                 GameUrl = project.GameUrl,
                 LauncherUrl = project.LauncherUrl,
                 AgeRating = project.AgeRating,

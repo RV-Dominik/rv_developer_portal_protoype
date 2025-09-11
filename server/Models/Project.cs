@@ -79,6 +79,7 @@ namespace ShowroomBackend.Models
         public string? GameLogoKey { get; set; }
         public string? CoverArtKey { get; set; }
         public string? TrailerKey { get; set; }
+        public string? ScreenshotsKeys { get; set; } // JSON array of screenshot file keys
         
         // Optional Add-Ons
         public string? ShowroomInterest { get; set; } // Yes with assistance, Yes in-house, No

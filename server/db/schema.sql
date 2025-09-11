@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS projects (
     game_logo_key TEXT,
     cover_art_key TEXT,
     trailer_key TEXT,
+    screenshots_keys TEXT, -- JSON array of screenshot file keys
     
     -- Optional Add-Ons
     showroom_interest TEXT, -- Yes with assistance, Yes in-house, No

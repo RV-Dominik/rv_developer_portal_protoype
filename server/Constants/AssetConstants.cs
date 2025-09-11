@@ -20,6 +20,7 @@ namespace ShowroomBackend.Constants
             public const string GameLogoKey = "game_logo_key";
             public const string CoverArtKey = "cover_art_key";
             public const string TrailerKey = "trailer_key";
+            public const string ScreenshotsKeys = "screenshots_keys";
         }
 
         // Project model property names (camelCase for C#)
@@ -28,6 +29,7 @@ namespace ShowroomBackend.Constants
             public const string GameLogoKey = "GameLogoKey";
             public const string CoverArtKey = "CoverArtKey";
             public const string TrailerKey = "TrailerKey";
+            public const string ScreenshotsKeys = "ScreenshotsKeys";
         }
 
         // Asset kind mappings for upload processing
@@ -40,7 +42,8 @@ namespace ShowroomBackend.Constants
                 { "hero_image", DatabaseFields.CoverArtKey },
                 { "cover_art", DatabaseFields.CoverArtKey },
                 { "cover", DatabaseFields.CoverArtKey },
-                { "trailer", DatabaseFields.TrailerKey }
+                { "trailer", DatabaseFields.TrailerKey },
+                { "screenshot", DatabaseFields.ScreenshotsKeys }
             };
         }
     }

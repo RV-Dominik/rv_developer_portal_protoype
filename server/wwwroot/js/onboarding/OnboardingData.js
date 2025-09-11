@@ -415,10 +415,10 @@ class OnboardingData {
             }
         }
 
-        // Handle screenshots (multiple files)
+        // Handle screenshots from project's screenshotsKeys field
         const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
         console.log('Screenshots area found:', !!screenshotsArea);
-        if (screenshotsArea) {
+        if (screenshotsArea && project.screenshotsKeys) {
             // Show loading state for screenshots
             this.showScreenshotsLoading(screenshotsArea);
             
@@ -429,49 +429,81 @@ class OnboardingData {
                 screenshotsArea.appendChild(list);
             }
             
-            console.log('Processing assets for screenshots:', assets.length, 'assets');
-            let screenshotCount = 0;
-            let loadedCount = 0;
-            
-            for (const a of assets) {
-                console.log('Processing asset:', a.kind, a.mimeType, a.fileName);
-                if ((a.kind || '').toLowerCase() === 'screenshot') {
-                    if (a.mimeType && a.mimeType.startsWith('image/')) {
-                        const item = document.createElement('div');
-                        item.className = 'thumb-item';
-                        const img = document.createElement('img');
-                        const bust = `${a.signedUrl}${a.signedUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+            try {
+                const screenshotKeys = JSON.parse(project.screenshotsKeys);
+                console.log('Processing screenshots from project key:', screenshotKeys.length, 'screenshots');
+                
+                if (screenshotKeys.length === 0) {
+                    this.hideScreenshotsLoading(screenshotsArea);
+                    return;
+                }
+                
+                let loadedCount = 0;
+                const totalScreenshots = screenshotKeys.length;
+                
+                for (const key of screenshotKeys) {
+                    if (key) {
+                        console.log('Processing screenshot key:', key);
+                        const thumb = document.createElement('div');
+                        thumb.className = 'thumb-item';
                         
-                        img.onload = () => {
+                        // Generate signed URL for this screenshot key
+                        this.core.apiCall(`/api/uploads/project-asset-urls/${project.id}`, {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' }
+                        }).then(async response => {
+                            if (response.ok) {
+                                const data = await response.json();
+                                const screenshotUrl = data.screenshotUrls?.find(url => url.includes(key));
+                                
+                                if (screenshotUrl) {
+                                    const img = new Image();
+                                    img.onload = () => {
+                                        thumb.innerHTML = `<img src="${screenshotUrl}" alt="Screenshot">`;
+                                        list.appendChild(thumb);
+                                        loadedCount++;
+                                        if (loadedCount === totalScreenshots) {
+                                            this.hideScreenshotsLoading(screenshotsArea);
+                                        }
+                                    };
+                                    img.onerror = () => {
+                                        console.error('Failed to load screenshot for key:', key);
+                                        loadedCount++;
+                                        if (loadedCount === totalScreenshots) {
+                                            this.hideScreenshotsLoading(screenshotsArea);
+                                        }
+                                    };
+                                    img.src = screenshotUrl;
+                                } else {
+                                    console.warn('No URL found for screenshot key:', key);
+                                    loadedCount++;
+                                    if (loadedCount === totalScreenshots) {
+                                        this.hideScreenshotsLoading(screenshotsArea);
+                                    }
+                                }
+                            } else {
+                                console.error('Failed to get screenshot URLs');
+                                loadedCount++;
+                                if (loadedCount === totalScreenshots) {
+                                    this.hideScreenshotsLoading(screenshotsArea);
+                                }
+                            }
+                        }).catch(error => {
+                            console.error('Error fetching screenshot URLs:', error);
                             loadedCount++;
-                            if (loadedCount === screenshotCount) {
+                            if (loadedCount === totalScreenshots) {
                                 this.hideScreenshotsLoading(screenshotsArea);
                             }
-                        };
-                        img.onerror = () => {
-                            console.error('Failed to load screenshot:', a.fileName);
-                            loadedCount++;
-                            if (loadedCount === screenshotCount) {
-                                this.hideScreenshotsLoading(screenshotsArea);
-                            }
-                        };
-                        
-                        img.src = bust;
-                        img.alt = a.fileName || 'screenshot';
-                        item.appendChild(img);
-                        list.appendChild(item);
-                        screenshotCount++;
-                        console.log('Added screenshot thumbnail:', a.fileName);
+                        });
                     }
                 }
-            }
-            
-            // If no screenshots to load, hide loading immediately
-            if (screenshotCount === 0) {
+            } catch (e) {
+                console.error('Failed to parse screenshots key:', e);
                 this.hideScreenshotsLoading(screenshotsArea);
             }
-            
-            console.log('Total screenshots added:', screenshotCount);
+        } else if (screenshotsArea) {
+            // No screenshots key, hide loading immediately
+            this.hideScreenshotsLoading(screenshotsArea);
         }
     }
 
