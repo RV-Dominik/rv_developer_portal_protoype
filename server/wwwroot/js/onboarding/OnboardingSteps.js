@@ -140,10 +140,10 @@ class OnboardingSteps {
                                 <div class="upload-icon">🖼️</div>
                                 <div class="upload-text">
                                     <strong>Thumbnail / Hero Image</strong>
-                                    <p>PNG 1920x1080 px</p>
+                                    <p>PNG/JPG 1920x1080 px</p>
                                 </div>
                             </div>
-                            <input type="file" id="hero-file" accept="image/png" style="display: none;">
+                            <input type="file" id="hero-file" accept="image/png,image/jpeg" style="display: none;">
                         </div>
                     </div>
                     
@@ -157,7 +157,7 @@ class OnboardingSteps {
                                     <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
                                 </div>
                             </div>
-                            <input type="file" id="screenshots-file" accept="image/*" multiple style="display: none;">
+                            <input type="file" id="screenshots-file" accept="image/png,image/jpeg" multiple style="display: none;">
                         </div>
                     </div>
                     

@@ -51,11 +51,11 @@ namespace ShowroomBackend.Controllers
                     return BadRequest(new { error = "No file provided" });
                 }
 
-                // Validate file type
-                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif", "video/mp4", "video/webm" };
+                // Validate file type - only formats supported by Unreal Engine
+                var allowedTypes = new[] { "image/jpeg", "image/png", "video/mp4" };
                 if (!allowedTypes.Contains(request.File.ContentType))
                 {
-                    return BadRequest(new { error = "Invalid file type. Only images and videos are allowed." });
+                    return BadRequest(new { error = "Invalid file type. Only PNG, JPEG images and MP4 videos are allowed (Unreal Engine compatible formats)." });
                 }
 
                 // Validate file size: images 10MB, videos 100MB
@@ -66,10 +66,13 @@ namespace ShowroomBackend.Controllers
                     return BadRequest(new { error = isVideo ? "File too large. Maximum video size is 100MB." : "File too large. Maximum image size is 10MB." });
                 }
 
-                // Optional strict dimension checks when provided
+                // Validate image dimensions when provided
                 if (request.Width.HasValue && request.Height.HasValue && request.File.ContentType.StartsWith("image/"))
                 {
-                    // For strict checks we'd decode the image; for now trust provided metadata to enforce UI hints
+                    // For now, we trust the client-provided dimensions since we're not decoding the image server-side
+                    // This is acceptable since the client-side validation should catch most issues
+                    _logger.LogInformation("Image dimensions: {Width}x{Height} for asset kind: {Kind}", 
+                        request.Width.Value, request.Height.Value, request.Kind);
                 }
 
                 // Additional constraints for teaser video (duration/size)

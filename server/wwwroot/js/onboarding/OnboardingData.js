@@ -537,7 +537,7 @@ class OnboardingData {
                     <div class="upload-icon">🖼️</div>
                     <div class="upload-text">
                         <strong>Thumbnail / Hero Image</strong>
-                        <p>PNG 1920x1080 px</p>
+                        <p>PNG/JPG 1920x1080 px</p>
                     </div>
                 `;
             } else if (areaId.includes('trailer')) {

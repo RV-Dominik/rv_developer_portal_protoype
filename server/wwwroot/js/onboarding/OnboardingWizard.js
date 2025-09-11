@@ -611,6 +611,44 @@ class OnboardingWizard {
         return this.data.restoreFormData(project);
     }
 
+    validateImageDimensions(file, uploadArea) {
+        return new Promise((resolve) => {
+            const expectedW = parseInt(uploadArea.getAttribute('data-w'));
+            const expectedH = parseInt(uploadArea.getAttribute('data-h'));
+            
+            if (!expectedW || !expectedH) {
+                resolve(true); // No dimension requirements, allow upload
+                return;
+            }
+
+            const img = new Image();
+            img.onload = () => {
+                const actualW = img.naturalWidth;
+                const actualH = img.naturalHeight;
+                
+                console.log(`Image dimensions: ${actualW}x${actualH}, expected: ${expectedW}x${expectedH}`);
+                
+                if (actualW === expectedW && actualH === expectedH) {
+                    console.log('✅ Image dimensions match requirements');
+                    resolve(true);
+                } else {
+                    const errorMsg = `Image dimensions must be exactly ${expectedW}x${expectedH}px. Your image is ${actualW}x${actualH}px.`;
+                    console.error('❌', errorMsg);
+                    this.core.showMessage(errorMsg, 'error');
+                    resolve(false);
+                }
+            };
+            
+            img.onerror = () => {
+                console.error('❌ Failed to load image for dimension validation');
+                this.core.showMessage('Failed to load image for validation', 'error');
+                resolve(false);
+            };
+            
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
     bindFileUploadEvents() {
         const uploadAreas = document.querySelectorAll('.file-upload-area');
         uploadAreas.forEach(area => {
@@ -640,6 +678,14 @@ class OnboardingWizard {
         try {
             this.isUploadInFlight = true;
             for (const file of files) {
+                // Validate image dimensions before upload
+                if (file.type.startsWith('image/')) {
+                    const isValidDimensions = await this.validateImageDimensions(file, uploadArea);
+                    if (!isValidDimensions) {
+                        continue; // Skip this file if dimensions are invalid
+                    }
+                }
+
                 const formData = new FormData();
                 formData.append('file', file);
                 // Derive kind from surface metadata
