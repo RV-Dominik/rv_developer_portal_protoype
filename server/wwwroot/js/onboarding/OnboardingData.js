@@ -172,19 +172,29 @@ class OnboardingData {
     }
 
     restoreFormData(project) {
+        console.log('=== RESTORE FORM DATA CALLED ===');
+        console.log('Current onboarding step:', this.core.currentOnboardingStep);
+        console.log('Project:', project);
+        
         switch (this.core.currentOnboardingStep) {
             case 'basics':
+                console.log('Restoring basics data...');
                 this.restoreBasicsData(project);
                 break;
             case 'assets':
+                console.log('Restoring assets data...');
                 this.restoreAssetsData(project);
                 break;
             case 'integration':
+                console.log('Restoring integration data...');
                 this.restoreIntegrationData(project);
                 break;
             case 'compliance':
+                console.log('Restoring compliance data...');
                 this.restoreComplianceData(project);
                 break;
+            default:
+                console.log('Unknown onboarding step:', this.core.currentOnboardingStep);
         }
     }
 
@@ -313,6 +323,7 @@ class OnboardingData {
     }
 
     async restoreAssetsData(project) {
+        console.log('=== RESTORE ASSETS DATA CALLED ===');
         console.log('Restoring assets for project:', project);
         console.log('Project asset keys:', {
             [AssetConstants.ASSET_KEYS.GAME_LOGO]: project[AssetConstants.ASSET_KEYS.GAME_LOGO],
@@ -322,6 +333,7 @@ class OnboardingData {
         console.log('All project keys:', Object.keys(project));
         
         // Show loading state for all asset areas
+        console.log('Showing loading state for all asset areas...');
         this.showAllAssetLoading();
         
         // Always fetch fresh signed URLs from the server using file keys
@@ -487,8 +499,11 @@ class OnboardingData {
 
     // Show loading state for asset upload area
     showAssetLoading(uploadArea) {
+        console.log('showAssetLoading called for:', uploadArea.id);
         const overlay = uploadArea.querySelector('.upload-overlay');
+        console.log('Found overlay:', !!overlay);
         if (overlay) {
+            console.log('Setting loading content for overlay');
             overlay.innerHTML = `
                 <div class="upload-icon">⏳</div>
                 <div class="upload-text">
@@ -497,6 +512,9 @@ class OnboardingData {
                 </div>
             `;
             overlay.style.opacity = '0.8';
+            console.log('Loading state applied to:', uploadArea.id);
+        } else {
+            console.log('❌ No overlay found in upload area:', uploadArea.id);
         }
     }
 
@@ -574,10 +592,16 @@ class OnboardingData {
             AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)
         ];
 
+        console.log('Asset area IDs to show loading for:', assetAreas);
+        
         assetAreas.forEach(areaId => {
             const area = document.getElementById(areaId);
+            console.log(`Looking for area ${areaId}:`, !!area);
             if (area) {
+                console.log(`Showing loading for ${areaId}`);
                 this.showAssetLoading(area);
+            } else {
+                console.log(`❌ Area ${areaId} not found in DOM`);
             }
         });
     }
