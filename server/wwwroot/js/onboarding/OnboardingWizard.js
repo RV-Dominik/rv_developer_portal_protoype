@@ -611,46 +611,6 @@ class OnboardingWizard {
         return this.data.restoreFormData(project);
     }
 
-    validateImageDimensions(file, uploadArea) {
-        return new Promise((resolve) => {
-            const expectedW = parseInt(uploadArea.getAttribute('data-w'));
-            const expectedH = parseInt(uploadArea.getAttribute('data-h'));
-            
-            if (!expectedW || !expectedH) {
-                resolve(true); // No dimension requirements, allow upload
-                return;
-            }
-
-            const img = new Image();
-            img.onload = () => {
-                const actualW = img.naturalWidth;
-                const actualH = img.naturalHeight;
-                
-                console.log(`Image dimensions: ${actualW}x${actualH}, expected: ${expectedW}x${expectedH}`);
-                
-                if (actualW === expectedW && actualH === expectedH) {
-                    console.log('✅ Image dimensions match requirements');
-                    this.clearUploadAreaError(uploadArea);
-                    resolve(true);
-                } else {
-                    const errorMsg = `Image dimensions must be exactly ${expectedW}x${expectedH}px. Your image is ${actualW}x${actualH}px.`;
-                    console.error('❌', errorMsg);
-                    this.core.showMessage(errorMsg, 'error');
-                    this.showUploadAreaError(uploadArea, errorMsg);
-                    resolve(false);
-                }
-            };
-            
-            img.onerror = (error) => {
-                console.error('❌ Failed to load image for dimension validation:', error);
-                console.error('Image source:', img.src);
-                this.core.showMessage('Failed to load image for validation. Please try a different image.', 'error');
-                resolve(false);
-            };
-            
-            img.src = URL.createObjectURL(file);
-        });
-    }
 
     bindFileUploadEvents() {
         const uploadAreas = document.querySelectorAll('.file-upload-area');
