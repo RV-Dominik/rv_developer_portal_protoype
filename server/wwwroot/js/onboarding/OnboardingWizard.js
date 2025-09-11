@@ -62,17 +62,39 @@ class OnboardingWizard {
         return new Promise((resolve) => {
             const checkElements = () => {
                 const form = document.getElementById('onboarding-form');
-                const shortDesc = document.getElementById('ob-short-description');
-                const genre = document.getElementById('ob-genre');
                 
                 console.log('=== WAIT FOR FORM ELEMENTS ===');
                 console.log('Form found:', !!form);
-                console.log('Short desc found:', !!shortDesc);
-                console.log('Genre found:', !!genre);
                 console.log('Current step:', this.core.currentOnboardingStep);
                 
-                if (form && shortDesc && genre) {
-                    console.log('✅ All basic form elements found, resolving...');
+                // Check for step-specific elements
+                let stepElementsFound = false;
+                
+                if (this.core.currentOnboardingStep === 'basics') {
+                    const shortDesc = document.getElementById('ob-short-description');
+                    const genre = document.getElementById('ob-genre');
+                    console.log('Short desc found:', !!shortDesc);
+                    console.log('Genre found:', !!genre);
+                    stepElementsFound = shortDesc && genre;
+                } else if (this.core.currentOnboardingStep === 'assets') {
+                    // For assets step, check for upload areas
+                    const uploadAreas = document.querySelectorAll('.file-upload-area');
+                    console.log('Upload areas found:', uploadAreas.length);
+                    stepElementsFound = uploadAreas.length > 0;
+                } else if (this.core.currentOnboardingStep === 'integration') {
+                    // For integration step, check for integration-specific elements
+                    const integrationElements = document.querySelectorAll('[id^="ob-"]');
+                    console.log('Integration elements found:', integrationElements.length);
+                    stepElementsFound = integrationElements.length > 0;
+                } else if (this.core.currentOnboardingStep === 'compliance') {
+                    // For compliance step, check for compliance-specific elements
+                    const complianceElements = document.querySelectorAll('[id^="ob-"]');
+                    console.log('Compliance elements found:', complianceElements.length);
+                    stepElementsFound = complianceElements.length > 0;
+                }
+                
+                if (form && stepElementsFound) {
+                    console.log('✅ All form elements found for step, resolving...');
                     resolve();
                 } else {
                     console.log('⏳ Still waiting for form elements...');
