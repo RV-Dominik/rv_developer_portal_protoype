@@ -683,13 +683,7 @@ class OnboardingWizard {
         try {
             this.isUploadInFlight = true;
             for (const file of files) {
-                // Validate image dimensions before upload
-                if (file.type.startsWith('image/')) {
-                    const isValidDimensions = await this.validateImageDimensions(file, uploadArea);
-                    if (!isValidDimensions) {
-                        continue; // Skip this file if dimensions are invalid
-                    }
-                }
+                // Note: Dimension validation is now handled server-side
 
                 const formData = new FormData();
                 formData.append('file', file);
@@ -719,6 +713,7 @@ class OnboardingWizard {
                     const displayUrl = result.signedUrl || result.publicUrl || null;
                     console.log(`Upload successful for ${file.name}:`, result);
                     this.core.showMessage('File uploaded successfully!', 'success');
+                    this.clearUploadAreaError(uploadArea);
                     this.updateUploadArea(uploadArea, file, displayUrl);
 
                     // Update project object with file keys for primary assets
@@ -786,14 +781,27 @@ class OnboardingWizard {
                     }
                 } else {
                     let message = 'Upload failed';
+                    let isDimensionError = false;
                     try {
                         const error = await response.json();
-                        if (error && error.error) message = error.error;
+                        if (error && error.error) {
+                            message = error.error;
+                            // Check if it's a dimension validation error
+                            isDimensionError = message.toLowerCase().includes('dimension') || 
+                                            message.toLowerCase().includes('size') ||
+                                            message.toLowerCase().includes('width') ||
+                                            message.toLowerCase().includes('height');
+                        }
                         console.error(`Upload failed for ${file.name}:`, error);
                     } catch (_) {
                         console.error(`Upload failed for ${file.name}:`, response.status, response.statusText);
                     }
                     this.core.showMessage(message, 'error');
+                    
+                    // Show visual feedback for dimension errors
+                    if (isDimensionError) {
+                        this.showUploadAreaError(uploadArea, message);
+                    }
                 }
 
                 if (progressTag && progressTag.parentNode) progressTag.parentNode.removeChild(progressTag);

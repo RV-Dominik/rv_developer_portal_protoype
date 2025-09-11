@@ -6,6 +6,7 @@ using ShowroomBackend.Models;
 using ShowroomBackend.Constants;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using SixLabors.ImageSharp;
 
 namespace ShowroomBackend.Controllers
 {
@@ -57,6 +58,25 @@ namespace ShowroomBackend.Controllers
                 if (!allowedTypes.Contains(request.File.ContentType))
                 {
                     return BadRequest(new { error = "Invalid file type. Only PNG, JPEG images and MP4 videos are allowed (Unreal Engine compatible formats)." });
+                }
+
+                // Validate image dimensions if provided
+                if (request.Width.HasValue && request.Height.HasValue && request.File.ContentType.StartsWith("image/"))
+                {
+                    var expectedWidth = request.Width.Value;
+                    var expectedHeight = request.Height.Value;
+                    _logger.LogInformation("Validating image dimensions: expected {ExpectedWidth}x{ExpectedHeight} for asset kind {AssetKind}", 
+                        expectedWidth, expectedHeight, request.Kind);
+                    
+                    // Validate actual image dimensions
+                    var (actualWidth, actualHeight) = await GetImageDimensionsAsync(request.File);
+                    if (actualWidth != expectedWidth || actualHeight != expectedHeight)
+                    {
+                        return BadRequest(new { error = $"Image dimensions must be exactly {expectedWidth}x{expectedHeight}px. Your image is {actualWidth}x{actualHeight}px." });
+                    }
+                    
+                    _logger.LogInformation("Image dimension validation passed for {FileName}: {ActualWidth}x{ActualHeight}", 
+                        request.File.FileName, actualWidth, actualHeight);
                 }
 
                 // Validate file size: images 10MB, videos 100MB
@@ -353,6 +373,21 @@ namespace ShowroomBackend.Controllers
             {
                 _logger.LogError(ex, "Error deleting asset {AssetId} from project {ProjectId}", assetId, projectId);
                 return StatusCode(500, new { error = "Failed to delete asset" });
+            }
+        }
+
+        private async Task<(int width, int height)> GetImageDimensionsAsync(IFormFile file)
+        {
+            try
+            {
+                using var stream = file.OpenReadStream();
+                using var image = await Image.LoadAsync(stream);
+                return (image.Width, image.Height);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get image dimensions for {FileName}", file.FileName);
+                throw new InvalidOperationException("Failed to read image dimensions", ex);
             }
         }
     }
