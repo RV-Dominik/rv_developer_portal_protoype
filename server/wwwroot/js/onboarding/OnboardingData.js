@@ -331,6 +331,7 @@ class OnboardingData {
         
         // Also get individual assets for screenshots
         const assets = await this.getSignedAssets(project.id);
+        console.log('Fetched assets for screenshots:', assets);
         
         // Update single-image upload areas with project URLs
         if (projectUrls.gameLogoUrl) {
@@ -371,6 +372,7 @@ class OnboardingData {
 
         // Handle screenshots (multiple files)
         const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+        console.log('Screenshots area found:', !!screenshotsArea);
         if (screenshotsArea) {
             let list = screenshotsArea.querySelector('.thumb-list');
             if (!list) {
@@ -379,7 +381,10 @@ class OnboardingData {
                 screenshotsArea.appendChild(list);
             }
             
+            console.log('Processing assets for screenshots:', assets.length, 'assets');
+            let screenshotCount = 0;
             for (const a of assets) {
+                console.log('Processing asset:', a.kind, a.mimeType, a.fileName);
                 if ((a.kind || '').toLowerCase() === 'screenshot') {
                     if (a.mimeType && a.mimeType.startsWith('image/')) {
                         const item = document.createElement('div');
@@ -390,9 +395,12 @@ class OnboardingData {
                         img.alt = a.fileName || 'screenshot';
                         item.appendChild(img);
                         list.appendChild(item);
+                        screenshotCount++;
+                        console.log('Added screenshot thumbnail:', a.fileName);
                     }
                 }
             }
+            console.log('Total screenshots added:', screenshotCount);
         }
     }
 

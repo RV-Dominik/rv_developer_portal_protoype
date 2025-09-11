@@ -635,13 +635,31 @@ class OnboardingWizard {
 
                     // Update project object with file keys for primary assets
                     const projectKey = AssetConstants.getProjectKeyForUploadArea(uploadArea);
-                    console.log('Upload area:', uploadArea.id, 'Data kind:', uploadArea.getAttribute('data-kind'), 'Project key:', projectKey, 'File key:', result.fileKey);
+                    console.log('=== UPLOAD DEBUG ===');
+                    console.log('Upload area ID:', uploadArea.id);
+                    console.log('Upload area data-kind:', uploadArea.getAttribute('data-kind'));
+                    console.log('Detected project key:', projectKey);
+                    console.log('File key from server:', result.fileKey);
+                    console.log('Current project keys before update:', {
+                        gameLogoKey: this.core.currentOnboardingProject.gameLogoKey,
+                        coverArtKey: this.core.currentOnboardingProject.coverArtKey,
+                        trailerKey: this.core.currentOnboardingProject.trailerKey
+                    });
                     
                     if (result.fileKey && projectKey) {
                         this.core.currentOnboardingProject[projectKey] = result.fileKey;
-                        console.log(`Set ${projectKey} to:`, result.fileKey);
+                        console.log(`✅ Set ${projectKey} to:`, result.fileKey);
+                        console.log('Current project keys after update:', {
+                            gameLogoKey: this.core.currentOnboardingProject.gameLogoKey,
+                            coverArtKey: this.core.currentOnboardingProject.coverArtKey,
+                            trailerKey: this.core.currentOnboardingProject.trailerKey
+                        });
                         // Update preview pane if visible
                         this.updateLivePreview();
+                    } else {
+                        console.log('❌ No project key detected or no file key received');
+                        console.log('Project key detected:', !!projectKey);
+                        console.log('File key received:', !!result.fileKey);
                     }
                 } else {
                     let message = 'Upload failed';

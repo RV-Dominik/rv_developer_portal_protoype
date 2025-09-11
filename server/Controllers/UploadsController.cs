@@ -122,10 +122,17 @@ namespace ShowroomBackend.Controllers
                 var fields = new Dictionary<string, object?>();
                 
                 // Map asset kind to project field using constants
-                if (AssetConstants.AssetKindMappings.KindToDatabaseField.TryGetValue((createdAsset.Kind ?? "").ToLowerInvariant(), out string? databaseField))
+                var assetKind = (createdAsset.Kind ?? "").ToLowerInvariant();
+                _logger.LogInformation("Processing asset with kind: '{AssetKind}' for project {ProjectId}", assetKind, projectId);
+                
+                if (AssetConstants.AssetKindMappings.KindToDatabaseField.TryGetValue(assetKind, out string? databaseField))
                 {
                     fields[databaseField] = fileKey;
-                    _logger.LogInformation("Setting {DatabaseField} to {FileKey} for project {ProjectId}", databaseField, fileKey, projectId);
+                    _logger.LogInformation("✅ Setting {DatabaseField} to {FileKey} for project {ProjectId}", databaseField, fileKey, projectId);
+                }
+                else
+                {
+                    _logger.LogWarning("❌ No database field mapping found for asset kind: '{AssetKind}' for project {ProjectId}", assetKind, projectId);
                 }
                 if (fields.Count > 0)
                 {
