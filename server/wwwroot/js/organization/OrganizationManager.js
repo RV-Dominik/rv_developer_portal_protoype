@@ -24,72 +24,92 @@ class OrganizationManager {
         }
     }
 
-    showOrganizationSetup() {
-        const dashboardSection = document.getElementById('dashboard-section');
-        if (!dashboardSection) return;
+    hideOrganizationModal() {
+        const modal = document.getElementById('organization-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
 
-        dashboardSection.innerHTML = `
-            <div class="organization-setup">
-                <div class="setup-header">
-                    <h2>Welcome to Readyverse Developer Portal</h2>
-                    <p>Before you can create projects, we need some information about your organization.</p>
-                </div>
-                
-                <div class="setup-form-container">
-                    <form id="organization-form" class="auth-form">
-                        <div class="form-group">
-                            <label for="org-name">Organization Name *</label>
-                            <input type="text" id="org-name" name="name" required 
-                                   placeholder="Enter your organization name" class="form-input">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="org-website">Website</label>
-                            <input type="url" id="org-website" name="website" 
-                                   placeholder="https://yourcompany.com" class="form-input">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="org-description">Description</label>
-                            <textarea id="org-description" name="description" 
-                                      placeholder="Brief description of your organization" 
-                                      class="form-input" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="form-row">
+    showOrganizationSetup() {
+        // Create or show the organization modal
+        let modal = document.getElementById('organization-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'organization-modal';
+            modal.className = 'organization-modal';
+            document.body.appendChild(modal);
+        }
+
+        modal.innerHTML = `
+            <div class="organization-modal-overlay">
+                <div class="organization-modal-content">
+                    <div class="organization-modal-header">
+                        <h2>Welcome to Readyverse Developer Portal</h2>
+                        <p>Before you can create projects, we need some information about your organization.</p>
+                        <button class="organization-modal-close" onclick="window.portal.organizationManager.hideOrganizationModal()">&times;</button>
+                    </div>
+                    
+                    <div class="organization-modal-body">
+                        <form id="organization-form" class="auth-form">
                             <div class="form-group">
-                                <label for="org-contact-name">Primary Contact Name *</label>
-                                <input type="text" id="org-contact-name" name="primaryContactName" required 
-                                       placeholder="John Doe" class="form-input">
+                                <label for="org-name">Organization Name *</label>
+                                <input type="text" id="org-name" name="name" required 
+                                       placeholder="Enter your organization name" class="form-input">
                             </div>
                             
                             <div class="form-group">
-                                <label for="org-contact-email">Primary Contact Email *</label>
-                                <input type="email" id="org-contact-email" name="primaryContactEmail" required 
-                                       placeholder="john@yourcompany.com" class="form-input">
+                                <label for="org-website">Website</label>
+                                <input type="url" id="org-website" name="website" 
+                                       placeholder="https://yourcompany.com" class="form-input">
                             </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="org-contact-phone">Primary Contact Phone</label>
-                            <input type="tel" id="org-contact-phone" name="primaryContactPhone" 
-                                   placeholder="+1 (555) 123-4567" class="form-input">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="org-socials">Social Media Links</label>
-                            <textarea id="org-socials" name="socials" 
-                                      placeholder="Twitter: @yourcompany&#10;LinkedIn: linkedin.com/company/yourcompany" 
-                                      class="form-input" rows="2"></textarea>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Create Organization</button>
-                        </div>
-                    </form>
+                            
+                            <div class="form-group">
+                                <label for="org-description">Description</label>
+                                <textarea id="org-description" name="description" 
+                                          placeholder="Brief description of your organization" 
+                                          class="form-input" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="org-contact-name">Primary Contact Name *</label>
+                                    <input type="text" id="org-contact-name" name="primaryContactName" required 
+                                           placeholder="John Doe" class="form-input">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="org-contact-email">Primary Contact Email *</label>
+                                    <input type="email" id="org-contact-email" name="primaryContactEmail" required 
+                                           placeholder="john@yourcompany.com" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="org-contact-phone">Primary Contact Phone</label>
+                                <input type="tel" id="org-contact-phone" name="primaryContactPhone" 
+                                       placeholder="+1 (555) 123-4567" class="form-input">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="org-socials">Social Media Links</label>
+                                <textarea id="org-socials" name="socials" 
+                                          placeholder="Twitter: @yourcompany&#10;LinkedIn: linkedin.com/company/yourcompany" 
+                                          class="form-input" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="window.portal.organizationManager.hideOrganizationModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Create Organization</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         `;
+
+        // Show the modal
+        modal.style.display = 'block';
 
         const form = document.getElementById('organization-form');
         if (form) {
@@ -125,8 +145,8 @@ class OrganizationManager {
 
             if (response.ok) {
                 this.core.showMessage('Organization created successfully!', 'success');
-                // Navigate back to dashboard and refresh projects
-                if (this.core.showDashboard) this.core.showDashboard();
+                // Close the modal and refresh projects
+                this.hideOrganizationModal();
                 if (this.core.projectManager && this.core.projectManager.loadProjects) {
                     this.core.projectManager.loadProjects();
                 }
