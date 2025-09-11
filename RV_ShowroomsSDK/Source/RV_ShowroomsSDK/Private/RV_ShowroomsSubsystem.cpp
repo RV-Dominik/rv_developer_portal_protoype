@@ -24,7 +24,7 @@ void URV_ShowroomsSubsystem::ListShowrooms()
 {
 	if (!EnsureApiUrl()) { OnListShowroomsCompleted.Broadcast({}, TEXT("Missing ApiBaseUrl")); return; }
 
-	const FString Url = ApiBaseUrl.TrimEnd().TrimEndChar('/') + TEXT("/api/showroom/games");
+	const FString Url = ApiBaseUrl.TrimEnd() + TEXT("/api/showroom/games");
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 	Request->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Req, FHttpResponsePtr Resp, bool bOk)
@@ -63,7 +63,7 @@ void URV_ShowroomsSubsystem::GetShowroomById(const FString& ShowroomId)
 {
 	if (!EnsureApiUrl()) { OnGetShowroomCompleted.Broadcast(FRV_ShowroomDetails(), TEXT("Missing ApiBaseUrl")); return; }
 
-	const FString Url = ApiBaseUrl.TrimEnd().TrimEndChar('/') + TEXT("/api/showroom/games/") + ShowroomId;
+	const FString Url = ApiBaseUrl.TrimEnd() + TEXT("/api/showroom/games/") + ShowroomId;
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
 	Request->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Req, FHttpResponsePtr Resp, bool bOk)
@@ -101,10 +101,10 @@ void URV_ShowroomsSubsystem::GetShowroomById(const FString& ShowroomId)
 static bool JsonTryGetString(const TSharedPtr<FJsonObject>& Obj, const FString& Key, FString& Out)
 {
 	if (!Obj.IsValid()) return false;
-	const TSharedPtr<FJsonValue>* Val = nullptr;
-	if (Obj->TryGetField(Key, Val) && Val && (*Val)->Type == EJson::String)
+	const TSharedPtr<FJsonValue> Val = Obj->TryGetField(Key);
+	if (Val.IsValid() && Val->Type == EJson::String)
 	{
-		Out = (*Val)->AsString();
+		Out = Val->AsString();
 		return true;
 	}
 	return false;

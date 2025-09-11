@@ -307,7 +307,7 @@ namespace ShowroomBackend.Services
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("Failed to update project {ProjectId}. Url=projects?id=eq.{ProjectId} Status: {StatusCode}, Error: {Error}", 
-                        id, response.StatusCode, errorContent);
+                        id, id, response.StatusCode, errorContent);
                     throw new Exception($"Supabase update failed: {response.StatusCode} - {errorContent}");
                 }
             }
@@ -1067,7 +1067,7 @@ namespace ShowroomBackend.Services
                 {
                     if (!string.IsNullOrEmpty(key))
                     {
-                        var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", key, 3600);
+                        var signedUrl = await GetSignedUrlAsync("showrooms", key, 3600);
                         if (!string.IsNullOrEmpty(signedUrl))
                         {
                             screenshotUrls.Add(signedUrl);
@@ -1119,11 +1119,11 @@ namespace ShowroomBackend.Services
                 BuildStatus = project.BuildStatus,
                 TargetPlatforms = targetPlatforms,
                 GameLogoUrl = !string.IsNullOrEmpty(project.GameLogoKey) ? 
-                    await _supabaseService.GetSignedUrlAsync("showrooms", project.GameLogoKey, 3600) : null,
+                    await GetSignedUrlAsync("showrooms", project.GameLogoKey, 3600) : null,
                 CoverArtUrl = !string.IsNullOrEmpty(project.CoverArtKey) ? 
-                    await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtKey, 3600) : null,
+                    await GetSignedUrlAsync("showrooms", project.CoverArtKey, 3600) : null,
                 TrailerUrl = !string.IsNullOrEmpty(project.TrailerKey) ? 
-                    await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerKey, 3600) : null,
+                    await GetSignedUrlAsync("showrooms", project.TrailerKey, 3600) : null,
                 ScreenshotUrls = await GetScreenshotUrlsFromProjectKey(project.ScreenshotsKeys),
                 GameUrl = project.GameUrl,
                 LauncherUrl = project.LauncherUrl,

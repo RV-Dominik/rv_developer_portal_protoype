@@ -125,7 +125,6 @@ namespace ShowroomBackend.Controllers
                     createdAsset.Kind, createdAsset.FileKey, createdAsset.ProjectId);
 
                 // Update project fields for primary assets (logo/cover/trailer) using storage keys
-                var bucket = "showrooms";
                 var fields = new Dictionary<string, object?>();
                 
                 // Map asset kind to project field using constants
