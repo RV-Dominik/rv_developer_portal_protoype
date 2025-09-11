@@ -630,11 +630,13 @@ class OnboardingWizard {
                 
                 if (actualW === expectedW && actualH === expectedH) {
                     console.log('✅ Image dimensions match requirements');
+                    this.clearUploadAreaError(uploadArea);
                     resolve(true);
                 } else {
                     const errorMsg = `Image dimensions must be exactly ${expectedW}x${expectedH}px. Your image is ${actualW}x${actualH}px.`;
                     console.error('❌', errorMsg);
                     this.core.showMessage(errorMsg, 'error');
+                    this.showUploadAreaError(uploadArea, errorMsg);
                     resolve(false);
                 }
             };
@@ -663,6 +665,8 @@ class OnboardingWizard {
             const fileInput = area.querySelector('input[type="file"]');
             if (fileInput) {
                 fileInput.addEventListener('change', (e) => {
+                    // Clear any existing error when new file is selected
+                    this.clearUploadAreaError(area);
                     this.handleFileUpload(e, area);
                 });
             }
@@ -973,5 +977,44 @@ class OnboardingWizard {
             console.error('Complete onboarding error:', error);
             this.core.showMessage('Failed to complete onboarding. Please try again.', 'error');
         }
+    }
+
+    showUploadAreaError(uploadArea, errorMessage) {
+        // Clear any existing error
+        this.clearUploadAreaError(uploadArea);
+        
+        // Add error styling
+        uploadArea.classList.add('has-error');
+        
+        // Create error message element
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'upload-error';
+        errorDiv.innerHTML = `
+            <div class="error-icon">⚠️</div>
+            <div class="error-message">${errorMessage}</div>
+        `;
+        
+        // Insert error message after the upload overlay
+        const overlay = uploadArea.querySelector('.upload-overlay');
+        if (overlay) {
+            overlay.parentNode.insertBefore(errorDiv, overlay.nextSibling);
+        } else {
+            uploadArea.appendChild(errorDiv);
+        }
+        
+        console.log('✅ Showed upload area error:', errorMessage);
+    }
+
+    clearUploadAreaError(uploadArea) {
+        // Remove error styling
+        uploadArea.classList.remove('has-error');
+        
+        // Remove error message element
+        const errorDiv = uploadArea.querySelector('.upload-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+        
+        console.log('✅ Cleared upload area error');
     }
 }
