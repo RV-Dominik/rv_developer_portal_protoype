@@ -192,7 +192,7 @@ class ProjectManager {
         if (!projectsList) return;
 
         // Add loading class to container
-        projectsList.classList.add('loading');
+        projectsList.classList.add('projects-loading');
 
         // Create loading element
         const loadingDiv = document.createElement('div');
@@ -214,7 +214,7 @@ class ProjectManager {
         if (!projectsList) return;
 
         // Remove loading class
-        projectsList.classList.remove('loading');
+        projectsList.classList.remove('projects-loading');
 
         // Remove loading element
         const loadingDiv = projectsList.querySelector('.dashboard-loading');
