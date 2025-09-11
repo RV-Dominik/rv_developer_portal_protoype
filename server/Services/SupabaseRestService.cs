@@ -837,7 +837,7 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync("projects?is_public=eq.true&onboarding_step=eq.done&select=*");
+                var response = await _httpClient.GetAsync("projects?onboarding_step=eq.done&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -848,7 +848,15 @@ namespace ShowroomBackend.Services
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                    var showroomGames = new List<ShowroomGameDto>();
+                    if (projects != null)
+                    {
+                        foreach (var project in projects)
+                        {
+                            showroomGames.Add(await MapToShowroomGameDtoAsync(project));
+                        }
+                    }
+                    return showroomGames;
                 }
 
                 return new List<ShowroomGameDto>();
@@ -864,7 +872,7 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"projects?id=eq.{id}&is_public=eq.true&onboarding_step=eq.done&select=*");
+                var response = await _httpClient.GetAsync($"projects?id=eq.{id}&onboarding_step=eq.done&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -876,7 +884,7 @@ namespace ShowroomBackend.Services
                     });
 
                     var project = projects?.FirstOrDefault();
-                    return project != null ? MapToShowroomGameDto(project) : null;
+                    return project != null ? await MapToShowroomGameDtoAsync(project) : null;
                 }
 
                 return null;
@@ -893,7 +901,7 @@ namespace ShowroomBackend.Services
             try
             {
                 var encodedGenre = Uri.EscapeDataString(genre);
-                var response = await _httpClient.GetAsync($"projects?is_public=eq.true&onboarding_step=eq.done&genre=eq.{encodedGenre}&select=*");
+                var response = await _httpClient.GetAsync($"projects?onboarding_step=eq.done&genre=eq.{encodedGenre}&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -904,7 +912,15 @@ namespace ShowroomBackend.Services
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                    var showroomGames = new List<ShowroomGameDto>();
+                    if (projects != null)
+                    {
+                        foreach (var project in projects)
+                        {
+                            showroomGames.Add(await MapToShowroomGameDtoAsync(project));
+                        }
+                    }
+                    return showroomGames;
                 }
 
                 return new List<ShowroomGameDto>();
@@ -921,7 +937,7 @@ namespace ShowroomBackend.Services
             try
             {
                 var encodedTrack = Uri.EscapeDataString(track);
-                var response = await _httpClient.GetAsync($"projects?is_public=eq.true&onboarding_step=eq.done&publishing_track=eq.{encodedTrack}&select=*");
+                var response = await _httpClient.GetAsync($"projects?onboarding_step=eq.done&publishing_track=eq.{encodedTrack}&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -932,7 +948,15 @@ namespace ShowroomBackend.Services
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                    var showroomGames = new List<ShowroomGameDto>();
+                    if (projects != null)
+                    {
+                        foreach (var project in projects)
+                        {
+                            showroomGames.Add(await MapToShowroomGameDtoAsync(project));
+                        }
+                    }
+                    return showroomGames;
                 }
 
                 return new List<ShowroomGameDto>();
@@ -949,7 +973,7 @@ namespace ShowroomBackend.Services
             try
             {
                 var encodedQuery = Uri.EscapeDataString(query);
-                var response = await _httpClient.GetAsync($"projects?is_public=eq.true&onboarding_step=eq.done&or=(name.ilike.*{encodedQuery}*,short_description.ilike.*{encodedQuery}*,full_description.ilike.*{encodedQuery}*)&select=*");
+                var response = await _httpClient.GetAsync($"projects?onboarding_step=eq.done&or=(name.ilike.*{encodedQuery}*,short_description.ilike.*{encodedQuery}*,full_description.ilike.*{encodedQuery}*)&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -960,7 +984,15 @@ namespace ShowroomBackend.Services
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                    var showroomGames = new List<ShowroomGameDto>();
+                    if (projects != null)
+                    {
+                        foreach (var project in projects)
+                        {
+                            showroomGames.Add(await MapToShowroomGameDtoAsync(project));
+                        }
+                    }
+                    return showroomGames;
                 }
 
                 return new List<ShowroomGameDto>();
@@ -978,7 +1010,7 @@ namespace ShowroomBackend.Services
             {
                 // For now, return the most recently completed games as "featured"
                 // In the future, this could be based on a "featured" flag or algorithm
-                var response = await _httpClient.GetAsync("projects?is_public=eq.true&onboarding_step=eq.done&order=onboarding_completed_at.desc&limit=10&select=*");
+                var response = await _httpClient.GetAsync("projects?onboarding_step=eq.done&order=onboarding_completed_at.desc&limit=10&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -989,7 +1021,15 @@ namespace ShowroomBackend.Services
                         PropertyNameCaseInsensitive = true
                     });
 
-                    return projects?.Select(MapToShowroomGameDto).ToList() ?? new List<ShowroomGameDto>();
+                    var showroomGames = new List<ShowroomGameDto>();
+                    if (projects != null)
+                    {
+                        foreach (var project in projects)
+                        {
+                            showroomGames.Add(await MapToShowroomGameDtoAsync(project));
+                        }
+                    }
+                    return showroomGames;
                 }
 
                 return new List<ShowroomGameDto>();
@@ -1001,7 +1041,35 @@ namespace ShowroomBackend.Services
             }
         }
 
-        private ShowroomGameDto MapToShowroomGameDto(Project project)
+        private async Task<string[]> GetProjectScreenshotUrlsAsync(Guid projectId)
+        {
+            try
+            {
+                var assets = await GetProjectAssetsAsync(projectId);
+                var screenshotUrls = new List<string>();
+                
+                foreach (var asset in assets)
+                {
+                    if (asset.Kind?.Equals(AssetConstants.AssetTypes.Screenshots, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", asset.FileKey, 3600);
+                        if (!string.IsNullOrEmpty(signedUrl))
+                        {
+                            screenshotUrls.Add(signedUrl);
+                        }
+                    }
+                }
+                
+                return screenshotUrls.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get screenshot URLs for project {ProjectId}", projectId);
+                return new string[0];
+            }
+        }
+
+        private async Task<ShowroomGameDto> MapToShowroomGameDtoAsync(Project project)
         {
             var targetPlatforms = new string[0];
             if (!string.IsNullOrEmpty(project.TargetPlatforms))
@@ -1029,10 +1097,13 @@ namespace ShowroomBackend.Services
                 PublishingTrack = project.PublishingTrack,
                 BuildStatus = project.BuildStatus,
                 TargetPlatforms = targetPlatforms,
-                GameLogoUrl = project.GameLogoKey, // Using key instead of URL
-                CoverArtUrl = project.CoverArtKey, // Using key instead of URL
-                TrailerUrl = project.TrailerKey, // Using key instead of URL
-                ScreenshotUrls = new string[0], // TODO: Get from assets table
+                GameLogoUrl = !string.IsNullOrEmpty(project.GameLogoKey) ? 
+                    await _supabaseService.GetSignedUrlAsync("showrooms", project.GameLogoKey, 3600) : null,
+                CoverArtUrl = !string.IsNullOrEmpty(project.CoverArtKey) ? 
+                    await _supabaseService.GetSignedUrlAsync("showrooms", project.CoverArtKey, 3600) : null,
+                TrailerUrl = !string.IsNullOrEmpty(project.TrailerKey) ? 
+                    await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerKey, 3600) : null,
+                ScreenshotUrls = await GetProjectScreenshotUrlsAsync(project.Id),
                 GameUrl = project.GameUrl,
                 LauncherUrl = project.LauncherUrl,
                 AgeRating = project.AgeRating,
