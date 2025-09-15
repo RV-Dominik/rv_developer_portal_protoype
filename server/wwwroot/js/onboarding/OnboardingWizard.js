@@ -108,8 +108,7 @@ class OnboardingWizard {
     }
 
     renderOnboardingWizard() {
-        const dashboardSection = document.getElementById('dashboard-section');
-        if (!dashboardSection || !this.core.currentOnboardingProject) return;
+        if (!this.core.currentOnboardingProject) return;
         
         // Set rendering flag to prevent validation during DOM updates
         this.isRendering = true;
@@ -117,7 +116,16 @@ class OnboardingWizard {
         const project = this.core.currentOnboardingProject;
         const step = this.core.currentOnboardingStep;
         
-        dashboardSection.innerHTML = `
+        // Create or get the onboarding modal
+        let modal = document.getElementById('onboarding-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'onboarding-modal';
+            modal.className = 'onboarding-modal';
+            document.body.appendChild(modal);
+        }
+        
+        modal.innerHTML = `
             <div class="wizard-grid">
                 <div class="wizard-card">
                     <div class="wizard-stepper">
@@ -188,6 +196,12 @@ class OnboardingWizard {
                 </div>
             </div>
         `;
+
+        // Show the modal
+        modal.classList.add('show');
+        
+        // Add modal close functionality
+        this.bindModalEvents(modal);
 
         this.bindOnboardingEvents();
         
@@ -439,7 +453,8 @@ class OnboardingWizard {
     getCtaText(step) {
         const ctaTexts = {
             'basics': 'Continue to Assets',
-            'assets': 'Continue to Integration',
+            'assets': 'Continue to Showroom',
+            'showroom': 'Continue to Integration',
             'integration': 'Continue to Compliance',
             'compliance': 'Review & Submit',
             'review': 'Complete Onboarding'
@@ -967,12 +982,45 @@ class OnboardingWizard {
             });
             
             this.core.showMessage('Onboarding completed successfully! Your project is now under review.', 'success');
-            if (this.core.projectManager) {
-                this.core.projectManager.showProjectsList();
-            }
+            
+            // Clear onboarding content and return to dashboard
+            this.clearOnboardingContent();
         } catch (error) {
             console.error('Complete onboarding error:', error);
             this.core.showMessage('Failed to complete onboarding. Please try again.', 'error');
+        }
+    }
+
+    bindModalEvents(modal) {
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.exitOnboarding();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                this.exitOnboarding();
+            }
+        });
+    }
+
+    clearOnboardingContent() {
+        const modal = document.getElementById('onboarding-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            // Keep modal in DOM for reuse, just hide it
+        }
+        
+        // Reset onboarding state
+        this.core.currentOnboardingProject = null;
+        this.core.currentOnboardingStep = null;
+        
+        // Refresh the dashboard to show updated project data
+        if (this.core.projectManager) {
+            this.core.projectManager.showProjectsList();
         }
     }
 
