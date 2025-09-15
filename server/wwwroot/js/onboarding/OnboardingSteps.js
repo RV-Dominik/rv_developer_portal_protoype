@@ -160,6 +160,11 @@ class OnboardingSteps {
                                 </div>
                             </div>
                             <input type="file" id="screenshots-file" accept="image/png,image/jpeg" multiple style="display: none;">
+                            <div class="screenshot-controls" style="position: absolute; top: 8px; right: 8px; display: none;">
+                                <button type="button" class="btn btn-sm btn-outline" id="clear-screenshots-btn" title="Clear all screenshots">
+                                    🗑️ Clear All
+                                </button>
+                            </div>
                         </div>
                     </div>
                     

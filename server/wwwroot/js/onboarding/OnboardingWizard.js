@@ -313,6 +313,100 @@ class OnboardingWizard {
         });
     }
 
+    // Screenshot management methods
+    removeScreenshot(thumbItem, fileKey) {
+        console.log('Removing screenshot with key:', fileKey);
+        
+        // Remove from UI
+        thumbItem.remove();
+        
+        // Remove from project data
+        if (this.core.currentOnboardingProject && this.core.currentOnboardingProject.screenshotsKeys) {
+            try {
+                let screenshots = JSON.parse(this.core.currentOnboardingProject.screenshotsKeys);
+                screenshots = screenshots.filter(key => key !== fileKey);
+                this.core.currentOnboardingProject.screenshotsKeys = JSON.stringify(screenshots);
+                
+                console.log('Updated screenshots array after removal:', screenshots);
+                
+                // Update UI to show remaining count
+                this.updateScreenshotCount();
+            } catch (e) {
+                console.error('Failed to parse screenshots keys:', e);
+            }
+        }
+    }
+
+    clearAllScreenshots() {
+        console.log('Clearing all screenshots');
+        
+        // Clear from project data
+        if (this.core.currentOnboardingProject) {
+            this.core.currentOnboardingProject.screenshotsKeys = JSON.stringify([]);
+        }
+        
+        // Clear UI
+        const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+        if (screenshotsArea) {
+            const list = screenshotsArea.querySelector('.thumb-list');
+            if (list) {
+                list.innerHTML = '';
+            }
+            
+            // Reset upload area appearance
+            const overlay = screenshotsArea.querySelector('.upload-overlay');
+            if (overlay) {
+                overlay.style.display = 'block';
+                overlay.style.opacity = '1';
+            }
+        }
+        
+        console.log('All screenshots cleared');
+    }
+
+    updateScreenshotCount() {
+        const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+        if (screenshotsArea) {
+            const list = screenshotsArea.querySelector('.thumb-list');
+            const count = list ? list.children.length : 0;
+            
+            // Update overlay text to show count
+            const text = screenshotsArea.querySelector('.upload-text p');
+            if (text) {
+                if (count > 0) {
+                    text.textContent = `${count} screenshot${count === 1 ? '' : 's'} uploaded`;
+                } else {
+                    text.textContent = 'PNG/JPG 1920x1080 px (max 10MB each)';
+                }
+            }
+        }
+    }
+
+    updateScreenshotControls(screenshotsArea) {
+        const list = screenshotsArea.querySelector('.thumb-list');
+        const controls = screenshotsArea.querySelector('.screenshot-controls');
+        const count = list ? list.children.length : 0;
+        
+        if (count > 0) {
+            // Show controls
+            if (controls) controls.style.display = 'block';
+            
+            // Bind clear all button
+            const clearBtn = screenshotsArea.querySelector('#clear-screenshots-btn');
+            if (clearBtn && !clearBtn.hasAttribute('data-bound')) {
+                clearBtn.setAttribute('data-bound', 'true');
+                clearBtn.onclick = () => {
+                    if (confirm('Are you sure you want to clear all screenshots?')) {
+                        this.clearAllScreenshots();
+                    }
+                };
+            }
+        } else {
+            // Hide controls
+            if (controls) controls.style.display = 'none';
+        }
+    }
+
     // Step navigation methods
     goToPreviousStep() {
         const steps = this.getWizardSteps();
@@ -827,6 +921,8 @@ class OnboardingWizard {
             }
             const item = document.createElement('div');
             item.className = 'thumb-item';
+            item.setAttribute('data-file-key', result.fileKey || '');
+            
             if (url && file.type.startsWith('image/')) {
                 const img = document.createElement('img');
                 img.src = url;
@@ -839,10 +935,25 @@ class OnboardingWizard {
                     console.log('Screenshot preview loaded successfully:', file.name);
                 };
                 item.appendChild(img);
+                
+                // Add remove button
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-screenshot-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.title = 'Remove screenshot';
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.removeScreenshot(item, result.fileKey);
+                };
+                item.appendChild(removeBtn);
             } else {
                 item.textContent = file.name;
             }
             list.appendChild(item);
+            
+            // Update controls and count
+            this.updateScreenshotCount();
+            this.updateScreenshotControls(uploadArea);
         } else {
             const overlay = uploadArea.querySelector('.upload-overlay');
             const background = uploadArea.querySelector('.upload-background');

@@ -574,11 +574,24 @@ class OnboardingData {
                             
                             const img = new Image();
                             img.onload = () => {
-                                thumb.innerHTML = `<img src="${screenshotUrl}" alt="Screenshot">`;
+                                // Create thumbnail with remove button
+                                thumb.innerHTML = `
+                                    <img src="${screenshotUrl}" alt="Screenshot">
+                                    <button class="remove-screenshot-btn" title="Remove screenshot">×</button>
+                                `;
+                                
+                                // Bind remove button
+                                const removeBtn = thumb.querySelector('.remove-screenshot-btn');
+                                removeBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    this.removeScreenshotFromRestored(thumb, screenshotKeys[i]);
+                                };
+                                
                                 list.appendChild(thumb);
                                 loadedCount++;
                                 if (loadedCount === screenshotUrls.length) {
                                     this.hideScreenshotsLoading(screenshotsArea);
+                                    this.updateScreenshotControls(screenshotsArea);
                                 }
                             };
                             img.onerror = () => {
@@ -794,5 +807,87 @@ class OnboardingData {
                 this.showAssetLoading(screenshotsArea);
             }
         }
+    }
+
+    // Screenshot management methods for restored data
+    removeScreenshotFromRestored(thumbItem, fileKey) {
+        console.log('Removing restored screenshot with key:', fileKey);
+        
+        // Remove from UI
+        thumbItem.remove();
+        
+        // Remove from project data
+        if (this.core.currentOnboardingProject && this.core.currentOnboardingProject.screenshotsKeys) {
+            try {
+                let screenshots = JSON.parse(this.core.currentOnboardingProject.screenshotsKeys);
+                screenshots = screenshots.filter(key => key !== fileKey);
+                this.core.currentOnboardingProject.screenshotsKeys = JSON.stringify(screenshots);
+                
+                console.log('Updated screenshots array after removal:', screenshots);
+                
+                // Update controls visibility
+                const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+                if (screenshotsArea) {
+                    this.updateScreenshotControls(screenshotsArea);
+                }
+            } catch (e) {
+                console.error('Failed to parse screenshots keys:', e);
+            }
+        }
+    }
+
+    updateScreenshotControls(screenshotsArea) {
+        const list = screenshotsArea.querySelector('.thumb-list');
+        const controls = screenshotsArea.querySelector('.screenshot-controls');
+        const count = list ? list.children.length : 0;
+        
+        if (count > 0) {
+            // Show controls
+            if (controls) controls.style.display = 'block';
+            
+            // Bind clear all button
+            const clearBtn = screenshotsArea.querySelector('#clear-screenshots-btn');
+            if (clearBtn && !clearBtn.hasAttribute('data-bound')) {
+                clearBtn.setAttribute('data-bound', 'true');
+                clearBtn.onclick = () => {
+                    if (confirm('Are you sure you want to clear all screenshots?')) {
+                        this.clearAllScreenshots();
+                    }
+                };
+            }
+        } else {
+            // Hide controls
+            if (controls) controls.style.display = 'none';
+        }
+    }
+
+    clearAllScreenshots() {
+        console.log('Clearing all screenshots');
+        
+        // Clear from project data
+        if (this.core.currentOnboardingProject) {
+            this.core.currentOnboardingProject.screenshotsKeys = JSON.stringify([]);
+        }
+        
+        // Clear UI
+        const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+        if (screenshotsArea) {
+            const list = screenshotsArea.querySelector('.thumb-list');
+            if (list) {
+                list.innerHTML = '';
+            }
+            
+            // Reset upload area appearance
+            const overlay = screenshotsArea.querySelector('.upload-overlay');
+            if (overlay) {
+                overlay.style.display = 'block';
+                overlay.style.opacity = '1';
+            }
+            
+            // Hide controls
+            this.updateScreenshotControls(screenshotsArea);
+        }
+        
+        console.log('All screenshots cleared');
     }
 }
