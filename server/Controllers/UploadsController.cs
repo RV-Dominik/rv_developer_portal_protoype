@@ -278,8 +278,8 @@ namespace ShowroomBackend.Controllers
 
                 var result = new Dictionary<string, string?>();
 
-                _logger.LogInformation("Project {ProjectId} asset keys - GameLogoKey: {GameLogoKey}, CoverArtKey: {CoverArtKey}, TrailerKey: {TrailerKey}", 
-                    projectId, project.GameLogoKey, project.CoverArtKey, project.TrailerKey);
+                _logger.LogInformation("Project {ProjectId} asset keys - GameLogoKey: {GameLogoKey}, CoverArtKey: {CoverArtKey}, TrailerKey: {TrailerKey}, ScreenshotsKeys: {ScreenshotsKeys}", 
+                    projectId, project.GameLogoKey, project.CoverArtKey, project.TrailerKey, project.ScreenshotsKeys);
 
                 // Convert storage keys to signed URLs
                 if (!string.IsNullOrEmpty(project.GameLogoKey))
@@ -296,6 +296,30 @@ namespace ShowroomBackend.Controllers
                 {
                     result["trailerUrl"] = await _supabaseService.GetSignedUrlAsync("showrooms", project.TrailerKey, ttl);
                     _logger.LogInformation("Generated trailerUrl for key {TrailerKey}", project.TrailerKey);
+                }
+
+                // Handle screenshots - convert JSON array of keys to signed URLs
+                if (!string.IsNullOrEmpty(project.ScreenshotsKeys))
+                {
+                    try
+                    {
+                        var screenshotKeys = JsonSerializer.Deserialize<List<string>>(project.ScreenshotsKeys);
+                        if (screenshotKeys != null && screenshotKeys.Count > 0)
+                        {
+                            var screenshotUrls = new List<string>();
+                            foreach (var key in screenshotKeys)
+                            {
+                                var signedUrl = await _supabaseService.GetSignedUrlAsync("showrooms", key, ttl);
+                                screenshotUrls.Add(signedUrl);
+                            }
+                            result["screenshotUrls"] = screenshotUrls;
+                            _logger.LogInformation("Generated {Count} screenshot URLs for project {ProjectId}", screenshotUrls.Count, projectId);
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogWarning("Failed to parse screenshots keys for project {ProjectId}: {Error}", projectId, ex.Message);
+                    }
                 }
 
                 return Ok(result);

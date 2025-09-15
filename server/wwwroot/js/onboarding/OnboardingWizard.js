@@ -766,7 +766,7 @@ class OnboardingWizard {
                         });
                         
                         // Update preview to show the uploaded file
-                        this.updateScreenshotPreview(uploadArea, result.fileName, result.fileKey);
+                        this.updateUploadArea(uploadArea, { name: result.fileName, type: 'image/jpeg' }, result.signedUrl);
                     } else {
                         console.log('❌ No project key detected or no file key received');
                         console.log('Project key detected:', !!projectKey);
