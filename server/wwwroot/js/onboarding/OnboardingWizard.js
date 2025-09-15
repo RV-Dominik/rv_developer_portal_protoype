@@ -1000,16 +1000,26 @@ class OnboardingWizard {
         // Close modal when clicking outside
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                this.exitOnboarding();
+                this.handleModalClose();
             }
         });
 
         // Close modal with Escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.classList.contains('show')) {
-                this.exitOnboarding();
+                this.handleModalClose();
             }
         });
+    }
+
+    handleModalClose() {
+        // For now, always show confirmation dialog to ensure user intent
+        const confirmed = confirm(
+            'Are you sure you want to exit? Your progress will be saved automatically.'
+        );
+        if (!confirmed) return;
+        
+        this.exitOnboarding();
     }
 
     clearOnboardingContent() {
