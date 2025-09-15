@@ -77,6 +77,8 @@ CREATE TABLE IF NOT EXISTS projects (
     
     -- System fields
     is_public BOOLEAN DEFAULT false,
+    is_published BOOLEAN DEFAULT false,
+    published_at TIMESTAMP WITH TIME ZONE NULL,
     user_id TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

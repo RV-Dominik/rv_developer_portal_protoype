@@ -42,6 +42,10 @@ namespace ShowroomBackend.Models.DTOs
         public DateTime? OnboardingCompletedAt { get; set; }
         
         // Showroom specific
+        public string? ShowroomTier { get; set; }
+        public string? ShowroomLightingColor { get; set; }
+        public bool IsPublished { get; set; } = false;
+        public DateTime? PublishedAt { get; set; }
         public bool IsFeatured { get; set; } = false;
         public int ViewCount { get; set; } = 0;
         public int LikeCount { get; set; } = 0;

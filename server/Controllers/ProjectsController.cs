@@ -103,6 +103,9 @@ namespace ShowroomBackend.Controllers
                 if (dto.Step == "done" || dto.Step == "completed") 
                 {
                     project.OnboardingCompletedAt = DateTime.UtcNow;
+                    // Auto-publish when onboarding is completed
+                    project.IsPublished = true;
+                    project.PublishedAt = DateTime.UtcNow;
                 }
 
                 // Build a fields dictionary to avoid sending columns that may not exist in Supabase
@@ -132,7 +135,9 @@ namespace ShowroomBackend.Controllers
                     { "reviewNotes", project.ReviewNotes },
                     { "assetsCompleted", project.AssetsCompleted },
                     { "onboardingStep", project.OnboardingStep },
-                    { "onboardingCompletedAt", project.OnboardingCompletedAt }
+                    { "onboardingCompletedAt", project.OnboardingCompletedAt },
+                    { "isPublished", project.IsPublished },
+                    { "publishedAt", project.PublishedAt }
                 };
 
                 _logger.LogInformation("Project partial update fields: {Fields}", System.Text.Json.JsonSerializer.Serialize(fields));
@@ -170,17 +175,19 @@ namespace ShowroomBackend.Controllers
                 if (project == null) return NotFound(new { error = "Project not found" });
                 if (project.UserId != userId) return Forbid();
 
-                // Mark onboarding as completed using specific field updates
+                // Mark onboarding as completed and auto-publish the project
                 var fields = new Dictionary<string, object?>
                 {
                     ["onboarding_step"] = "done",
-                    ["onboarding_completed_at"] = DateTime.UtcNow
+                    ["onboarding_completed_at"] = DateTime.UtcNow,
+                    ["is_published"] = true,
+                    ["published_at"] = DateTime.UtcNow
                 };
 
                 var updated = await _supabaseService.UpdateProjectFieldsAsync(id, fields);
                 if (updated == null) return StatusCode(500, new { error = "Failed to complete onboarding" });
 
-                _logger.LogInformation("Onboarding completed for project {ProjectId}", id);
+                _logger.LogInformation("Onboarding completed and project {ProjectId} auto-published", id);
 
                 return Ok(updated);
             }
@@ -188,6 +195,86 @@ namespace ShowroomBackend.Controllers
             {
                 _logger.LogError(ex, "Error completing onboarding for project {Id}", id);
                 return StatusCode(500, new { error = "Failed to complete onboarding" });
+            }
+        }
+
+        /// <summary>
+        /// Publish a project to the showroom
+        /// </summary>
+        /// <param name="id">Project ID</param>
+        /// <returns>Updated project or error</returns>
+        [HttpPost("{id}/publish")]
+        public async Task<IActionResult> PublishProject(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+
+                var project = await _supabaseService.GetProjectByIdAsync(id);
+                if (project == null) return NotFound(new { error = "Project not found" });
+                if (project.UserId != userId) return Forbid();
+
+                // Only allow publishing if onboarding is completed
+                if (project.OnboardingStep != "done" && project.OnboardingStep != "completed")
+                {
+                    return BadRequest(new { error = "Project must complete onboarding before publishing" });
+                }
+
+                var fields = new Dictionary<string, object?>
+                {
+                    ["is_published"] = true,
+                    ["published_at"] = DateTime.UtcNow
+                };
+
+                var updated = await _supabaseService.UpdateProjectFieldsAsync(id, fields);
+                if (updated == null) return StatusCode(500, new { error = "Failed to publish project" });
+
+                _logger.LogInformation("Project {ProjectId} published by user {UserId}", id, userId);
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error publishing project {Id}", id);
+                return StatusCode(500, new { error = "Failed to publish project" });
+            }
+        }
+
+        /// <summary>
+        /// Unpublish a project from the showroom
+        /// </summary>
+        /// <param name="id">Project ID</param>
+        /// <returns>Updated project or error</returns>
+        [HttpPost("{id}/unpublish")]
+        public async Task<IActionResult> UnpublishProject(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized(new { error = "Not authenticated" });
+
+                var project = await _supabaseService.GetProjectByIdAsync(id);
+                if (project == null) return NotFound(new { error = "Project not found" });
+                if (project.UserId != userId) return Forbid();
+
+                var fields = new Dictionary<string, object?>
+                {
+                    ["is_published"] = false,
+                    ["published_at"] = null
+                };
+
+                var updated = await _supabaseService.UpdateProjectFieldsAsync(id, fields);
+                if (updated == null) return StatusCode(500, new { error = "Failed to unpublish project" });
+
+                _logger.LogInformation("Project {ProjectId} unpublished by user {UserId}", id, userId);
+
+                return Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unpublishing project {Id}", id);
+                return StatusCode(500, new { error = "Failed to unpublish project" });
             }
         }
 

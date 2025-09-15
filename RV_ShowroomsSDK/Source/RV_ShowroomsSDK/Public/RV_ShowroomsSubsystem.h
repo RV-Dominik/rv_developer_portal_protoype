@@ -6,8 +6,8 @@
 
 #include "RV_ShowroomsSubsystem.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRV_ShowroomsListResult, const TArray<FRV_ShowroomSummary>&, Showrooms, const FString&, Error);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRV_ShowroomDetailsResult, const FRV_ShowroomDetails&, Showroom, const FString&, Error);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRV_ShowroomsListResult, const bool, bSuccess, const TArray<FRV_ShowroomSummary>&, Showrooms, const FString&, Error);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRV_ShowroomDetailsResult, const bool, bSuccess, const FRV_ShowroomDetails&, Showroom, const FString&, Error);
 
 UCLASS(BlueprintType)
 class URV_ShowroomsSubsystem : public UGameInstanceSubsystem
@@ -17,21 +17,17 @@ class URV_ShowroomsSubsystem : public UGameInstanceSubsystem
 public:
 	// Base URL for the backend, e.g. https://rv-developer-portal-prototype.onrender.com
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Readyverse|Config")
-	FString ApiBaseUrl;
+	FString ApiBaseUrl = "https://rv-developer-portal-protoype.onrender.com";
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UFUNCTION(BlueprintCallable, Category="Readyverse|Showroom")
-	void ListShowrooms();
+	void ListShowrooms(const FRV_ShowroomsListResult& OnComplete);
 
 	UFUNCTION(BlueprintCallable, Category="Readyverse|Showroom")
-	void GetShowroomById(const FString& ShowroomId);
+	void GetShowroomById(const FString& ShowroomId, const FRV_ShowroomDetailsResult& OnComplete);
 
-	UPROPERTY(BlueprintAssignable)
-	FRV_ShowroomsListResult OnListShowroomsCompleted;
 
-	UPROPERTY(BlueprintAssignable)
-	FRV_ShowroomDetailsResult OnGetShowroomCompleted;
 
 private:
 	bool EnsureApiUrl();

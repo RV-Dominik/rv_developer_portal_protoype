@@ -10,28 +10,18 @@ void URV_ShowroomsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
-bool URV_ShowroomsSubsystem::EnsureApiUrl()
+void URV_ShowroomsSubsystem::ListShowrooms(const FRV_ShowroomsListResult& OnComplete)
 {
-	if (ApiBaseUrl.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("RV_ShowroomsSubsystem ApiBaseUrl is empty."));
-		return false;
-	}
-	return true;
-}
-
-void URV_ShowroomsSubsystem::ListShowrooms()
-{
-	if (!EnsureApiUrl()) { OnListShowroomsCompleted.Broadcast({}, TEXT("Missing ApiBaseUrl")); return; }
+	if (!EnsureApiUrl()) { OnComplete.ExecuteIfBound(false,{}, TEXT("Missing ApiBaseUrl")); return; }
 
 	const FString Url = ApiBaseUrl.TrimEnd() + TEXT("/api/showroom/games");
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Req, FHttpResponsePtr Resp, bool bOk)
+	Request->OnProcessRequestComplete().BindLambda([this, OnComplete](FHttpRequestPtr Req, FHttpResponsePtr Resp, bool bOk)
 	{
 		if (!bOk || !Resp.IsValid())
 		{
-			OnListShowroomsCompleted.Broadcast({}, TEXT("Network error"));
+			OnComplete.ExecuteIfBound(false,{}, TEXT("Network error"));
 			return;
 		}
 
@@ -40,16 +30,16 @@ void URV_ShowroomsSubsystem::ListShowrooms()
 			TArray<FRV_ShowroomSummary> Out;
 			if (ParseShowroomsJson(Resp->GetContentAsString(), Out))
 			{
-				OnListShowroomsCompleted.Broadcast(Out, TEXT(""));
+				OnComplete.ExecuteIfBound(true, Out, TEXT(""));
 			}
 			else
 			{
-				OnListShowroomsCompleted.Broadcast({}, TEXT("Parse error"));
+				OnComplete.ExecuteIfBound(false,{}, TEXT("Parse error"));
 			}
 		}
 		else
 		{
-			OnListShowroomsCompleted.Broadcast({}, FString::Printf(TEXT("HTTP %d"), Resp->GetResponseCode()));
+			OnComplete.ExecuteIfBound(false,{}, FString::Printf(TEXT("HTTP %d"), Resp->GetResponseCode()));
 		}
 	});
 
@@ -59,18 +49,18 @@ void URV_ShowroomsSubsystem::ListShowrooms()
 	Request->ProcessRequest();
 }
 
-void URV_ShowroomsSubsystem::GetShowroomById(const FString& ShowroomId)
+void URV_ShowroomsSubsystem::GetShowroomById(const FString& ShowroomId, const FRV_ShowroomDetailsResult& OnComplete)
 {
-	if (!EnsureApiUrl()) { OnGetShowroomCompleted.Broadcast(FRV_ShowroomDetails(), TEXT("Missing ApiBaseUrl")); return; }
+	if (!EnsureApiUrl()) { OnComplete.ExecuteIfBound(false, FRV_ShowroomDetails(), TEXT("Missing ApiBaseUrl")); return; }
 
 	const FString Url = ApiBaseUrl.TrimEnd() + TEXT("/api/showroom/games/") + ShowroomId;
 
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-	Request->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Req, FHttpResponsePtr Resp, bool bOk)
+	Request->OnProcessRequestComplete().BindLambda([this, OnComplete](FHttpRequestPtr Req, FHttpResponsePtr Resp, bool bOk)
 	{
 		if (!bOk || !Resp.IsValid())
 		{
-			OnGetShowroomCompleted.Broadcast(FRV_ShowroomDetails(), TEXT("Network error"));
+			OnComplete.ExecuteIfBound(false,FRV_ShowroomDetails(), TEXT("Network error"));
 			return;
 		}
 
@@ -79,16 +69,16 @@ void URV_ShowroomsSubsystem::GetShowroomById(const FString& ShowroomId)
 			FRV_ShowroomDetails Details;
 			if (ParseShowroomJson(Resp->GetContentAsString(), Details))
 			{
-				OnGetShowroomCompleted.Broadcast(Details, TEXT(""));
+				OnComplete.ExecuteIfBound(true,Details, TEXT(""));
 			}
 			else
 			{
-				OnGetShowroomCompleted.Broadcast(FRV_ShowroomDetails(), TEXT("Parse error"));
+				OnComplete.ExecuteIfBound(false, FRV_ShowroomDetails(), TEXT("Parse error"));
 			}
 		}
 		else
 		{
-			OnGetShowroomCompleted.Broadcast(FRV_ShowroomDetails(), FString::Printf(TEXT("HTTP %d"), Resp->GetResponseCode()));
+			OnComplete.ExecuteIfBound(false, FRV_ShowroomDetails(), FString::Printf(TEXT("HTTP %d"), Resp->GetResponseCode()));
 		}
 	});
 
@@ -109,6 +99,18 @@ static bool JsonTryGetString(const TSharedPtr<FJsonObject>& Obj, const FString& 
 	}
 	return false;
 }
+
+bool URV_ShowroomsSubsystem::EnsureApiUrl()
+{
+	if (ApiBaseUrl.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("RV_ShowroomsSubsystem ApiBaseUrl is empty."));
+		return false;
+	}
+	return true;
+}
+
+
 
 bool URV_ShowroomsSubsystem::ParseShowroomsJson(const FString& Json, TArray<FRV_ShowroomSummary>& OutList) const
 {
@@ -132,6 +134,8 @@ bool URV_ShowroomsSubsystem::ParseShowroomsJson(const FString& Json, TArray<FRV_
 		JsonTryGetString(Obj, TEXT("buildStatus"), S.buildStatus);
 		JsonTryGetString(Obj, TEXT("gameLogoUrl"), S.gameLogoUrl);
 		JsonTryGetString(Obj, TEXT("coverArtUrl"), S.coverArtUrl);
+		JsonTryGetString(Obj, TEXT("showroomTier"), S.showroomTier);
+		JsonTryGetString(Obj, TEXT("showroomLightingColor"), S.showroomLightingColor);
 
 		OutList.Add(MoveTemp(S));
 	}
@@ -156,6 +160,8 @@ bool URV_ShowroomsSubsystem::ParseShowroomJson(const FString& Json, FRV_Showroom
 	JsonTryGetString(Obj, TEXT("buildStatus"), Base.buildStatus);
 	JsonTryGetString(Obj, TEXT("gameLogoUrl"), Base.gameLogoUrl);
 	JsonTryGetString(Obj, TEXT("coverArtUrl"), Base.coverArtUrl);
+	JsonTryGetString(Obj, TEXT("showroomTier"), Base.showroomTier);
+	JsonTryGetString(Obj, TEXT("showroomLightingColor"), Base.showroomLightingColor);
 
 	JsonTryGetString(Obj, TEXT("trailerUrl"), OutDetails.trailerUrl);
 	JsonTryGetString(Obj, TEXT("gameUrl"), OutDetails.gameUrl);

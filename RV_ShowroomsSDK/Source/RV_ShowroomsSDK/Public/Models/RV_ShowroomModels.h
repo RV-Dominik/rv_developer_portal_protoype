@@ -38,6 +38,12 @@ struct FRV_ShowroomSummary
 
 	UPROPERTY(BlueprintReadOnly, Category="Readyverse|Showroom")
 	FString coverArtUrl;
+
+	UPROPERTY(BlueprintReadOnly, Category="Readyverse|Showroom")
+	FString showroomTier;
+
+	UPROPERTY(BlueprintReadOnly, Category="Readyverse|Showroom")
+	FString showroomLightingColor;
 };
 
 USTRUCT(BlueprintType)

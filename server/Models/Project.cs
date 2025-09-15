@@ -100,6 +100,8 @@ namespace ShowroomBackend.Models
         
         // System fields
         public bool IsPublic { get; set; } = false;
+        public bool IsPublished { get; set; } = false;
+        public DateTime? PublishedAt { get; set; }
         public string UserId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

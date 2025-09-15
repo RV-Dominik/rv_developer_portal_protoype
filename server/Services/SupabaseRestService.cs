@@ -838,7 +838,7 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync("projects?onboarding_step=eq.done&select=*");
+                var response = await _httpClient.GetAsync("projects?is_published=eq.true&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -939,7 +939,7 @@ namespace ShowroomBackend.Services
             try
             {
                 var encodedGenre = Uri.EscapeDataString(genre);
-                var response = await _httpClient.GetAsync($"projects?onboarding_step=eq.done&genre=eq.{encodedGenre}&select=*");
+                var response = await _httpClient.GetAsync($"projects?is_published=eq.true&genre=eq.{encodedGenre}&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -975,7 +975,7 @@ namespace ShowroomBackend.Services
             try
             {
                 var encodedTrack = Uri.EscapeDataString(track);
-                var response = await _httpClient.GetAsync($"projects?onboarding_step=eq.done&publishing_track=eq.{encodedTrack}&select=*");
+                var response = await _httpClient.GetAsync($"projects?is_published=eq.true&publishing_track=eq.{encodedTrack}&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -1011,7 +1011,7 @@ namespace ShowroomBackend.Services
             try
             {
                 var encodedQuery = Uri.EscapeDataString(query);
-                var response = await _httpClient.GetAsync($"projects?onboarding_step=eq.done&or=(name.ilike.*{encodedQuery}*,short_description.ilike.*{encodedQuery}*,full_description.ilike.*{encodedQuery}*)&select=*");
+                var response = await _httpClient.GetAsync($"projects?is_published=eq.true&or=(name.ilike.*{encodedQuery}*,short_description.ilike.*{encodedQuery}*,full_description.ilike.*{encodedQuery}*)&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -1048,7 +1048,7 @@ namespace ShowroomBackend.Services
             {
                 // For now, return the most recently completed games as "featured"
                 // In the future, this could be based on a "featured" flag or algorithm
-                var response = await _httpClient.GetAsync("projects?onboarding_step=eq.done&order=onboarding_completed_at.desc&limit=10&select=*");
+                var response = await _httpClient.GetAsync("projects?is_published=eq.true&order=published_at.desc&limit=10&select=*");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -1162,6 +1162,10 @@ namespace ShowroomBackend.Services
                 TrailerUrl = !string.IsNullOrEmpty(project.TrailerKey) ? 
                     await GetSignedUrlAsync("showrooms", project.TrailerKey, 3600) : null,
                 ScreenshotUrls = await GetScreenshotUrlsFromProjectKey(project.ScreenshotsKeys),
+                ShowroomTier = project.ShowroomTier,
+                ShowroomLightingColor = project.ShowroomLightingColor,
+                IsPublished = project.IsPublished,
+                PublishedAt = project.PublishedAt,
                 GameUrl = project.GameUrl,
                 LauncherUrl = project.LauncherUrl,
                 AgeRating = project.AgeRating,
