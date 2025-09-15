@@ -684,6 +684,7 @@ class OnboardingWizard {
                     const result = await response.json();
                     const displayUrl = result.signedUrl || result.publicUrl || null;
                     console.log(`Upload successful for ${file.name}:`, result);
+                    console.log('Display URL for preview:', displayUrl);
                     this.core.showMessage('File uploaded successfully!', 'success');
                     this.clearUploadAreaError(uploadArea);
                     this.hideUploadLoading(uploadArea);
@@ -790,6 +791,13 @@ class OnboardingWizard {
 
     updateUploadArea(uploadArea, file, url) {
         // For the screenshots area, append thumbnails for each uploaded file
+        console.log('=== UPDATE UPLOAD AREA DEBUG ===');
+        console.log('Upload area ID:', uploadArea.id);
+        console.log('Expected screenshots ID:', AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+        console.log('Is screenshots area:', uploadArea.id === AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+        console.log('File type:', file.type);
+        console.log('URL provided:', url);
+        
         if (uploadArea.id === AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)) {
             let list = uploadArea.querySelector('.thumb-list');
             if (!list) {
@@ -803,6 +811,13 @@ class OnboardingWizard {
                 const img = document.createElement('img');
                 img.src = url;
                 img.alt = file.name;
+                img.onerror = () => {
+                    console.error('Failed to load screenshot image:', url);
+                    item.innerHTML = `<div style="padding: 8px; text-align: center; color: #666;">❌ Failed to load<br/>${file.name}</div>`;
+                };
+                img.onload = () => {
+                    console.log('Screenshot preview loaded successfully:', file.name);
+                };
                 item.appendChild(img);
             } else {
                 item.textContent = file.name;
