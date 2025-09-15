@@ -532,9 +532,10 @@ class OnboardingData {
                 const totalScreenshots = screenshotKeys.length;
                 
                 // Get screenshot URLs from the project asset URLs API
-                this.core.apiCall(`/api/uploads/project-asset-urls/${project.id}`, {
+                fetch(`${this.core.apiBaseUrl}/api/uploads/project-asset-urls/${project.id}`, {
                     method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
                 }).then(async response => {
                     if (response.ok) {
                         const data = await response.json();
