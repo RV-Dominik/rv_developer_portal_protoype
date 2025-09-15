@@ -224,6 +224,7 @@ class OnboardingData {
         }
     }
 
+
     restoreShowroomData(project) {
         console.log('Restoring showroom data for project:', project);
         console.log('Project showroomTier:', project.showroomTier);
@@ -539,6 +540,9 @@ class OnboardingData {
                 }).then(async response => {
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Screenshot API response data:', data);
+                        
+                        // The API should return screenshotUrls array
                         const screenshotUrls = data.screenshotUrls || [];
                         console.log('Received screenshot URLs:', screenshotUrls.length);
                         
