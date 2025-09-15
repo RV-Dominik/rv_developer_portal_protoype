@@ -1033,6 +1033,9 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   margin-bottom: 2rem;
   position: relative;
+  flex-wrap: nowrap;
+  min-width: 0; /* Allow flex items to shrink */
+  gap: 0.5rem; /* Add small gap between steps */
 }
 
 .wizard-stepper::before {
@@ -1089,11 +1092,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .step-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--rv-grey-2);
   text-align: center;
   font-weight: 500;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+  flex-shrink: 1;
 }
 
 .wizard-step.active .step-number {
@@ -1124,9 +1132,45 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Ensure wizard content can scroll in modal */
 .onboarding-modal .wizard-content {
-  height: 100%;
+  height: calc(100% - 120px); /* Account for stepper height */
   overflow-y: auto;
   padding-right: 8px; /* Space for scrollbar */
+}
+
+/* Custom scrollbar styling for modals */
+.onboarding-modal .wizard-content::-webkit-scrollbar,
+.onboarding-modal .wizard-card::-webkit-scrollbar,
+.onboarding-modal .preview-pane::-webkit-scrollbar {
+  width: 8px;
+}
+
+.onboarding-modal .wizard-content::-webkit-scrollbar-track,
+.onboarding-modal .wizard-card::-webkit-scrollbar-track,
+.onboarding-modal .preview-pane::-webkit-scrollbar-track {
+  background: var(--rv-blue-20);
+  border-radius: 4px;
+}
+
+.onboarding-modal .wizard-content::-webkit-scrollbar-thumb,
+.onboarding-modal .wizard-card::-webkit-scrollbar-thumb,
+.onboarding-modal .preview-pane::-webkit-scrollbar-thumb {
+  background: var(--rv-blue-50);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.onboarding-modal .wizard-content::-webkit-scrollbar-thumb:hover,
+.onboarding-modal .wizard-card::-webkit-scrollbar-thumb:hover,
+.onboarding-modal .preview-pane::-webkit-scrollbar-thumb:hover {
+  background: var(--rv-blue);
+}
+
+/* Firefox scrollbar styling */
+.onboarding-modal .wizard-content,
+.onboarding-modal .wizard-card,
+.onboarding-modal .preview-pane {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rv-blue-50) var(--rv-blue-20);
 }
 
 .step-header {
@@ -2183,12 +2227,12 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--card-dark);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  max-width: 1200px;
+  max-width: 1400px;
   width: 100%;
   max-height: 90vh;
-  overflow: visible;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: 1fr 300px;
+  grid-template-columns: 1fr 350px;
   gap: 0;
 }
 
@@ -2449,6 +2493,9 @@ h1, h2, h3, h4, h5, h6 {
   
   .wizard-stepper {
     margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
   }
   
   .step-number {
@@ -2458,7 +2505,26 @@ h1, h2, h3, h4, h5, h6 {
   }
   
   .step-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    max-width: 70px;
+  }
+  
+  /* For very small screens, make steps even more compact */
+  @media (max-width: 480px) {
+    .wizard-stepper {
+      justify-content: center;
+    }
+    
+    .step-label {
+      font-size: 0.6rem;
+      max-width: 60px;
+    }
+    
+    .step-number {
+      width: 28px;
+      height: 28px;
+      font-size: 0.8rem;
+    }
   }
   
   .step-title {
@@ -2793,6 +2859,32 @@ h1, h2, h3, h4, h5, h6 {
   overflow-y: auto;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   border: 1px solid var(--rv-blue-20);
+}
+
+/* Custom scrollbar for organization modal */
+.organization-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.organization-modal-content::-webkit-scrollbar-track {
+  background: var(--rv-blue-20);
+  border-radius: 4px;
+}
+
+.organization-modal-content::-webkit-scrollbar-thumb {
+  background: var(--rv-blue-50);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.organization-modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--rv-blue);
+}
+
+/* Firefox scrollbar for organization modal */
+.organization-modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rv-blue-50) var(--rv-blue-20);
 }
 
 .organization-modal-header {

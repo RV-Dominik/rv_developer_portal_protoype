@@ -153,8 +153,8 @@ class OrganizationManager {
                 this.core.showMessage('Organization created successfully!', 'success');
                 // Close the modal and refresh projects
                 this.hideOrganizationModal();
-                if (this.core.projectManager && this.core.projectManager.loadProjects) {
-                    this.core.projectManager.loadProjects();
+                if (this.core.projectManager && this.core.projectManager.showProjectsList) {
+                    this.core.projectManager.showProjectsList();
                 }
             } else {
                 this.core.showMessage(result.error || 'Failed to create organization', 'error');
