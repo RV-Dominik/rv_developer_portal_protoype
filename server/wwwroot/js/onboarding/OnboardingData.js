@@ -207,6 +207,10 @@ class OnboardingData {
                 console.log('Restoring assets data...');
                 this.restoreAssetsData(project);
                 break;
+            case 'showroom':
+                console.log('Restoring showroom data...');
+                this.restoreShowroomData(project);
+                break;
             case 'integration':
                 console.log('Restoring integration data...');
                 this.restoreIntegrationData(project);
@@ -217,6 +221,48 @@ class OnboardingData {
                 break;
             default:
                 console.log('Unknown onboarding step:', this.core.currentOnboardingStep);
+        }
+    }
+
+    restoreShowroomData(project) {
+        console.log('Restoring showroom data for project:', project);
+        console.log('Project showroomTier:', project.showroomTier);
+        console.log('Project showroomLightingColor:', project.showroomLightingColor);
+        
+        // Restore tier selection
+        if (project.showroomTier) {
+            const tierStandard = document.getElementById('tier-standard');
+            const tierBespoke = document.getElementById('tier-bespoke');
+            
+            if (project.showroomTier === 'standard' && tierStandard) {
+                tierStandard.checked = true;
+                // Show lighting config
+                const lightingConfig = document.getElementById('lighting-config');
+                const bespokeInfo = document.getElementById('bespoke-info');
+                if (lightingConfig) lightingConfig.style.display = 'block';
+                if (bespokeInfo) bespokeInfo.style.display = 'none';
+            } else if (project.showroomTier === 'bespoke' && tierBespoke) {
+                tierBespoke.checked = true;
+                // Show bespoke info
+                const lightingConfig = document.getElementById('lighting-config');
+                const bespokeInfo = document.getElementById('bespoke-info');
+                if (lightingConfig) lightingConfig.style.display = 'none';
+                if (bespokeInfo) bespokeInfo.style.display = 'block';
+            }
+        }
+        
+        // Restore lighting color
+        if (project.showroomLightingColor) {
+            const colorPicker = document.getElementById('showroom-lighting-color');
+            if (colorPicker) {
+                colorPicker.value = project.showroomLightingColor;
+                
+                // Update color preview
+                const colorSwatch = document.querySelector('.color-swatch');
+                const colorValue = document.querySelector('.color-value');
+                if (colorSwatch) colorSwatch.style.backgroundColor = project.showroomLightingColor;
+                if (colorValue) colorValue.textContent = project.showroomLightingColor;
+            }
         }
     }
 
