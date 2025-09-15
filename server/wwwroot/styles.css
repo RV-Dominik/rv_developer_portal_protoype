@@ -1122,6 +1122,13 @@ h1, h2, h3, h4, h5, h6 {
   position: relative;
 }
 
+/* Ensure wizard content can scroll in modal */
+.onboarding-modal .wizard-content {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 8px; /* Space for scrollbar */
+}
+
 .step-header {
   margin-bottom: 2rem;
 }
@@ -2179,7 +2186,7 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 1200px;
   width: 100%;
   max-height: 90vh;
-  overflow: hidden;
+  overflow: visible;
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: 0;
@@ -2190,6 +2197,8 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 16px 0 0 16px;
   padding: 2rem;
   overflow-y: auto;
+  max-height: 90vh;
+  height: 100%;
 }
 
 .onboarding-modal .preview-pane {
@@ -2197,6 +2206,8 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 0 16px 16px 0;
   padding: 2rem;
   overflow-y: auto;
+  max-height: 90vh;
+  height: 100%;
 }
 
 /* Integration Status Grid */
@@ -2857,5 +2868,16 @@ h1, h2, h3, h4, h5, h6 {
   
   .organization-modal-body .form-actions .btn {
     width: 100%;
+  }
+  
+  /* Onboarding modal responsive */
+  .onboarding-modal .wizard-grid {
+    grid-template-columns: 1fr;
+    max-height: 95vh;
+  }
+  
+  .onboarding-modal .wizard-card,
+  .onboarding-modal .preview-pane {
+    max-height: 50vh;
   }
 }

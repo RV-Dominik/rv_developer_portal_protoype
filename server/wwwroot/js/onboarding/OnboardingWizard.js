@@ -168,7 +168,7 @@ class OnboardingWizard {
                                 </div>
                                 <div class="wizard-cta">
                                     <div class="step-progress">
-                                        <span class="progress-text">Step ${this.getStepNumber(step)} of 5</span>
+                                        <span class="progress-text">Step ${this.getStepNumber(step)} of 6</span>
                                         <div class="progress-bar">
                                             <div class="progress-fill" style="width: ${this.getStepProgress(step)}%"></div>
                                         </div>
@@ -435,19 +435,21 @@ class OnboardingWizard {
         const stepNumbers = {
             'basics': 1,
             'assets': 2,
-            'integration': 3,
-            'compliance': 4,
-            'review': 5
+            'showroom': 3,
+            'integration': 4,
+            'compliance': 5,
+            'review': 6
         };
         return stepNumbers[step] || 1;
     }
 
     getStepProgress(step) {
         const stepProgress = {
-            'basics': 20,
-            'assets': 40,
-            'integration': 60,
-            'compliance': 80,
+            'basics': 17,
+            'assets': 33,
+            'showroom': 50,
+            'integration': 67,
+            'compliance': 83,
             'review': 100
         };
         return stepProgress[step] || 0;
