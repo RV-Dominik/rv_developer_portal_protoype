@@ -510,9 +510,6 @@ class OnboardingData {
         const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
         console.log('Screenshots area found:', !!screenshotsArea);
         if (screenshotsArea && project.screenshotsKeys) {
-            // Show loading state for screenshots
-            this.showScreenshotsLoading(screenshotsArea);
-            
             let list = screenshotsArea.querySelector('.thumb-list');
             if (!list) {
                 list = document.createElement('div');
@@ -533,11 +530,25 @@ class OnboardingData {
                 console.log('Showing loading for screenshots area');
                 this.showScreenshotsLoading(screenshotsArea);
                 
+                // Add a small delay to ensure loading state is visible
+                setTimeout(() => {
+                    console.log('Loading state should be visible now');
+                }, 100);
+                
+                // Test: Show loading for 3 seconds regardless of API response
+                setTimeout(() => {
+                    console.log('Test: Hiding loading state after 3 seconds');
+                    this.hideScreenshotsLoading(screenshotsArea);
+                }, 3000);
+                
                 let loadedCount = 0;
                 const totalScreenshots = screenshotKeys.length;
                 
                 // Get screenshot URLs from the project asset URLs API
-                fetch(`${this.core.apiBaseUrl}/api/uploads/project-asset-urls/${project.id}`, {
+                console.log('Calling screenshot API with project ID:', project.id);
+                console.log('API URL:', `${this.core.apiBaseUrl}/api/uploads/${project.id}/project-urls`);
+                
+                fetch(`${this.core.apiBaseUrl}/api/uploads/${project.id}/project-urls`, {
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'
@@ -617,6 +628,16 @@ class OnboardingData {
                         console.error('❌ Screenshot API returned error status:', response.status);
                         const errorText = await response.text();
                         console.error('Error response body:', errorText);
+                        
+                        // Handle specific error cases
+                        if (response.status === 401) {
+                            console.error('❌ Authentication failed - user not logged in');
+                        } else if (response.status === 404) {
+                            console.error('❌ Project not found - project ID might be invalid:', project.id);
+                        } else if (response.status === 500) {
+                            console.error('❌ Server error - check server logs');
+                        }
+                        
                         this.hideScreenshotsLoading(screenshotsArea);
                     }
                 }).catch(error => {
@@ -627,7 +648,7 @@ class OnboardingData {
                     // Show user-friendly message
                     const list = screenshotsArea.querySelector('.thumb-list');
                     if (list) {
-                        list.innerHTML = '<div class="error-message" style="padding: 1rem; text-align: center; color: #ff6b6b;">⚠️ Unable to load screenshots. Please check if the server is running.</div>';
+                        list.innerHTML = '<div class="error-message" style="padding: 1rem; text-align: center; color: #ff6b6b;">⚠️ Unable to load screenshots. Please try refreshing the page.</div>';
                     }
                 });
             } catch (e) {
@@ -720,16 +741,38 @@ class OnboardingData {
 
     // Show loading state for screenshots area
     showScreenshotsLoading(screenshotsArea) {
+        console.log('=== SHOW SCREENSHOTS LOADING ===');
+        console.log('Screenshots area:', screenshotsArea);
+        console.log('Screenshots area ID:', screenshotsArea?.id);
+        console.log('Screenshots area classes:', screenshotsArea?.className);
+        
         const overlay = screenshotsArea.querySelector('.upload-overlay');
+        console.log('Found overlay:', !!overlay);
+        console.log('Overlay element:', overlay);
+        
         if (overlay) {
+            console.log('Overlay before update:', overlay.innerHTML);
             overlay.innerHTML = `
-                <div class="upload-icon">⏳</div>
+                <div class="upload-icon" style="font-size: 2rem; animation: spin 1s linear infinite;">⏳</div>
                 <div class="upload-text">
                     <strong>Loading Screenshots...</strong>
                     <p>Fetching screenshot previews</p>
                 </div>
             `;
-            overlay.style.opacity = '0.8';
+            overlay.style.display = 'block';
+            overlay.style.opacity = '1';
+            overlay.style.background = 'rgba(0, 0, 0, 0.8)';
+            overlay.style.border = '2px dashed #4A90E2';
+            console.log('Loading state applied to screenshots area');
+            console.log('Overlay after update:', overlay.innerHTML);
+            console.log('Overlay styles:', {
+                display: overlay.style.display,
+                opacity: overlay.style.opacity,
+                background: overlay.style.background
+            });
+        } else {
+            console.error('❌ No overlay found in screenshots area');
+            console.log('Available elements in screenshots area:', screenshotsArea?.querySelectorAll('*'));
         }
     }
 

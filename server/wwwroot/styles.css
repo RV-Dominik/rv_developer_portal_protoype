@@ -1307,6 +1307,12 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Loading animation for screenshots */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Showroom Content Styles */
 .asset-usage-info {
   background: var(--bg-secondary);
