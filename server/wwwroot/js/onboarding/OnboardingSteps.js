@@ -199,7 +199,16 @@ class OnboardingSteps {
                                     <div class="tier-badge">Self-Service</div>
                                 </div>
                                 <div class="tier-content">
-                                    <p>Create your own showroom with customizable lighting and basic features.</p>
+                                    <p>Create your own showroom using the assets you uploaded in the previous step.</p>
+                                    <div class="asset-usage-info">
+                                        <p><strong>Your showroom will include:</strong></p>
+                                        <ul>
+                                            <li>🎮 Game Logo - for branding and identification</li>
+                                            <li>🖼️ Cover Art - as the main hero image</li>
+                                            <li>📸 Screenshots - displayed in a gallery</li>
+                                            <li>🎬 Trailer - for video previews</li>
+                                        </ul>
+                                    </div>
                                     <ul>
                                         <li>Custom lighting colors</li>
                                         <li>Basic showroom templates</li>
@@ -219,6 +228,15 @@ class OnboardingSteps {
                                 </div>
                                 <div class="tier-content">
                                     <p>Readyverse will build a custom showroom for and with you.</p>
+                                    <div class="bespoke-info">
+                                        <p><strong>Our team will work with you to:</strong></p>
+                                        <ul>
+                                            <li>Design a unique showroom layout</li>
+                                            <li>Integrate your assets creatively</li>
+                                            <li>Add custom interactive elements</li>
+                                            <li>Optimize the user experience</li>
+                                        </ul>
+                                    </div>
                                     <ul>
                                         <li>Custom showroom design</li>
                                         <li>Dedicated support team</li>
@@ -452,6 +470,8 @@ class OnboardingSteps {
                 return this.getBasicsPreview(project);
             case 'assets':
                 return this.getAssetsPreview(project);
+            case 'showroom':
+                return this.getShowroomPreview(project);
             case 'integration':
                 return this.getIntegrationPreview(project);
             case 'compliance':
@@ -524,6 +544,67 @@ class OnboardingSteps {
                 </div>
                 <div class="preview-card-footer">
                     <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                        <span class="btn-icon">🎮</span>
+                        <span class="btn-text">${buttonText}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    getShowroomPreview(project) {
+        const isStandardTier = project.showroomTier === 'standard';
+        const hasAssets = this.hasRequiredAssets(project);
+        const buttonClass = (hasAssets && isStandardTier) ? 'btn btn-primary' : 'btn btn-secondary disabled';
+        const buttonText = (hasAssets && isStandardTier) ? 'Open in Readyverse' : 
+                          (!hasAssets ? 'Upload Assets First' : 'Select Standard Tier');
+        
+        return `
+            <div class="preview-card enhanced">
+                <div class="preview-card-header">
+                    <h4>Showroom Preview</h4>
+                    <div class="preview-badge">${project.showroomTier || 'Not Selected'}</div>
+                </div>
+                <div class="showroom-preview-content">
+                    ${isStandardTier ? `
+                        <div class="showroom-info">
+                            <h5>Standard Showroom</h5>
+                            <p>Your showroom will use the assets uploaded in the previous step:</p>
+                            <ul class="asset-list">
+                                <li>🎮 Game Logo - for branding</li>
+                                <li>🖼️ Cover Art - as the main display image</li>
+                                <li>📸 Screenshots - for the gallery</li>
+                                <li>🎬 Trailer - for video preview</li>
+                            </ul>
+                            <div class="lighting-preview" style="background: ${project.showroomLightingColor || '#4A90E2'}; padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                                <p style="color: white; margin: 0; text-align: center;">
+                                    <strong>Lighting Color:</strong> ${project.showroomLightingColor || '#4A90E2'}
+                                </p>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="showroom-info">
+                            <h5>Bespoke Showroom</h5>
+                            <p>Readyverse will create a custom showroom design for you. Our team will work with you to build a unique experience tailored to your game.</p>
+                            <div class="bespoke-features">
+                                <div class="feature-item">
+                                    <span class="feature-icon">🎨</span>
+                                    <span>Custom Design</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">👥</span>
+                                    <span>Dedicated Support</span>
+                                </div>
+                                <div class="feature-item">
+                                    <span class="feature-icon">⚡</span>
+                                    <span>Advanced Features</span>
+                                </div>
+                            </div>
+                        </div>
+                    `}
+                </div>
+                <div class="preview-card-footer">
+                    <button class="${buttonClass}" id="open-unreal-btn" ${(!hasAssets || !isStandardTier) ? 'disabled' : ''}>
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">${buttonText}</span>
                     </button>

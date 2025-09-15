@@ -1174,6 +1174,120 @@ h1, h2, h3, h4, h5, h6 {
   scrollbar-color: var(--rv-blue-50) var(--rv-blue-20);
 }
 
+/* Showroom Preview Styles */
+.showroom-preview-content {
+  padding: 1rem 0;
+}
+
+.showroom-info h5 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.showroom-info p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.asset-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.asset-list li {
+  padding: 0.5rem 0;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.asset-list li:last-child {
+  border-bottom: none;
+}
+
+.lighting-preview {
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.bespoke-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  color: var(--text-secondary);
+}
+
+.feature-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+/* Showroom Content Styles */
+.asset-usage-info {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.asset-usage-info p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.asset-usage-info ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.asset-usage-info li {
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.bespoke-info {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.bespoke-info p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.bespoke-info ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.bespoke-info li {
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
 .step-header {
   margin-bottom: 2rem;
 }

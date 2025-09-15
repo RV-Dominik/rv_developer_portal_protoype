@@ -538,13 +538,20 @@ class OnboardingData {
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'
                 }).then(async response => {
+                    console.log('Screenshot API response status:', response.status);
+                    console.log('Screenshot API response headers:', response.headers);
+                    
                     if (response.ok) {
-                        const data = await response.json();
-                        console.log('Screenshot API response data:', data);
+                        const responseText = await response.text();
+                        console.log('Screenshot API raw response:', responseText);
                         
-                        // The API should return screenshotUrls array
-                        const screenshotUrls = data.screenshotUrls || [];
-                        console.log('Received screenshot URLs:', screenshotUrls.length);
+                        try {
+                            const data = JSON.parse(responseText);
+                            console.log('Screenshot API parsed data:', data);
+                            
+                            // The API should return screenshotUrls array
+                            const screenshotUrls = data.screenshotUrls || [];
+                            console.log('Received screenshot URLs:', screenshotUrls.length);
                         
                         for (let i = 0; i < screenshotUrls.length; i++) {
                             const screenshotUrl = screenshotUrls[i];
@@ -572,12 +579,19 @@ class OnboardingData {
                             img.src = screenshotUrl;
                         }
                         
-                        // If no screenshots to load, hide loading immediately
-                        if (screenshotUrls.length === 0) {
+                            // If no screenshots to load, hide loading immediately
+                            if (screenshotUrls.length === 0) {
+                                this.hideScreenshotsLoading(screenshotsArea);
+                            }
+                        } catch (parseError) {
+                            console.error('❌ Failed to parse screenshot API response as JSON:', parseError);
+                            console.error('Raw response was:', responseText);
                             this.hideScreenshotsLoading(screenshotsArea);
                         }
                     } else {
-                        console.error('❌ Failed to get screenshot URLs');
+                        console.error('❌ Screenshot API returned error status:', response.status);
+                        const errorText = await response.text();
+                        console.error('Error response body:', errorText);
                         this.hideScreenshotsLoading(screenshotsArea);
                     }
                 }).catch(error => {
