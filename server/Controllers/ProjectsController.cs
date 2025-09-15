@@ -75,6 +75,10 @@ namespace ShowroomBackend.Controllers
                 if (!string.IsNullOrEmpty(dto.TargetPlatforms)) project.TargetPlatforms = dto.TargetPlatforms;
                 if (dto.IsPublic.HasValue) project.IsPublic = dto.IsPublic.Value;
 
+                // Showroom fields
+                if (!string.IsNullOrEmpty(dto.ShowroomTier)) project.ShowroomTier = dto.ShowroomTier;
+                if (!string.IsNullOrEmpty(dto.ShowroomLightingColor)) project.ShowroomLightingColor = dto.ShowroomLightingColor;
+
                 // Integration fields
                 if (!string.IsNullOrEmpty(dto.PassSsoIntegrationStatus)) project.PassSsoIntegrationStatus = dto.PassSsoIntegrationStatus;
                 if (!string.IsNullOrEmpty(dto.ReadyverseSdkIntegrationStatus)) project.ReadyverseSdkIntegrationStatus = dto.ReadyverseSdkIntegrationStatus;
@@ -119,6 +123,8 @@ namespace ShowroomBackend.Controllers
                     { "buildStatus", project.BuildStatus },
                     { "targetPlatforms", project.TargetPlatforms },
                     { "isPublic", project.IsPublic },
+                    { "showroomTier", project.ShowroomTier },
+                    { "showroomLightingColor", project.ShowroomLightingColor },
                     { "passSsoIntegrationStatus", project.PassSsoIntegrationStatus },
                     { "readyverseSdkIntegrationStatus", project.ReadyverseSdkIntegrationStatus },
                     { "gameUrl", project.GameUrl },

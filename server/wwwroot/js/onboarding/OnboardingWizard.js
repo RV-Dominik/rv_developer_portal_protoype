@@ -397,7 +397,7 @@ class OnboardingWizard {
 
     // Helper methods
     getWizardSteps() {
-        return ['basics', 'assets', 'integration', 'compliance', 'review'];
+        return ['basics', 'assets', 'showroom', 'integration', 'compliance', 'review'];
     }
 
     getStepClasses(stepName, currentStep) {
@@ -451,6 +451,7 @@ class OnboardingWizard {
         const titles = {
             'basics': 'Project Basics',
             'assets': 'Game Assets',
+            'showroom': 'Showroom Configuration',
             'integration': 'Technical Integration',
             'compliance': 'Compliance & Legal',
             'review': 'Review & Submit'
@@ -462,6 +463,7 @@ class OnboardingWizard {
         const descriptions = {
             'basics': 'Tell us about your project and its basic information.',
             'assets': 'Upload your game assets including logos, screenshots, and trailers.',
+            'showroom': 'Configure your showroom tier and lighting preferences.',
             'integration': 'Configure technical integration with Readyverse services.',
             'compliance': 'Complete legal requirements and compliance checks.',
             'review': 'Review all information before submitting for approval.'

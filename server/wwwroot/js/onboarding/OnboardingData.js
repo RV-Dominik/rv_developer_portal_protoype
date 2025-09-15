@@ -12,6 +12,8 @@ class OnboardingData {
                 return this.collectBasicsData(data);
             case 'assets':
                 return this.collectAssetsData(data);
+            case 'showroom':
+                return this.collectShowroomData(data);
             case 'integration':
                 return this.collectIntegrationData(data);
             case 'compliance':
@@ -53,6 +55,26 @@ class OnboardingData {
     collectAssetsData(data) {
         // Assets are handled separately through file upload
         data.assetsCompleted = true;
+        return data;
+    }
+
+    collectShowroomData(data) {
+        const tierStandard = document.getElementById('tier-standard');
+        const tierBespoke = document.getElementById('tier-bespoke');
+        const colorPicker = document.getElementById('showroom-lighting-color');
+        
+        // Determine selected tier
+        if (tierStandard && tierStandard.checked) {
+            data.showroomTier = 'standard';
+        } else if (tierBespoke && tierBespoke.checked) {
+            data.showroomTier = 'bespoke';
+        }
+        
+        // Get lighting color (only for standard tier)
+        if (colorPicker && data.showroomTier === 'standard') {
+            data.showroomLightingColor = colorPicker.value;
+        }
+        
         return data;
     }
 

@@ -17,6 +17,10 @@ namespace ShowroomBackend.Models.DTOs
         // Assets
         public bool? AssetsCompleted { get; set; }
 
+        // Showroom
+        public string? ShowroomTier { get; set; }
+        public string? ShowroomLightingColor { get; set; }
+
         // Integration
         public string? PassSsoIntegrationStatus { get; set; }
         public string? ReadyverseSdkIntegrationStatus { get; set; }
