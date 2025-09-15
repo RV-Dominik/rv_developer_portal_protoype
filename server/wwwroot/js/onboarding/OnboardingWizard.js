@@ -200,6 +200,9 @@ class OnboardingWizard {
         // Show the modal
         modal.classList.add('show');
         
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
+        
         // Add modal close functionality
         this.bindModalEvents(modal);
 
@@ -1013,6 +1016,9 @@ class OnboardingWizard {
             modal.classList.remove('show');
             // Keep modal in DOM for reuse, just hide it
         }
+        
+        // Unlock body scroll
+        document.body.style.overflow = '';
         
         // Reset onboarding state
         this.core.currentOnboardingProject = null;

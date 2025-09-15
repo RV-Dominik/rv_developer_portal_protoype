@@ -354,9 +354,20 @@ class OnboardingData {
         });
         console.log('All project keys:', Object.keys(project));
         
-        // Show loading state for all asset areas
-        console.log('Showing loading state for all asset areas...');
-        this.showAllAssetLoading();
+        // Check if project has any assets before showing loading states
+        const hasAnyAssets = project[AssetConstants.ASSET_KEYS.GAME_LOGO] || 
+                            project[AssetConstants.ASSET_KEYS.COVER_ART] || 
+                            project[AssetConstants.ASSET_KEYS.TRAILER] ||
+                            (project.screenshots && project.screenshots.length > 0);
+        
+        if (!hasAnyAssets) {
+            console.log('No assets found for project, skipping loading states');
+            return;
+        }
+        
+        // Show loading state only for areas that have assets
+        console.log('Showing loading state for asset areas with data...');
+        this.showAssetLoadingForExistingAssets(project);
         
         // Always fetch fresh signed URLs from the server using file keys
         // This prevents issues with expired URLs and ensures we have the latest assets
@@ -661,5 +672,43 @@ class OnboardingData {
                 console.log(`❌ Area ${areaId} not found in DOM`);
             }
         });
+    }
+
+    // Show loading state only for asset areas that have existing assets
+    showAssetLoadingForExistingAssets(project) {
+        console.log('Showing loading only for areas with existing assets...');
+        
+        // Check each asset type and show loading only if it exists
+        if (project[AssetConstants.ASSET_KEYS.GAME_LOGO]) {
+            const logoArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON));
+            if (logoArea) {
+                console.log('Showing loading for game logo area');
+                this.showAssetLoading(logoArea);
+            }
+        }
+        
+        if (project[AssetConstants.ASSET_KEYS.COVER_ART]) {
+            const coverArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE));
+            if (coverArea) {
+                console.log('Showing loading for cover art area');
+                this.showAssetLoading(coverArea);
+            }
+        }
+        
+        if (project[AssetConstants.ASSET_KEYS.TRAILER]) {
+            const trailerArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER));
+            if (trailerArea) {
+                console.log('Showing loading for trailer area');
+                this.showAssetLoading(trailerArea);
+            }
+        }
+        
+        if (project.screenshots && project.screenshots.length > 0) {
+            const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+            if (screenshotsArea) {
+                console.log('Showing loading for screenshots area');
+                this.showAssetLoading(screenshotsArea);
+            }
+        }
     }
 }

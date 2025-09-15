@@ -649,6 +649,9 @@ class OnboardingSteps {
 
         // Show modal
         modal.classList.add('show');
+        
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
 
         // Handle cancel button
         const cancelBtn = document.getElementById('modal-cancel-btn');
@@ -681,6 +684,9 @@ class OnboardingSteps {
         if (modal) {
             modal.classList.remove('show');
         }
+        
+        // Unlock body scroll
+        document.body.style.overflow = '';
     }
 
     openInReadyverse(projectId) {

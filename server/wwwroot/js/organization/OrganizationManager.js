@@ -29,6 +29,9 @@ class OrganizationManager {
         if (modal) {
             modal.style.display = 'none';
         }
+        
+        // Unlock body scroll
+        document.body.style.overflow = '';
     }
 
     showOrganizationSetup() {
@@ -110,6 +113,9 @@ class OrganizationManager {
 
         // Show the modal
         modal.style.display = 'block';
+        
+        // Lock body scroll
+        document.body.style.overflow = 'hidden';
 
         const form = document.getElementById('organization-form');
         if (form) {
