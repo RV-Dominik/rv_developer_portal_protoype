@@ -529,6 +529,10 @@ class OnboardingData {
                     return;
                 }
                 
+                // Show loading state for screenshots
+                console.log('Showing loading for screenshots area');
+                this.showScreenshotsLoading(screenshotsArea);
+                
                 let loadedCount = 0;
                 const totalScreenshots = screenshotKeys.length;
                 
@@ -544,6 +548,14 @@ class OnboardingData {
                     if (response.ok) {
                         const responseText = await response.text();
                         console.log('Screenshot API raw response:', responseText);
+                        
+                        // Check if response is HTML (error page)
+                        if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<html')) {
+                            console.error('❌ API returned HTML instead of JSON - likely server error or authentication issue');
+                            console.error('HTML response:', responseText.substring(0, 200) + '...');
+                            this.hideScreenshotsLoading(screenshotsArea);
+                            return;
+                        }
                         
                         try {
                             const data = JSON.parse(responseText);
@@ -596,7 +608,14 @@ class OnboardingData {
                     }
                 }).catch(error => {
                     console.error('❌ Error fetching screenshot URLs:', error);
+                    console.error('This might be due to server not running or authentication issues');
                     this.hideScreenshotsLoading(screenshotsArea);
+                    
+                    // Show user-friendly message
+                    const list = screenshotsArea.querySelector('.thumb-list');
+                    if (list) {
+                        list.innerHTML = '<div class="error-message" style="padding: 1rem; text-align: center; color: #ff6b6b;">⚠️ Unable to load screenshots. Please check if the server is running.</div>';
+                    }
                 });
             } catch (e) {
                 console.error('Failed to parse screenshots key:', e);
