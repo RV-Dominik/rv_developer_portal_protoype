@@ -276,7 +276,7 @@ namespace ShowroomBackend.Controllers
                 var ttlStr = _configuration["ASSET_URL_TTL"];
                 if (int.TryParse(ttlStr, out var parsed)) ttl = parsed;
 
-                var result = new Dictionary<string, string?>();
+                var result = new Dictionary<string, object?>();
 
                 _logger.LogInformation("Project {ProjectId} asset keys - GameLogoKey: {GameLogoKey}, CoverArtKey: {CoverArtKey}, TrailerKey: {TrailerKey}, ScreenshotsKeys: {ScreenshotsKeys}", 
                     projectId, project.GameLogoKey, project.CoverArtKey, project.TrailerKey, project.ScreenshotsKeys);
