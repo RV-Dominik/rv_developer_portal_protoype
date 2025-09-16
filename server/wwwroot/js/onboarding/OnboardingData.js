@@ -891,11 +891,18 @@ class OnboardingData {
             }
         }
         
-        if (project.screenshots && project.screenshots.length > 0) {
-            const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
-            if (screenshotsArea) {
-                console.log('Showing loading for screenshots area');
-                this.showAssetLoading(screenshotsArea);
+        if (project.screenshotsKeys) {
+            try {
+                const screenshots = JSON.parse(project.screenshotsKeys);
+                if (screenshots && screenshots.length > 0) {
+                    const screenshotsArea = document.getElementById(AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
+                    if (screenshotsArea) {
+                        console.log('Showing loading for screenshots area');
+                        this.showAssetLoading(screenshotsArea);
+                    }
+                }
+            } catch (e) {
+                console.warn('Failed to parse screenshots keys:', e);
             }
         }
     }

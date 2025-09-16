@@ -1937,14 +1937,53 @@ h1, h2, h3, h4, h5, h6 {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
+  grid-auto-rows: minmax(200px, auto);
 }
-.asset-upload-item.small { grid-column: span 3; }
-.asset-upload-item.medium { grid-column: span 6; }
-.asset-upload-item.wide { grid-column: span 12; }
+
+/* First row: App Icon (2 cols) + Hero Image (5 cols) + Trailer (5 cols) = 12 cols */
+.asset-upload-item.small { 
+  grid-column: 1 / 3; 
+  grid-row: 1;
+  max-width: 300px;
+  aspect-ratio: 1;
+}
+
+.asset-upload-item.small .file-upload-area {
+  aspect-ratio: 1;
+}
+.asset-upload-item.medium:first-of-type { 
+  grid-column: 3 / 8; 
+  grid-row: 1;
+}
+.asset-upload-item.medium:last-of-type { 
+  grid-column: 8 / 13; 
+  grid-row: 1;
+}
+
+/* Second row: Screenshots (full width) */
+.asset-upload-item.wide { 
+  grid-column: 1 / 13; 
+  grid-row: 2;
+  min-height: 300px;
+}
 
 @media (max-width: 1024px) {
-  .asset-upload-item.small { grid-column: span 4; }
-  .asset-upload-item.medium, .asset-upload-item.wide { grid-column: span 12; }
+  .asset-upload-item.small { 
+    grid-column: 1 / 13; 
+    grid-row: 1;
+  }
+  .asset-upload-item.medium:first-of-type { 
+    grid-column: 1 / 13; 
+    grid-row: 2;
+  }
+  .asset-upload-item.medium:last-of-type { 
+    grid-column: 1 / 13; 
+    grid-row: 3;
+  }
+  .asset-upload-item.wide { 
+    grid-column: 1 / 13; 
+    grid-row: 4;
+  }
 }
 
 .upload-placeholder {
