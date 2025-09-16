@@ -535,12 +535,6 @@ class OnboardingData {
                     console.log('Loading state should be visible now');
                 }, 100);
                 
-                // Test: Show loading for 3 seconds regardless of API response
-                setTimeout(() => {
-                    console.log('Test: Hiding loading state after 3 seconds');
-                    this.hideScreenshotsLoading(screenshotsArea);
-                }, 3000);
-                
                 let loadedCount = 0;
                 const totalScreenshots = screenshotKeys.length;
                 
@@ -585,6 +579,7 @@ class OnboardingData {
                             
                             const img = new Image();
                             img.onload = () => {
+                                console.log('✅ Screenshot image loaded successfully:', screenshotUrl);
                                 // Create thumbnail with remove button
                                 thumb.innerHTML = `
                                     <img src="${screenshotUrl}" alt="Screenshot">
@@ -600,6 +595,7 @@ class OnboardingData {
                                 
                                 list.appendChild(thumb);
                                 loadedCount++;
+                                console.log(`Screenshot ${loadedCount}/${screenshotUrls.length} loaded`);
                                 if (loadedCount === screenshotUrls.length) {
                                     this.hideScreenshotsLoading(screenshotsArea);
                                     this.updateScreenshotControls(screenshotsArea);
@@ -612,6 +608,8 @@ class OnboardingData {
                                     this.hideScreenshotsLoading(screenshotsArea);
                                 }
                             };
+                            
+                            console.log('Setting image source to:', screenshotUrl);
                             img.src = screenshotUrl;
                         }
                         

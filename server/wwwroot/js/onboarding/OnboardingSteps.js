@@ -135,7 +135,7 @@ class OnboardingSteps {
                         </div>
                     </div>
                     
-                    <div class="asset-upload-item wide">
+                    <div class="asset-upload-item medium">
                         <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE)}" data-kind="${AssetConstants.ASSET_TYPES.HERO_IMAGE}" data-w="1920" data-h="1080">
                             <div class="upload-background"></div>
                             <div class="upload-overlay">
@@ -149,7 +149,7 @@ class OnboardingSteps {
                         </div>
                     </div>
                     
-                    <div class="asset-upload-item medium">
+                    <div class="asset-upload-item wide">
                         <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)}" data-kind="${AssetConstants.ASSET_TYPES.SCREENSHOTS}" data-w="1920" data-h="1080">
                             <div class="upload-background"></div>
                             <div class="upload-overlay">
