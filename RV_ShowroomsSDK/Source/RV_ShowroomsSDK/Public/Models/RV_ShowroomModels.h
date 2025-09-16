@@ -44,6 +44,9 @@ struct FRV_ShowroomSummary
 
 	UPROPERTY(BlueprintReadOnly, Category="Readyverse|Showroom")
 	FString showroomLightingColor;
+
+	UPROPERTY(BlueprintReadOnly, Category="Readyverse|Showroom")
+	FLinearColor showroomLightingColorLinear;
 };
 
 USTRUCT(BlueprintType)

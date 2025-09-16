@@ -69,6 +69,7 @@ private:
 	bool EnsureApiUrl();
 	bool ParseShowroomsJson(const FString& Json, TArray<FRV_ShowroomSummary>& OutList) const;
 	bool ParseShowroomJson(const FString& Json, FRV_ShowroomDetails& OutDetails) const;
+	FLinearColor HexStringToLinearColor(const FString& HexString) const;
 
 	// Deep link parameters storage
 	FString PendingDeepLinkShowroomId;

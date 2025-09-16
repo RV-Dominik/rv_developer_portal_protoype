@@ -183,6 +183,40 @@ bool URV_ShowroomsSubsystem::EnsureApiUrl()
 	return true;
 }
 
+FLinearColor URV_ShowroomsSubsystem::HexStringToLinearColor(const FString& HexString) const
+{
+	FString CleanHex = HexString.TrimStartAndEnd();
+	
+	// Remove # if present
+	if (CleanHex.StartsWith(TEXT("#")))
+	{
+		CleanHex = CleanHex.Mid(1);
+	}
+	
+	// Ensure we have a valid hex string
+	if (CleanHex.Len() != 6)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid hex color string: %s, using default color"), *HexString);
+		return FLinearColor::White;
+	}
+	
+	// Parse hex values
+	uint32 HexValue = 0;
+	if (!FParse::HexNumber(*CleanHex, HexValue))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to parse hex color: %s, using default color"), *HexString);
+		return FLinearColor::White;
+	}
+	
+	// Extract RGB components (hex is in RRGGBB format)
+	uint8 R = (HexValue >> 16) & 0xFF;
+	uint8 G = (HexValue >> 8) & 0xFF;
+	uint8 B = HexValue & 0xFF;
+	
+	// Convert to linear color (0-255 range to 0.0-1.0 range)
+	return FLinearColor(R / 255.0f, G / 255.0f, B / 255.0f, 1.0f);
+}
+
 
 
 bool URV_ShowroomsSubsystem::ParseShowroomsJson(const FString& Json, TArray<FRV_ShowroomSummary>& OutList) const
@@ -209,6 +243,9 @@ bool URV_ShowroomsSubsystem::ParseShowroomsJson(const FString& Json, TArray<FRV_
 		JsonTryGetString(Obj, TEXT("coverArtUrl"), S.coverArtUrl);
 		JsonTryGetString(Obj, TEXT("showroomTier"), S.showroomTier);
 		JsonTryGetString(Obj, TEXT("showroomLightingColor"), S.showroomLightingColor);
+		
+		// Convert hex color string to FLinearColor
+		S.showroomLightingColorLinear = HexStringToLinearColor(S.showroomLightingColor);
 
 		OutList.Add(MoveTemp(S));
 	}
@@ -235,6 +272,9 @@ bool URV_ShowroomsSubsystem::ParseShowroomJson(const FString& Json, FRV_Showroom
 	JsonTryGetString(Obj, TEXT("coverArtUrl"), Base.coverArtUrl);
 	JsonTryGetString(Obj, TEXT("showroomTier"), Base.showroomTier);
 	JsonTryGetString(Obj, TEXT("showroomLightingColor"), Base.showroomLightingColor);
+	
+	// Convert hex color string to FLinearColor
+	Base.showroomLightingColorLinear = HexStringToLinearColor(Base.showroomLightingColor);
 
 	JsonTryGetString(Obj, TEXT("trailerUrl"), OutDetails.trailerUrl);
 	JsonTryGetString(Obj, TEXT("gameUrl"), OutDetails.gameUrl);
