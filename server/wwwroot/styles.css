@@ -1901,18 +1901,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 6px;
 }
 
-/* Larger preview target for logo container */
-.asset-upload-item.small .file-upload-area {
-  min-width: 256px;
-  min-height: 256px;
-}
-
-@media (min-width: 1280px) {
-  .asset-upload-item.small .file-upload-area {
-    min-width: 512px;
-    min-height: 512px;
-  }
-}
+/* Removed conflicting min-width/min-height styles to allow grid layout to work properly */
 
 /* Aspect ratio helpers for upload surfaces */
 .ratio-16-9 { aspect-ratio: 16 / 9; }
@@ -1938,26 +1927,55 @@ h1, h2, h3, h4, h5, h6 {
   grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
   grid-auto-rows: minmax(200px, auto);
+  width: 100%;
+  position: relative;
+  /* Debug: Add border to see grid container */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
-/* First row: App Icon (2 cols) + Hero Image (5 cols) + Trailer (5 cols) = 12 cols */
+/* First row: App Icon (2 cols) + Hero Image (6 cols) + Trailer (4 cols) = 12 cols */
 .asset-upload-item.small { 
   grid-column: 1 / 3; 
   grid-row: 1;
-  max-width: 300px;
+  max-width: 200px;
   aspect-ratio: 1;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  /* Debug: Add border to see grid item */
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  box-sizing: border-box;
 }
 
 .asset-upload-item.small .file-upload-area {
   aspect-ratio: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
+
 .asset-upload-item.medium:first-of-type { 
-  grid-column: 3 / 8; 
+  grid-column: 3 / 9; 
   grid-row: 1;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  /* Debug: Add border to see grid item */
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  box-sizing: border-box;
 }
+
 .asset-upload-item.medium:last-of-type { 
-  grid-column: 8 / 13; 
+  grid-column: 9 / 13; 
   grid-row: 1;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  /* Debug: Add border to see grid item */
+  border: 1px solid rgba(0, 0, 255, 0.3);
+  box-sizing: border-box;
 }
 
 /* Second row: Screenshots (full width) */
@@ -1965,6 +1983,9 @@ h1, h2, h3, h4, h5, h6 {
   grid-column: 1 / 13; 
   grid-row: 2;
   min-height: 300px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 1024px) {
