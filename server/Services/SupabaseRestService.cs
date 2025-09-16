@@ -874,22 +874,9 @@ namespace ShowroomBackend.Services
         {
             try
             {
-                // First check if project exists at all
-                var basicQueryUrl = $"projects?id=eq.{id.ToString()}&select=*";
-                _logger.LogInformation("Basic query URL: {QueryUrl}", basicQueryUrl);
-                
-                var basicResponse = await _httpClient.GetAsync(basicQueryUrl);
-                _logger.LogInformation("Basic response status: {StatusCode}", basicResponse.StatusCode);
-                
-                if (basicResponse.IsSuccessStatusCode)
-                {
-                    var basicContent = await basicResponse.Content.ReadAsStringAsync();
-                    _logger.LogInformation("Basic response content: {Content}", basicContent);
-                }
-                
-                // Now check with onboarding step filter
-                var queryUrl = $"projects?id=eq.{id.ToString()}&onboarding_step=eq.done&select=*";
-                _logger.LogInformation("Querying for game with ID: {GameId}, URL: {QueryUrl}", id, queryUrl);
+                // Use the same filter as GetPublishedGamesAsync for consistency
+                var queryUrl = $"projects?id=eq.{id.ToString()}&is_published=eq.true&select=*";
+                _logger.LogInformation("Querying for published game with ID: {GameId}, URL: {QueryUrl}", id, queryUrl);
                 
                 var response = await _httpClient.GetAsync(queryUrl);
                 
