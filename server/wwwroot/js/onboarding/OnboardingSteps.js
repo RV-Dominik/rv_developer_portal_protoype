@@ -254,7 +254,7 @@ class OnboardingSteps {
                     </div>
                 </div>
                 
-                <div class="form-group" id="lighting-config" style="display: none;">
+                <div class="form-group" id="lighting-config" style="display: ${project.showroomTier === 'standard' ? 'block' : 'none'};">
                     <label for="showroom-lighting-color">Showroom Lighting Color</label>
                     <div class="color-picker-container">
                         <input type="color" id="showroom-lighting-color" name="showroomLightingColor" 
@@ -267,7 +267,7 @@ class OnboardingSteps {
                     <p class="form-hint">Choose the primary lighting color for your showroom environment.</p>
                 </div>
                 
-                <div class="form-group" id="bespoke-info" style="display: none;">
+                <div class="form-group" id="bespoke-info" style="display: ${project.showroomTier === 'bespoke' ? 'block' : 'none'};">
                     <div class="info-card">
                         <div class="info-icon">🎨</div>
                         <div class="info-content">
