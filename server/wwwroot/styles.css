@@ -1255,8 +1255,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .thumb-item img {
-  width: 100px;
-  height: 56px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
@@ -1921,76 +1921,90 @@ h1, h2, h3, h4, h5, h6 {
   backdrop-filter: blur(2px);
 }
 
-/* Grid sizing modifiers for asset upload items */
+/* Simple vertical layout for asset upload items */
 .asset-upload-grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1rem;
-  grid-template-rows: 300px 300px; /* Set specific row heights */
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.asset-upload-section {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.asset-upload-header {
+  margin-bottom: 0.75rem;
+}
+
+.asset-upload-header h5 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.asset-upload-header p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.asset-upload-item {
   width: 100%;
   position: relative;
 }
 
-/* First row: App Icon (2 cols) + Hero Image (5 cols) + Trailer (5 cols) = 12 cols */
-.asset-upload-item.small { 
-  grid-column: 1 / 3; 
-  grid-row: 1;
-  max-width: 350px;
-  aspect-ratio: 1;
-  width: 100%;
-  position: relative;
-  z-index: 1;
+.asset-upload-item.small {
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .asset-upload-item.small .file-upload-area {
   aspect-ratio: 1;
   width: 100%;
-  height: 100%;
+  height: 300px;
   position: relative;
 }
 
-.asset-upload-item.medium:first-of-type { 
-  grid-column: 3 / 8; 
-  grid-row: 1;
+.asset-upload-item.medium {
   width: 100%;
-  position: relative;
-  z-index: 1;
 }
 
-.asset-upload-item.medium:last-of-type { 
-  grid-column: 8 / 13; 
-  grid-row: 1;
+.asset-upload-item.medium .file-upload-area {
+  aspect-ratio: 16 / 9;
   width: 100%;
+  height: 200px;
   position: relative;
-  z-index: 1;
 }
 
-/* Second row: Screenshots (full width) */
-.asset-upload-item.wide { 
-  grid-column: 1 / 13; 
-  grid-row: 2;
-  min-height: 300px;
+.asset-upload-item.wide {
   width: 100%;
-  position: relative;
-  z-index: 1;
 }
 
-@media (max-width: 1024px) {
-  .asset-upload-item.small { 
-    grid-column: 1 / 13; 
-    grid-row: 1;
+.asset-upload-item.wide .file-upload-area {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: 250px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .asset-upload-item.small {
+    max-width: 100%;
   }
-  .asset-upload-item.medium:first-of-type { 
-    grid-column: 1 / 13; 
-    grid-row: 2;
+  
+  .asset-upload-item.small .file-upload-area {
+    height: 250px;
   }
-  .asset-upload-item.medium:last-of-type { 
-    grid-column: 1 / 13; 
-    grid-row: 3;
+  
+  .asset-upload-item.medium .file-upload-area {
+    height: 150px;
   }
-  .asset-upload-item.wide { 
-    grid-column: 1 / 13; 
-    grid-row: 4;
+  
+  .asset-upload-item.wide .file-upload-area {
+    height: 200px;
   }
 }
 
@@ -2396,23 +2410,16 @@ h1, h2, h3, h4, h5, h6 {
 /* Thumbnails for screenshots upload area */
 .thumb-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 8px;
   margin-top: 8px;
-}
-.thumb-item {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.thumb-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  min-height: 60px;
+  position: relative;
+  z-index: 10;
 }
 
 .asset-slot {

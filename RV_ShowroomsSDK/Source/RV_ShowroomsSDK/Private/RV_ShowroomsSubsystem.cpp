@@ -35,18 +35,52 @@ void URV_ShowroomsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		if (FParse::Value(*CommandLine, TEXT("rvshowroom://"), DeepLinkUrl))
 		{
 			DeepLinkUrl = TEXT("rvshowroom://") + DeepLinkUrl;
-			HandleDeepLink(DeepLinkUrl, FRV_DeepLinkResult::CreateLambda([](bool bSuccess, const FString& Error)
-			{
-				if (bSuccess)
-				{
-					UE_LOG(LogTemp, Log, TEXT("Deep link handled successfully"));
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Deep link failed: %s"), *Error);
-				}
-			}));
+			
+			// Create a lambda function for the deep link result
+			FRV_DeepLinkResult OnDeepLinkComplete;
+			OnDeepLinkComplete.BindUFunction(this, FName("OnDeepLinkComplete"));
+			
+			HandleDeepLink(DeepLinkUrl, OnDeepLinkComplete);
 		}
+	}
+}
+
+void URV_ShowroomsSubsystem::OnDeepLinkComplete(bool bSuccess, const FString& Error)
+{
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Deep link handled successfully"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Deep link failed: %s"), *Error);
+	}
+}
+
+void URV_ShowroomsSubsystem::OnShowroomLoadComplete(bool bSuccess, const FRV_ShowroomDetails& Showroom, const FString& Error)
+{
+	// Broadcast the multicast delegate
+	OnShowroomLoaded.Broadcast(bSuccess, Showroom, Error);
+	
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Showroom loaded successfully: %s"), *Showroom.name);
+		
+		// If we have pending deep link data, log it for use by other systems
+		if (!PendingDeepLinkShowroomId.IsEmpty())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Deep link showroom ID: %s"), *PendingDeepLinkShowroomId);
+			PendingDeepLinkShowroomId.Empty();
+		}
+		else if (!PendingDeepLinkShowroomJson.IsEmpty())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Deep link showroom data was pre-loaded"));
+			PendingDeepLinkShowroomJson.Empty();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load showroom: %s"), *Error);
 	}
 }
 
@@ -133,32 +167,9 @@ void URV_ShowroomsSubsystem::LoadShowroom(const FString& ShowroomId)
 	UE_LOG(LogTemp, Log, TEXT("Loading showroom: %s"), *ShowroomId);
 	
 	// Use the existing GetShowroomById function but with multicast delegate
-	GetShowroomById(ShowroomId, FRV_ShowroomDetailsResult::CreateLambda([this](bool bSuccess, const FRV_ShowroomDetails& Showroom, const FString& Error)
-	{
-		// Broadcast the multicast delegate
-		OnShowroomLoaded.Broadcast(bSuccess, Showroom, Error);
-		
-		if (bSuccess)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Showroom loaded successfully: %s"), *Showroom.name);
-			
-			// If we have pending deep link data, log it for use by other systems
-			if (!PendingDeepLinkShowroomId.IsEmpty())
-			{
-				UE_LOG(LogTemp, Log, TEXT("Deep link showroom ID: %s"), *PendingDeepLinkShowroomId);
-				PendingDeepLinkShowroomId.Empty();
-			}
-			else if (!PendingDeepLinkShowroomJson.IsEmpty())
-			{
-				UE_LOG(LogTemp, Log, TEXT("Deep link showroom data was pre-loaded"));
-				PendingDeepLinkShowroomJson.Empty();
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to load showroom: %s"), *Error);
-		}
-	}));
+	FRV_ShowroomDetailsResult OnComplete;
+	OnComplete.BindUFunction(this, FName("OnShowroomLoadComplete"));
+	GetShowroomById(ShowroomId, OnComplete);
 }
 
 static bool JsonTryGetString(const TSharedPtr<FJsonObject>& Obj, const FString& Key, FString& Out)
@@ -200,7 +211,7 @@ FLinearColor URV_ShowroomsSubsystem::HexStringToLinearColor(const FString& HexSt
 		return FLinearColor::White;
 	}
 	
-	// Parse hex values
+	// Parse hex values using FParse::HexNumber
 	uint32 HexValue = 0;
 	if (!FParse::HexNumber(*CleanHex, HexValue))
 	{
@@ -354,7 +365,13 @@ void URV_ShowroomsSubsystem::HandleDeepLink(const FString& DeepLinkUrl, const FR
 			if (!ShowroomJson.IsEmpty())
 			{
 				// Decode URL-encoded JSON data
-				ShowroomJson = FGenericPlatformHttp::UrlDecode(ShowroomJson);
+				// Simple URL decode - replace %20 with space, %22 with quote, etc.
+				ShowroomJson = ShowroomJson.Replace(TEXT("%20"), TEXT(" "));
+				ShowroomJson = ShowroomJson.Replace(TEXT("%22"), TEXT("\""));
+				ShowroomJson = ShowroomJson.Replace(TEXT("%7B"), TEXT("{"));
+				ShowroomJson = ShowroomJson.Replace(TEXT("%7D"), TEXT("}"));
+				ShowroomJson = ShowroomJson.Replace(TEXT("%5B"), TEXT("["));
+				ShowroomJson = ShowroomJson.Replace(TEXT("%5D"), TEXT("]"));
 				
 				// Open showroom with pre-loaded data (skip server call)
 				OpenShowroomFromDeepLinkWithData(ShowroomJson);

@@ -6,9 +6,9 @@
 
 #include "RV_ShowroomsSubsystem.generated.h"
 
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRV_ShowroomsListResult, const bool, bSuccess, const TArray<FRV_ShowroomSummary>&, Showrooms, const FString&, Error);
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRV_ShowroomDetailsResult, const bool, bSuccess, const FRV_ShowroomDetails&, Showroom, const FString&, Error);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FRV_DeepLinkResult, const bool, bSuccess, const FString&, Error);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRV_ShowroomsListResult, bool, bSuccess, const TArray<FRV_ShowroomSummary>&, Showrooms, const FString&, Error);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FRV_ShowroomDetailsResult, bool, bSuccess, const FRV_ShowroomDetails&, Showroom, const FString&, Error);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FRV_DeepLinkResult, bool, bSuccess, const FString&, Error);
 
 UCLASS(BlueprintType)
 class URV_ShowroomsSubsystem : public UGameInstanceSubsystem
@@ -74,6 +74,13 @@ private:
 	// Deep link parameters storage
 	FString PendingDeepLinkShowroomId;
 	FString PendingDeepLinkShowroomJson;
+
+	// Callback functions for delegates
+	UFUNCTION()
+	void OnDeepLinkComplete(bool bSuccess, const FString& Error);
+	
+	UFUNCTION()
+	void OnShowroomLoadComplete(bool bSuccess, const FRV_ShowroomDetails& Showroom, const FString& Error);
 };
 
 

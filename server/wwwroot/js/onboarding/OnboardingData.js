@@ -827,15 +827,25 @@ class OnboardingData {
     // Hide loading state for screenshots area
     hideScreenshotsLoading(screenshotsArea) {
         const overlay = screenshotsArea.querySelector('.upload-overlay');
+        const list = screenshotsArea.querySelector('.thumb-list');
+        const hasThumbnails = list && list.children.length > 0;
+        
         if (overlay) {
-            overlay.innerHTML = `
-                <div class="upload-icon">📸</div>
-                <div class="upload-text">
-                    <strong>Screenshots</strong>
-                    <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
-                </div>
-            `;
-            overlay.style.opacity = '1';
+            if (hasThumbnails) {
+                // If we have thumbnails, hide the overlay completely
+                overlay.style.display = 'none';
+            } else {
+                // If no thumbnails, show the default upload state
+                overlay.innerHTML = `
+                    <div class="upload-icon">📸</div>
+                    <div class="upload-text">
+                        <strong>Screenshots</strong>
+                        <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
+                    </div>
+                `;
+                overlay.style.display = 'block';
+                overlay.style.opacity = '1';
+            }
         }
     }
 

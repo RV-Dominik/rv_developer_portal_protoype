@@ -121,64 +121,76 @@ class OnboardingSteps {
                 <p>Upload the required assets for your project. All files will be stored securely.</p>
                 
                 <div class="asset-upload-grid">
-                    <div class="asset-upload-item small">
-                        <div class="file-upload-area ratio-1-1" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON)}" data-kind="${AssetConstants.ASSET_TYPES.APP_ICON}" data-w="1024" data-h="1024">
-                            <div class="upload-background"></div>
-                            <div class="upload-overlay">
-                                <div class="upload-icon">🧩</div>
-                                <div class="upload-text">
-                                    <strong>App Icon</strong>
-                                    <p>PNG 1024x1024 px</p>
-                                </div>
-                            </div>
-                            <input type="file" id="appicon-file" accept="image/png" style="display: none;">
+                    <!-- App Icon -->
+                    <div class="asset-upload-section">
+                        <div class="asset-upload-header">
+                            <h5>App Icon</h5>
+                            <p>PNG 1024x1024 px</p>
                         </div>
-                    </div>
-                    
-                    <div class="asset-upload-item medium">
-                        <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE)}" data-kind="${AssetConstants.ASSET_TYPES.HERO_IMAGE}" data-w="1920" data-h="1080">
-                            <div class="upload-background"></div>
-                            <div class="upload-overlay">
-                                <div class="upload-icon">🖼️</div>
-                                <div class="upload-text">
-                                    <strong>Thumbnail / Hero Image</strong>
-                                    <p>PNG/JPG 1920x1080 px</p>
+                        <div class="asset-upload-item small">
+                            <div class="file-upload-area ratio-1-1" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.APP_ICON)}" data-kind="${AssetConstants.ASSET_TYPES.APP_ICON}" data-w="1024" data-h="1024">
+                                <div class="upload-background"></div>
+                                <div class="upload-overlay">
+                                    <div class="upload-icon">🧩</div>
                                 </div>
-                            </div>
-                            <input type="file" id="hero-file" accept="image/png,image/jpeg" style="display: none;">
-                        </div>
-                    </div>
-                    
-                    <div class="asset-upload-item wide">
-                        <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)}" data-kind="${AssetConstants.ASSET_TYPES.SCREENSHOTS}" data-w="1920" data-h="1080">
-                            <div class="upload-background"></div>
-                            <div class="upload-overlay">
-                                <div class="upload-icon">📸</div>
-                                <div class="upload-text">
-                                    <strong>Screenshots</strong>
-                                    <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
-                                </div>
-                            </div>
-                            <input type="file" id="screenshots-file" accept="image/png,image/jpeg" multiple style="display: none;">
-                            <div class="screenshot-controls" style="position: absolute; top: 8px; right: 8px; display: none;">
-                                <button type="button" class="btn btn-sm btn-outline" id="clear-screenshots-btn" title="Clear all screenshots">
-                                    🗑️ Clear All
-                                </button>
+                                <input type="file" id="appicon-file" accept="image/png" style="display: none;">
                             </div>
                         </div>
                     </div>
                     
-                    <div class="asset-upload-item medium">
-                        <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER)}" data-kind="${AssetConstants.ASSET_TYPES.TRAILER}" data-w="1920" data-h="1080" data-duration="15" data-maxsize="5242880">
-                            <div class="upload-background"></div>
-                            <div class="upload-overlay">
-                                <div class="upload-icon">🎬</div>
-                                <div class="upload-text">
-                                    <strong>Trailer</strong>
-                                    <p>MP4 Full HD 1920x1080, 15s max, 5MB max</p>
+                    <!-- Hero Image -->
+                    <div class="asset-upload-section">
+                        <div class="asset-upload-header">
+                            <h5>Thumbnail / Hero Image</h5>
+                            <p>PNG/JPG 1920x1080 px</p>
+                        </div>
+                        <div class="asset-upload-item medium">
+                            <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.HERO_IMAGE)}" data-kind="${AssetConstants.ASSET_TYPES.HERO_IMAGE}" data-w="1920" data-h="1080">
+                                <div class="upload-background"></div>
+                                <div class="upload-overlay">
+                                    <div class="upload-icon">🖼️</div>
+                                </div>
+                                <input type="file" id="hero-file" accept="image/png,image/jpeg" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trailer -->
+                    <div class="asset-upload-section">
+                        <div class="asset-upload-header">
+                            <h5>Trailer</h5>
+                            <p>MP4 Full HD 1920x1080, 15s max, 5MB max</p>
+                        </div>
+                        <div class="asset-upload-item medium">
+                            <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.TRAILER)}" data-kind="${AssetConstants.ASSET_TYPES.TRAILER}" data-w="1920" data-h="1080" data-duration="15" data-maxsize="5242880">
+                                <div class="upload-background"></div>
+                                <div class="upload-overlay">
+                                    <div class="upload-icon">🎬</div>
+                                </div>
+                                <input type="file" id="trailer-file" accept="video/mp4" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Screenshots -->
+                    <div class="asset-upload-section">
+                        <div class="asset-upload-header">
+                            <h5>Screenshots</h5>
+                            <p>PNG/JPG 1920x1080 px (max 10MB each)</p>
+                        </div>
+                        <div class="asset-upload-item wide">
+                            <div class="file-upload-area ratio-16-9" id="${AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)}" data-kind="${AssetConstants.ASSET_TYPES.SCREENSHOTS}" data-w="1920" data-h="1080">
+                                <div class="upload-background"></div>
+                                <div class="upload-overlay">
+                                    <div class="upload-icon">📸</div>
+                                </div>
+                                <input type="file" id="screenshots-file" accept="image/png,image/jpeg" multiple style="display: none;">
+                                <div class="screenshot-controls" style="position: absolute; top: 8px; right: 8px; display: none;">
+                                    <button type="button" class="btn btn-sm btn-outline" id="clear-screenshots-btn" title="Clear all screenshots">
+                                        🗑️ Clear All
+                                    </button>
                                 </div>
                             </div>
-                            <input type="file" id="trailer-file" accept="video/mp4" style="display: none;">
                         </div>
                     </div>
                 </div>
