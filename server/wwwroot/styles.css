@@ -1550,27 +1550,28 @@ h1, h2, h3, h4, h5, h6 {
 /* Overlay layer for text and icons */
 .upload-overlay {
   position: relative;
-  z-index: 2;
+  z-index: 1; /* keep below thumb-list and controls */
   padding: 2rem;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   transition: all 0.3s ease;
 }
 
-/* When image is uploaded, hide the overlay text */
-.file-upload-area.has-image .upload-overlay {
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(2px);
-}
-
-/* When video is uploaded, hide the overlay text */
+/* When image is uploaded, dim overlay but let clicks pass through */
+.file-upload-area.has-image .upload-overlay,
 .file-upload-area.has-video .upload-overlay {
   background: rgba(0,0,0,0.35);
   backdrop-filter: blur(2px);
+  pointer-events: none; /* do not block buttons/controls */
 }
+
+/* Ensure thumb list and controls are above overlay */
+.thumb-list { position: relative; z-index: 5; }
+.screenshot-controls { position: absolute; z-index: 20; right: 8px; top: 8px; pointer-events: auto; }
+.remove-screenshot-btn { z-index: 15; }
 
 .file-upload-area.has-video video {
   width: 100%;
