@@ -36,15 +36,16 @@ namespace ShowroomBackend.Services
         {
             // Core descriptive fields
             "name","slug","company_name","company_logo_url","primary_contact_name","primary_contact_email","primary_contact_phone",
-            "company_website","company_socials","short_description","full_description","genre","publishing_track",
+            "company_website","company_socials","short_description","full_description","genre","publishing_track","target_platforms",
             // Distribution/tech
             "platform_type","distribution_method","game_url","build_status",
-            "pass_sso_integration_status","readyverse_sdk_integration_status","requires_launcher",
+            "pass_sso_integration_status","readyverse_sdk_integration_status","requires_launcher","integration_notes",
             // Readiness flags present in setup guide
             "is_listed_on_platform","platform_listing_url","has_stable_url","has_https_support","has_uptime_monitoring","has_support_commitment",
             "has_distribution_rights","build_format","meets_performance_guidelines","has_install_instructions","has_patch_commitment",
             // Compliance & assets per setup guide
-            "age_rating",
+            "age_rating","rating_board","support_email","review_completed","review_notes","assets_completed",
+            "legal_requirements_completed","privacy_policy_provided","terms_accepted","content_guidelines_accepted","distribution_rights_confirmed",
             // Storage keys for primary assets
             AssetConstants.DatabaseFields.GameLogoKey,
             AssetConstants.DatabaseFields.CoverArtKey,
