@@ -364,8 +364,19 @@ class OnboardingWizard {
             if (overlay) {
                 overlay.style.display = 'block';
                 overlay.style.opacity = '1';
+                overlay.style.background = '';
+                overlay.style.pointerEvents = 'auto';
             }
         }
+        
+        // Ensure loading spinner is not shown
+        if (this.data && typeof this.data.hideScreenshotsLoading === 'function') {
+            this.data.hideScreenshotsLoading(screenshotsArea);
+        }
+        
+        // Update controls
+        this.updateScreenshotControls(screenshotsArea);
+        this.updateScreenshotCount();
         
         console.log('All screenshots cleared');
     }
@@ -1303,3 +1314,4 @@ class OnboardingWizard {
         }
     }
 }
+

@@ -1569,9 +1569,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Ensure thumb list and controls are above overlay */
-.thumb-list { position: relative; z-index: 5; }
-.screenshot-controls { position: absolute; z-index: 20; right: 8px; top: 8px; pointer-events: auto; }
-.remove-screenshot-btn { z-index: 15; }
+.thumb-list { position: relative; z-index: 50; }
+.screenshot-controls { position: absolute; z-index: 60; right: 8px; top: 8px; pointer-events: auto; }
+.remove-screenshot-btn { z-index: 55; }
 
 .file-upload-area.has-video video {
   width: 100%;

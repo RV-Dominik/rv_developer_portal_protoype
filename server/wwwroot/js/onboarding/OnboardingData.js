@@ -835,7 +835,7 @@ class OnboardingData {
                 // If we have thumbnails, hide the overlay completely
                 overlay.style.display = 'none';
             } else {
-                // If no thumbnails, show the default upload state
+                // If no thumbnails, show the default upload state and re-enable clicks
                 overlay.innerHTML = `
                     <div class="upload-icon">📸</div>
                     <div class="upload-text">
@@ -845,6 +845,7 @@ class OnboardingData {
                 `;
                 overlay.style.display = 'block';
                 overlay.style.opacity = '1';
+                overlay.style.pointerEvents = 'auto';
             }
         }
     }
