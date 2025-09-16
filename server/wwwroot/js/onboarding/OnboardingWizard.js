@@ -293,23 +293,31 @@ class OnboardingWizard {
     }
 
     bindReadyverseButtons() {
-        const readyverseButtons = document.querySelectorAll('#open-unreal-btn');
-        readyverseButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const projectId = this.core.currentOnboardingProject?.id;
-                if (projectId) {
-                    // Check if assets are uploaded
-                    const hasAssets = this.steps.hasRequiredAssets(this.core.currentOnboardingProject);
-                    if (hasAssets) {
-                        // Show modal warning
-                        this.steps.showReadyverseModal(projectId);
-                    } else {
-                        // Show message that assets need to be uploaded first
-                        this.core.showMessage('Please upload assets first before opening in Readyverse.', 'info');
-                    }
-                }
-            });
+        // Use event delegation so dynamically re-rendered previews still work
+        if (this._readyverseDelegated) return; // bind once
+        this._readyverseDelegated = true;
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('#open-unreal-btn');
+            if (!button) return;
+            e.preventDefault();
+
+            // Only act if button is enabled
+            if (button.classList.contains('disabled') || button.hasAttribute('disabled')) {
+                return;
+            }
+
+            const projectId = this.core.currentOnboardingProject?.id;
+            if (!projectId) return;
+
+            const hasAssets = this.steps.hasRequiredAssets(this.core.currentOnboardingProject);
+            const isStandardTier = this.core.currentOnboardingProject?.showroomTier === 'standard';
+
+            // Only allow from showroom step with Standard tier and required assets
+            if (hasAssets && isStandardTier) {
+                this.steps.showReadyverseModal(projectId);
+            } else {
+                this.core.showMessage('Please select Standard tier and upload required assets first.', 'info');
+            }
         });
     }
 

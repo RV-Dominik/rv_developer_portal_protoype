@@ -1962,10 +1962,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .asset-upload-item.small .file-upload-area {
-  aspect-ratio: 1;
+  aspect-ratio: 1 / 1;
   width: 100%;
-  height: 300px;
-  position: relative;
+  height: auto;
 }
 
 .asset-upload-item.medium {

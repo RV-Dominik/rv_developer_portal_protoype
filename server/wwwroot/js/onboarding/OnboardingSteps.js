@@ -519,7 +519,7 @@ class OnboardingSteps {
                     </div>
                 </div>
                 <div class="preview-card-footer">
-                    <button class="btn btn-secondary disabled" id="open-unreal-btn" disabled>
+                    <button class="btn btn-secondary disabled" id="open-unreal-btn-disabled" disabled>
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">Upload Assets First</span>
                     </button>
@@ -560,7 +560,7 @@ class OnboardingSteps {
                     </div>
                 </div>
                 <div class="preview-card-footer">
-                    <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                    <button class="${buttonClass}" id="open-unreal-btn-disabled" ${!hasAssets ? 'disabled' : ''}>
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">${buttonText}</span>
                     </button>
@@ -665,7 +665,7 @@ class OnboardingSteps {
                     </div>
                 </div>
                 <div class="preview-card-footer">
-                    <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                    <button class="${buttonClass}" id="open-unreal-btn-disabled" ${!hasAssets ? 'disabled' : ''}>
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">${buttonText}</span>
                     </button>
@@ -704,7 +704,7 @@ class OnboardingSteps {
                     </div>
                 </div>
                 <div class="preview-card-footer">
-                    <button class="${buttonClass}" id="open-unreal-btn" ${!hasAssets ? 'disabled' : ''}>
+                    <button class="${buttonClass}" id="open-unreal-btn-disabled" ${!hasAssets ? 'disabled' : ''}>
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">${buttonText}</span>
                     </button>
@@ -717,14 +717,14 @@ class OnboardingSteps {
         return `
             <div class="preview-card enhanced">
                 <div class="preview-card-header">
-                    <h4>Review</h4>
+                    <h4>Review & Submit</h4>
                     <div class="preview-badge">Final Check</div>
                 </div>
                 <div class="preview-summary">
                     <p>Verify all details before submission.</p>
                 </div>
                 <div class="preview-card-footer">
-                    <button class="btn btn-primary" id="open-unreal-btn">
+                    <button class="btn btn-primary" id="open-unreal-btn-disabled">
                         <span class="btn-icon">🎮</span>
                         <span class="btn-text">Open in Readyverse</span>
                     </button>

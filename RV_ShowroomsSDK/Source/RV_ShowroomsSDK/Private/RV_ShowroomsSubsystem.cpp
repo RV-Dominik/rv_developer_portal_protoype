@@ -211,21 +211,7 @@ FLinearColor URV_ShowroomsSubsystem::HexStringToLinearColor(const FString& HexSt
 		return FLinearColor::White;
 	}
 	
-	// Parse hex values using FParse::HexNumber
-	uint32 HexValue = 0;
-	if (!FParse::HexNumber(*CleanHex, HexValue))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to parse hex color: %s, using default color"), *HexString);
-		return FLinearColor::White;
-	}
-	
-	// Extract RGB components (hex is in RRGGBB format)
-	uint8 R = (HexValue >> 16) & 0xFF;
-	uint8 G = (HexValue >> 8) & 0xFF;
-	uint8 B = HexValue & 0xFF;
-	
-	// Convert to linear color (0-255 range to 0.0-1.0 range)
-	return FLinearColor(R / 255.0f, G / 255.0f, B / 255.0f, 1.0f);
+	return FLinearColor(FColor::FromHex(CleanHex));
 }
 
 
