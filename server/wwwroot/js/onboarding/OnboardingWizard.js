@@ -60,49 +60,47 @@ class OnboardingWizard {
 
     waitForFormElements() {
         return new Promise((resolve) => {
+            const start = performance.now();
+            const TIMEOUT_MS = 7000; // fail-safe
+
             const checkElements = () => {
                 const form = document.getElementById('onboarding-form');
-                
-                console.log('=== WAIT FOR FORM ELEMENTS ===');
-                console.log('Form found:', !!form);
-                console.log('Current step:', this.core.currentOnboardingStep);
-                
-                // Check for step-specific elements
+
+                // Check for step-specific elements quietly (no spammy logs)
                 let stepElementsFound = false;
-                
                 if (this.core.currentOnboardingStep === 'basics') {
                     const shortDesc = document.getElementById('ob-short-description');
                     const genre = document.getElementById('ob-genre');
-                    console.log('Short desc found:', !!shortDesc);
-                    console.log('Genre found:', !!genre);
-                    stepElementsFound = shortDesc && genre;
+                    stepElementsFound = !!(shortDesc && genre);
                 } else if (this.core.currentOnboardingStep === 'assets') {
-                    // For assets step, check for upload areas
                     const uploadAreas = document.querySelectorAll('.file-upload-area');
-                    console.log('Upload areas found:', uploadAreas.length);
                     stepElementsFound = uploadAreas.length > 0;
                 } else if (this.core.currentOnboardingStep === 'integration') {
-                    // For integration step, check for integration-specific elements
                     const integrationElements = document.querySelectorAll('[id^="ob-"]');
-                    console.log('Integration elements found:', integrationElements.length);
                     stepElementsFound = integrationElements.length > 0;
                 } else if (this.core.currentOnboardingStep === 'compliance') {
-                    // For compliance step, check for compliance-specific elements
                     const complianceElements = document.querySelectorAll('[id^="ob-"]');
-                    console.log('Compliance elements found:', complianceElements.length);
                     stepElementsFound = complianceElements.length > 0;
+                } else if (this.core.currentOnboardingStep === 'showroom') {
+                    // Require the tier radios to exist
+                    const tierRadios = document.querySelectorAll('input[name="showroomTier"]');
+                    stepElementsFound = tierRadios.length > 0;
                 }
-                
+
                 if (form && stepElementsFound) {
-                    console.log('✅ All form elements found for step, resolving...');
                     resolve();
-                } else {
-                    console.log('⏳ Still waiting for form elements...');
-                    // Use requestAnimationFrame for better performance than setTimeout
-                    requestAnimationFrame(checkElements);
+                    return;
                 }
+
+                // Fail-safe to avoid waiting forever
+                if (performance.now() - start > TIMEOUT_MS) {
+                    resolve();
+                    return;
+                }
+
+                requestAnimationFrame(checkElements);
             };
-            
+
             checkElements();
         });
     }
