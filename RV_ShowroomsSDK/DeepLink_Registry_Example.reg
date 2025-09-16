@@ -19,3 +19,5 @@ Windows Registry Editor Version 5.00
 
 ; Alternative: Use a launcher script
 ; @="\"C:\\Path\\To\\Your\\Launcher.bat\" \"%1\""
+
+
