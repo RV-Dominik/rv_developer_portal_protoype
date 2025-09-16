@@ -738,7 +738,13 @@ class OnboardingWizard {
     bindFileUploadEvents() {
         const uploadAreas = document.querySelectorAll('.file-upload-area');
         uploadAreas.forEach(area => {
-            area.addEventListener('click', () => {
+            area.addEventListener('click', (e) => {
+                // Ignore clicks on controls inside the area (e.g., Clear All)
+                if (e.target.closest('.screenshot-controls') || e.target.closest('.remove-screenshot-btn')) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return;
+                }
                 const fileInput = area.querySelector('input[type="file"]');
                 if (fileInput) {
                     fileInput.click();

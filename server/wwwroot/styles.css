@@ -2947,11 +2947,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Preview Card Footer */
 .preview-card-footer {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--rv-blue-20);
-  display: flex;
-  justify-content: center;
+  position: relative;
+  z-index: 5; /* above any semi-transparent preview/overlay */
 }
 
 .preview-card-footer .btn {
@@ -2971,6 +2968,13 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* Ensure screenshot controls are above upload overlay */
+.screenshot-controls,
+.remove-screenshot-btn {
+  position: relative;
+  z-index: 6;
 }
 
 /* Readyverse Modal */
