@@ -51,9 +51,9 @@ namespace ShowroomBackend.Services
             AssetConstants.DatabaseFields.TrailerKey,
             AssetConstants.DatabaseFields.ScreenshotsKeys,
             // Optional add-ons and system
-            "showroom_interest","wants_surreal_estate","submission_status","intake_submitted_at","technical_integration_submitted_at",
+            "showroom_interest","showroom_tier","showroom_lighting_color","wants_surreal_estate","submission_status","intake_submitted_at","technical_integration_submitted_at",
             "compliance_review_submitted_at","game_submission_submitted_at","approved_at","rejection_reason","readyverse_tech_team_notes",
-            "readyverse_ops_notes","is_public","user_id","updated_at","onboarding_step","onboarding_completed_at"
+            "readyverse_ops_notes","is_public","is_published","published_at","user_id","updated_at","onboarding_step","onboarding_completed_at"
         };
 
         private static string ToSnakeCase(string key)
