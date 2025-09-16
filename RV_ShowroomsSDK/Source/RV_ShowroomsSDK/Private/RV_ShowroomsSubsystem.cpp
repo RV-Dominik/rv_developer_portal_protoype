@@ -4,10 +4,50 @@
 #include "Interfaces/IHttpResponse.h"
 #include "Json.h"
 #include "JsonObjectConverter.h"
+#include "Engine/Engine.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "HAL/PlatformProcess.h"
+#include "Misc/Paths.h"
+#include "Misc/FileHelper.h"
 
 void URV_ShowroomsSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	
+	// Automatically register deep link protocol on startup if enabled
+	if (bAutoRegisterDeepLink)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Auto-registering deep link protocol on startup"));
+		RegisterDeepLinkProtocol();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Deep link auto-registration is disabled"));
+	}
+	
+	// Check for deep link parameters on startup
+	FString CommandLine = FCommandLine::Get();
+	if (CommandLine.Contains(TEXT("rvshowroom://")))
+	{
+		// Extract deep link URL from command line
+		FString DeepLinkUrl;
+		if (FParse::Value(*CommandLine, TEXT("rvshowroom://"), DeepLinkUrl))
+		{
+			DeepLinkUrl = TEXT("rvshowroom://") + DeepLinkUrl;
+			HandleDeepLink(DeepLinkUrl, FRV_DeepLinkResult::CreateLambda([](bool bSuccess, const FString& Error)
+			{
+				if (bSuccess)
+				{
+					UE_LOG(LogTemp, Log, TEXT("Deep link handled successfully"));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Deep link failed: %s"), *Error);
+				}
+			}));
+		}
+	}
 }
 
 void URV_ShowroomsSubsystem::ListShowrooms(const FRV_ShowroomsListResult& OnComplete)
@@ -86,6 +126,39 @@ void URV_ShowroomsSubsystem::GetShowroomById(const FString& ShowroomId, const FR
 	Request->SetVerb(TEXT("GET"));
 	Request->SetHeader(TEXT("Accept"), TEXT("application/json"));
 	Request->ProcessRequest();
+}
+
+void URV_ShowroomsSubsystem::LoadShowroom(const FString& ShowroomId)
+{
+	UE_LOG(LogTemp, Log, TEXT("Loading showroom: %s"), *ShowroomId);
+	
+	// Use the existing GetShowroomById function but with multicast delegate
+	GetShowroomById(ShowroomId, FRV_ShowroomDetailsResult::CreateLambda([this](bool bSuccess, const FRV_ShowroomDetails& Showroom, const FString& Error)
+	{
+		// Broadcast the multicast delegate
+		OnShowroomLoaded.Broadcast(bSuccess, Showroom, Error);
+		
+		if (bSuccess)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Showroom loaded successfully: %s"), *Showroom.name);
+			
+			// If we have pending deep link data, log it for use by other systems
+			if (!PendingDeepLinkShowroomId.IsEmpty())
+			{
+				UE_LOG(LogTemp, Log, TEXT("Deep link showroom ID: %s"), *PendingDeepLinkShowroomId);
+				PendingDeepLinkShowroomId.Empty();
+			}
+			else if (!PendingDeepLinkShowroomJson.IsEmpty())
+			{
+				UE_LOG(LogTemp, Log, TEXT("Deep link showroom data was pre-loaded"));
+				PendingDeepLinkShowroomJson.Empty();
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to load showroom: %s"), *Error);
+		}
+	}));
 }
 
 static bool JsonTryGetString(const TSharedPtr<FJsonObject>& Obj, const FString& Key, FString& Out)
@@ -185,6 +258,139 @@ bool URV_ShowroomsSubsystem::ParseShowroomJson(const FString& Json, FRV_Showroom
 	if (JsonTryGetString(Obj, TEXT("updatedAt"), Updated)) { FDateTime::ParseIso8601(*Updated, OutDetails.updatedAt); }
 
 	return true;
+}
+
+void URV_ShowroomsSubsystem::HandleDeepLink(const FString& DeepLinkUrl, const FRV_DeepLinkResult& OnComplete)
+{
+	UE_LOG(LogTemp, Log, TEXT("Handling deep link: %s"), *DeepLinkUrl);
+	
+	// Broadcast the deep link event
+	OnDeepLinkReceived.Broadcast(DeepLinkUrl);
+	
+	// Parse the deep link URL
+	FString UrlPath;
+	if (DeepLinkUrl.StartsWith(TEXT("rvshowroom://open")))
+	{
+		// Extract query parameters
+		FString QueryString;
+		if (DeepLinkUrl.Contains(TEXT("?")))
+		{
+			DeepLinkUrl.Split(TEXT("?"), nullptr, &QueryString);
+		}
+		
+		if (QueryString.IsEmpty())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("No parameters found in deep link"));
+			return;
+		}
+		
+		// Parse parameters
+		TMap<FString, FString> Parameters;
+		TArray<FString> ParamPairs;
+		QueryString.ParseIntoArray(ParamPairs, TEXT("&"), true);
+		
+		for (const FString& Pair : ParamPairs)
+		{
+			FString Key, Value;
+			if (Pair.Split(TEXT("="), &Key, &Value))
+			{
+				Parameters.Add(Key, Value);
+			}
+		}
+		
+		// Extract required parameters
+		FString ProjectId = Parameters.FindRef(TEXT("projectId"));
+		FString Action = Parameters.FindRef(TEXT("action"));
+		FString ShowroomJson = Parameters.FindRef(TEXT("showroomData"));
+		
+		if (ProjectId.IsEmpty() && ShowroomJson.IsEmpty())
+		{
+			OnComplete.ExecuteIfBound(false, TEXT("Missing projectId or showroomData parameter"));
+			return;
+		}
+		
+		if (Action == TEXT("open_showroom"))
+		{
+			if (!ShowroomJson.IsEmpty())
+			{
+				// Decode URL-encoded JSON data
+				ShowroomJson = FGenericPlatformHttp::UrlDecode(ShowroomJson);
+				
+				// Open showroom with pre-loaded data (skip server call)
+				OpenShowroomFromDeepLinkWithData(ShowroomJson);
+				OnComplete.ExecuteIfBound(true, TEXT("Showroom opened with pre-loaded data"));
+			}
+			else
+			{
+				// Open showroom with ID (load from server)
+				OpenShowroomFromDeepLink(ProjectId);
+				OnComplete.ExecuteIfBound(true, TEXT("Showroom opened with ID"));
+			}
+		}
+		else
+		{
+			OnComplete.ExecuteIfBound(false, FString::Printf(TEXT("Unknown action: %s"), *Action));
+		}
+	}
+	else
+	{
+		OnComplete.ExecuteIfBound(false, TEXT("Invalid deep link format"));
+	}
+}
+
+void URV_ShowroomsSubsystem::OpenShowroomFromDeepLink(const FString& ProjectId)
+{
+	UE_LOG(LogTemp, Log, TEXT("Opening showroom from deep link with ID: %s"), *ProjectId);
+	
+	// Store showroom ID for loading from server
+	PendingDeepLinkShowroomId = ProjectId;
+	PendingDeepLinkShowroomJson.Empty();
+	
+	// Load the showroom from server - this will trigger the OnShowroomLoaded multicast delegate
+	LoadShowroom(ProjectId);
+	
+	// Show immediate feedback
+	if (GEngine)
+	{
+		FString Message = FString::Printf(TEXT("Loading showroom from server: %s"), *ProjectId);
+		UE_LOG(LogTemp, Log, TEXT("%s"), *Message);
+	}
+}
+
+void URV_ShowroomsSubsystem::OpenShowroomFromDeepLinkWithData(const FString& ShowroomJson)
+{
+	UE_LOG(LogTemp, Log, TEXT("Opening showroom from deep link with pre-loaded data"));
+	
+	// Store showroom JSON data
+	PendingDeepLinkShowroomJson = ShowroomJson;
+	PendingDeepLinkShowroomId.Empty();
+	
+	// Parse the JSON and broadcast the multicast delegate immediately
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ShowroomJson);
+	TSharedPtr<FJsonObject> JsonObject;
+	
+	if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
+	{
+		// Parse the showroom data
+		FRV_ShowroomDetails ShowroomDetails;
+		if (ParseShowroomJson(ShowroomJson, ShowroomDetails))
+		{
+			UE_LOG(LogTemp, Log, TEXT("Showroom data parsed successfully: %s"), *ShowroomDetails.name);
+			
+			// Broadcast the multicast delegate immediately (no server call needed)
+			OnShowroomLoaded.Broadcast(true, ShowroomDetails, TEXT(""));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to parse showroom JSON data"));
+			OnShowroomLoaded.Broadcast(false, FRV_ShowroomDetails(), TEXT("Failed to parse showroom data"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to deserialize showroom JSON"));
+		OnShowroomLoaded.Broadcast(false, FRV_ShowroomDetails(), TEXT("Invalid JSON format"));
+	}
 }
 
 

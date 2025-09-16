@@ -775,21 +775,67 @@ class OnboardingSteps {
         document.body.style.overflow = '';
     }
 
-    openInReadyverse(projectId) {
-        // Try to open the project in Readyverse
-        const url = `rvshowroom://open?projectId=${projectId}`;
-        
-        // Create a temporary link and click it
-        const link = document.createElement('a');
-        link.href = url;
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+	async openInReadyverse(projectId) {
+		try {
+			// First try to get the complete showroom data
+			const response = await fetch(`${this.core.apiBaseUrl}/api/showroom/${projectId}`);
+			if (response.ok) {
+				const showroomData = await response.json();
+				
+				// Build deep link URL with complete showroom data
+				const params = new URLSearchParams({
+					action: 'open_showroom',
+					showroomData: JSON.stringify(showroomData)
+				});
 
-        // Show a toast message
-        this.showToast('Opening project in Readyverse...', 'info');
-    }
+				const url = `rvshowroom://open?${params.toString()}`;
+				
+				// Create a temporary link and click it
+				const link = document.createElement('a');
+				link.href = url;
+				link.style.display = 'none';
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+
+				// Show a toast message
+				this.showToast('Opening project in Readyverse with complete data...', 'info');
+			} else {
+				// Fallback to ID-only approach if showroom data fetch fails
+				this.openInReadyverseWithId(projectId);
+			}
+		} catch (error) {
+			console.error('Failed to fetch showroom data:', error);
+			// Fallback to ID-only approach
+			this.openInReadyverseWithId(projectId);
+		}
+		
+		// Fallback: Show instructions if deep link doesn't work
+		setTimeout(() => {
+			this.showToast('If Readyverse didn\'t open, make sure the client is installed', 'warning');
+		}, 2000);
+	}
+
+	openInReadyverseWithId(projectId) {
+		// Build deep link URL with just the showroom ID
+		const params = new URLSearchParams({
+			projectId: projectId,
+			action: 'open_showroom'
+		});
+
+		const url = `rvshowroom://open?${params.toString()}`;
+		
+		// Create a temporary link and click it
+		const link = document.createElement('a');
+		link.href = url;
+		link.style.display = 'none';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+
+		// Show a toast message
+		this.showToast('Opening project in Readyverse...', 'info');
+	}
 
     showToast(message, type = 'info') {
         // Create toast element

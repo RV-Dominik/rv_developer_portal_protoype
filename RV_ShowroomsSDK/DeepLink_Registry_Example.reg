@@ -1,0 +1,21 @@
+Windows Registry Editor Version 5.00
+
+; Registry file to register the rvshowroom:// protocol
+; Run this file as Administrator to register the deep link protocol
+
+[HKEY_CLASSES_ROOT\rvshowroom]
+@="URL:Readyverse Showroom Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\rvshowroom\DefaultIcon]
+@="C:\\Path\\To\\Your\\UnrealGame.exe,0"
+
+[HKEY_CLASSES_ROOT\rvshowroom\shell]
+
+[HKEY_CLASSES_ROOT\rvshowroom\shell\open]
+
+[HKEY_CLASSES_ROOT\rvshowroom\shell\open\command]
+@="\"C:\\Path\\To\\Your\\UnrealGame.exe\" \"%1\""
+
+; Alternative: Use a launcher script
+; @="\"C:\\Path\\To\\Your\\Launcher.bat\" \"%1\""
