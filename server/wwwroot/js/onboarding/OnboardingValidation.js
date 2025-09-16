@@ -393,7 +393,7 @@ class OnboardingValidation {
         // If standard tier is selected, validate color picker
         if (standardTier && standardTier.checked) {
             const colorPicker = document.getElementById('showroom-lighting-color');
-            if (colorPicker && !colorPicker.value) {
+            if (colorPicker && (!colorPicker.value || colorPicker.value.trim() === '')) {
                 this.showColorPickerError(colorPicker, 'Please select a lighting color');
                 return false;
             }

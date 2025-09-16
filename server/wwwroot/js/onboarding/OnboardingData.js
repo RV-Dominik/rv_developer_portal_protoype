@@ -5,22 +5,32 @@ class OnboardingData {
     }
 
     collectStepData(step) {
+        console.log('=== COLLECT STEP DATA CALLED ===');
+        console.log('Step parameter:', step);
+        console.log('Step type:', typeof step);
         const data = { step };
         
         switch (step) {
             case 'basics':
+                console.log('Calling collectBasicsData');
                 return this.collectBasicsData(data);
             case 'assets':
+                console.log('Calling collectAssetsData');
                 return this.collectAssetsData(data);
             case 'showroom':
+                console.log('Calling collectShowroomData');
                 return this.collectShowroomData(data);
             case 'integration':
+                console.log('Calling collectIntegrationData');
                 return this.collectIntegrationData(data);
             case 'compliance':
+                console.log('Calling collectComplianceData');
                 return this.collectComplianceData(data);
             case 'review':
+                console.log('Calling collectReviewData');
                 return this.collectReviewData(data);
             default:
+                console.log('Unknown step, returning basic data:', step);
                 return data;
         }
     }
@@ -59,22 +69,62 @@ class OnboardingData {
     }
 
     collectShowroomData(data) {
+        console.log('=== COLLECTING SHOWROOM DATA ===');
+        console.log('Document ready state:', document.readyState);
+        console.log('All radio buttons with name showroomTier:', document.querySelectorAll('input[name="showroomTier"]'));
+        console.log('All elements with id tier-standard:', document.querySelectorAll('#tier-standard'));
+        console.log('All elements with id tier-bespoke:', document.querySelectorAll('#tier-bespoke'));
+        console.log('All elements with id showroom-lighting-color:', document.querySelectorAll('#showroom-lighting-color'));
+        
         const tierStandard = document.getElementById('tier-standard');
         const tierBespoke = document.getElementById('tier-bespoke');
         const colorPicker = document.getElementById('showroom-lighting-color');
         
+        console.log('Tier standard element:', tierStandard);
+        console.log('Tier bespoke element:', tierBespoke);
+        console.log('Color picker element:', colorPicker);
+        console.log('Tier standard checked:', tierStandard?.checked);
+        console.log('Tier bespoke checked:', tierBespoke?.checked);
+        console.log('Color picker value:', colorPicker?.value);
+        
+        // Also try alternative selectors
+        const allTierRadios = document.querySelectorAll('input[name="showroomTier"]');
+        console.log('All tier radios found:', allTierRadios.length);
+        allTierRadios.forEach((radio, index) => {
+            console.log(`Radio ${index}:`, {
+                id: radio.id,
+                value: radio.value,
+                checked: radio.checked,
+                name: radio.name
+            });
+        });
+        
         // Determine selected tier
         if (tierStandard && tierStandard.checked) {
             data.showroomTier = 'standard';
+            console.log('Selected tier: standard');
         } else if (tierBespoke && tierBespoke.checked) {
             data.showroomTier = 'bespoke';
+            console.log('Selected tier: bespoke');
+        } else {
+            console.log('No tier selected - checking all radios manually');
+            allTierRadios.forEach(radio => {
+                if (radio.checked) {
+                    data.showroomTier = radio.value;
+                    console.log('Found selected tier via manual check:', radio.value);
+                }
+            });
         }
         
         // Get lighting color (only for standard tier)
         if (colorPicker && data.showroomTier === 'standard') {
             data.showroomLightingColor = colorPicker.value;
+            console.log('Collected lighting color:', data.showroomLightingColor);
+        } else {
+            console.log('Not collecting lighting color - tier:', data.showroomTier, 'colorPicker:', !!colorPicker);
         }
         
+        console.log('Final showroom data:', data);
         return data;
     }
 

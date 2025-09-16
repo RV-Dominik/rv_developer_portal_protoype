@@ -802,7 +802,7 @@ class OnboardingWizard {
                     this.core.showMessage('File uploaded successfully!', 'success');
                     this.clearUploadAreaError(uploadArea);
                     this.hideUploadLoading(uploadArea);
-                    this.updateUploadArea(uploadArea, file, displayUrl);
+                    this.updateUploadArea(uploadArea, file, displayUrl, result.fileKey);
 
                     // Update project object with file keys for primary assets
                     const projectKey = AssetConstants.getProjectKeyForUploadArea(uploadArea);
@@ -860,7 +860,7 @@ class OnboardingWizard {
                         });
                         
                         // Update preview to show the uploaded file
-                        this.updateUploadArea(uploadArea, { name: result.fileName, type: 'image/jpeg' }, result.signedUrl);
+                        this.updateUploadArea(uploadArea, { name: result.fileName, type: 'image/jpeg' }, result.signedUrl, result.fileKey);
                     } else {
                         console.log('❌ No project key detected or no file key received');
                         console.log('Project key detected:', !!projectKey);
@@ -903,7 +903,7 @@ class OnboardingWizard {
         }
     }
 
-    updateUploadArea(uploadArea, file, url) {
+    updateUploadArea(uploadArea, file, url, fileKey = null) {
         // For the screenshots area, append thumbnails for each uploaded file
         console.log('=== UPDATE UPLOAD AREA DEBUG ===');
         console.log('Upload area ID:', uploadArea.id);
@@ -911,6 +911,7 @@ class OnboardingWizard {
         console.log('Is screenshots area:', uploadArea.id === AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS));
         console.log('File type:', file.type);
         console.log('URL provided:', url);
+        console.log('File key provided:', fileKey);
         
         if (uploadArea.id === AssetConstants.getUploadAreaId(AssetConstants.ASSET_TYPES.SCREENSHOTS)) {
             let list = uploadArea.querySelector('.thumb-list');
@@ -921,7 +922,7 @@ class OnboardingWizard {
             }
             const item = document.createElement('div');
             item.className = 'thumb-item';
-            item.setAttribute('data-file-key', result.fileKey || '');
+            item.setAttribute('data-file-key', fileKey || '');
             
             if (url && file.type.startsWith('image/')) {
                 const img = document.createElement('img');
@@ -943,7 +944,7 @@ class OnboardingWizard {
                 removeBtn.title = 'Remove screenshot';
                 removeBtn.onclick = (e) => {
                     e.stopPropagation();
-                    this.removeScreenshot(item, result.fileKey);
+                    this.removeScreenshot(item, fileKey);
                 };
                 item.appendChild(removeBtn);
             } else {
@@ -1050,6 +1051,9 @@ class OnboardingWizard {
             
             // Collect and save step data
             const formData = this.data.collectStepData(step);
+            console.log('=== FORM SUBMISSION DEBUG ===');
+            console.log('Current step:', step);
+            console.log('Collected form data:', formData);
             const result = await this.data.saveOnboardingStep(formData);
             
             if (result) {
