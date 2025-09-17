@@ -1,200 +1,357 @@
-# Low-Tier Showroom Prototype
+# Readyverse Developer Portal
 
-A complete prototype for a low-tier showroom template where developers can create and manage game showrooms with a simple web portal and Unity client integration.
+A comprehensive developer portal for creating and managing game showrooms with seamless integration between web portal, Unreal Engine SDK, and Unity client. Built with ASP.NET Core, Supabase, and modern web technologies.
 
 ## 🎯 Overview
 
-This prototype provides an **easy onboarding path** for developers to create showrooms with an upsell path to custom/bespoke solutions. It's built with modern web technologies and designed to scale from prototype to production.
+This project provides a complete solution for developers to create, manage, and showcase game showrooms through multiple channels:
+
+- **Web Portal**: Full-featured onboarding and project management
+- **Unreal Engine SDK**: Deep linking and showroom loading capabilities  
+- **Backend API**: Secure, scalable ASP.NET Core service
+- **Database**: PostgreSQL with Row Level Security via Supabase
 
 ## 🏗️ Architecture
 
-- **Backend**: Node.js/Express on Render
+### Backend Stack
+- **Framework**: ASP.NET Core 8.0
 - **Database**: PostgreSQL via Supabase
 - **Storage**: Supabase Storage for assets
-- **Authentication**: Magic link login via Supabase Auth
-- **Frontend**: Vanilla HTML/CSS/JS portal
-- **Client**: Unity showroom loader
+- **Authentication**: JWT + Magic link via Supabase Auth
+- **Deployment**: Docker container on Render.com
+- **Security**: Row Level Security, input validation, rate limiting
+
+### Frontend Stack
+- **Portal**: Vanilla HTML/CSS/JavaScript
+- **UI Framework**: Custom component system
+- **Styling**: CSS Grid/Flexbox with custom properties
+- **State Management**: Modular JavaScript classes
+
+### Client Integration
+- **Unreal Engine**: C++ SDK with Blueprint support
+- **Deep Linking**: Custom protocol (`rvshowroom://`)
 
 ## ✨ Features
 
 ### Developer Portal
-- 🔐 Magic link authentication
-- 📝 Project creation and management
-- 🖼️ Asset upload (logo, header, screenshots, trailer)
-- 🎨 Theme customization
-- 📱 Responsive design
+- 🔐 **Magic Link Authentication** - Passwordless login system
+- 📝 **Multi-Step Onboarding** - Guided project creation process
+- 🖼️ **Asset Management** - Upload and manage game assets
+- 🎨 **Showroom Customization** - Theme and lighting configuration
+- 📱 **Responsive Design** - Works on all device sizes
+- 🔒 **Security First** - RLS, input validation, rate limiting
 
 ### Backend API
-- 🔒 Secure authentication
-- 📊 Project CRUD operations
-- 📁 File upload with processing
-- 🌐 Public manifest API for Unity
-- ⚡ Image optimization and resizing
+- 🔒 **Secure Authentication** - JWT tokens with HTTP-only cookies
+- 📊 **Project CRUD** - Complete project lifecycle management
+- 📁 **File Upload** - Secure asset upload with validation
+- 🌐 **Public APIs** - Showroom data for client consumption
+- ⚡ **Performance** - Caching, optimization, and CDN integration
+- 🛡️ **Security Middleware** - SQL injection, XSS, and rate limiting protection
 
-### Unity Client
-- 📥 Automatic manifest loading
-- 🖼️ Asset downloading and display
-- 🎬 Video trailer support
-- 🎨 Theme application
-- 📱 Responsive UI layout
+### Unreal Engine SDK
+- 🔗 **Deep Linking** - Open showrooms directly from web
+- 📥 **Showroom Loading** - Fetch and display showroom data
+- 🎨 **Theme Application** - Apply colors and styling
+- 📱 **Blueprint Integration** - Full Blueprint support
+- 🔄 **Event System** - Delegates and multicast events
+- 🪟 **Auto-Registration** - Automatic deep link protocol setup
+
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- Unity 2022.3 LTS+
+- .NET 8.0 SDK
+- Unreal Engine 5.0+ (for Unreal SDK)
 - Supabase account
-- Render account
+- Render.com account
+- Docker (for local development)
 
 ### 1. Backend Setup
 
 ```bash
 cd server
-npm install
 cp env.example .env
 # Edit .env with your Supabase credentials
-npm run dev
+dotnet restore
+dotnet run
 ```
 
 ### 2. Database Setup
 
 1. Create a Supabase project
-2. Run the SQL schema from `server/db/schema.sql`
+2. Run the SQL migrations in order:
+   ```sql
+   -- Run in Supabase SQL Editor
+   -- 1. server/db/schema.sql
+   -- 2. server/db/migrations/003_security_rls_policies.sql
+   ```
 3. Create a storage bucket named `showrooms`
+4. Configure RLS policies (included in migration)
 
 ### 3. Deploy to Render
 
 1. Connect your GitHub repository to Render
 2. Use the `render.yaml` configuration
-3. Set environment variables
+3. Set environment variables:
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `SUPABASE_ANON_KEY`
+   - `JWT_SECRET` (32+ characters)
+   - `PUBLIC_BASE_URL`
 4. Deploy!
 
-### 4. Unity Setup
+### 4. Unreal Engine Setup
 
-1. Import the Unity sample from `unity-sample/`
-2. Configure the `ShowroomLoader` component
-3. Set your backend URL and project slug
-4. Build and run!
+1. Copy `RV_ShowroomsSDK/` to your project's `Plugins/` folder
+2. Enable the plugin in your Unreal project
+3. Set `ApiBaseUrl` to your backend URL
+4. Use Blueprint or C++ to load showrooms
 
 ## 📁 Project Structure
 
 ```
-├── server/                 # Node.js backend
-│   ├── routes/            # API endpoints
-│   ├── db/               # Database layer
-│   ├── supabase/         # Supabase client
-│   └── web/              # Static portal files
-├── unity-sample/         # Unity client
-│   ├── Scripts/          # C# scripts
-│   └── UI/               # UI prefabs
-├── docs/                 # Documentation
-│   ├── ARCHITECTURE.md   # System design
-│   ├── API.md           # API documentation
-│   └── DEPLOY.md        # Deployment guide
-└── README.md            # This file
+├── server/                     # ASP.NET Core Backend
+│   ├── Controllers/           # API Controllers
+│   │   ├── AuthController.cs  # Authentication endpoints
+│   │   ├── ProjectsController.cs # Project management
+│   │   ├── ShowroomController.cs # Showroom data
+│   │   ├── UploadsController.cs  # File uploads
+│   │   ├── OrganizationController.cs # Organization management
+│   │   └── ManifestController.cs # Public manifest API
+│   ├── Services/              # Business logic
+│   │   ├── AuthenticationService.cs # JWT + Magic link auth
+│   │   └── SupabaseRestService.cs # Database operations
+│   ├── Models/                # Data models
+│   │   ├── Project.cs         # Project entity
+│   │   ├── Organization.cs    # Organization entity
+│   │   ├── User.cs           # User entity
+│   │   └── DTOs/             # Data transfer objects
+│   ├── Middleware/            # Security middleware
+│   │   └── SecurityMiddleware.cs # Input validation, rate limiting
+│   ├── Constants/             # Application constants
+│   │   └── AssetConstants.cs # Asset type definitions
+│   ├── db/                    # Database
+│   │   ├── schema.sql         # Main schema
+│   │   └── migrations/        # Database migrations
+│   ├── wwwroot/               # Static web files
+│   │   ├── index.html         # Main portal
+│   │   ├── js/                # JavaScript modules
+│   │   │   ├── core/          # Core functionality
+│   │   │   │   ├── PortalCore.js # Main portal class
+│   │   │   │   └── AssetConstants.js # Frontend constants
+│   │   │   ├── onboarding/    # Onboarding wizard
+│   │   │   │   ├── OnboardingWizard.js # Wizard UI and navigation
+│   │   │   │   ├── OnboardingSteps.js # Step content and previews
+│   │   │   │   ├── OnboardingValidation.js # Client-side validation
+│   │   │   │   └── OnboardingData.js # Data collection and API calls
+│   │   │   ├── projects/      # Project management
+│   │   │   │   └── ProjectManager.js # Project CRUD operations
+│   │   │   └── organization/  # Organization features
+│   │   │       └── OrganizationManager.js # Organization management
+│   │   ├── styles.css         # Main stylesheet
+│   │   └── portal-refactored.js # Main application orchestrator
+│   ├── Dockerfile             # Container configuration
+│   ├── render.yaml            # Render.com deployment
+│   ├── Program.cs             # Application entry point
+│   └── SECURITY_CONFIG.md     # Security configuration guide
+├── RV_ShowroomsSDK/           # Unreal Engine SDK
+│   ├── Source/                # C++ source code
+│   │   └── RV_ShowroomsSDK/
+│   │       ├── Public/        # Header files
+│   │       │   ├── RV_ShowroomsSubsystem.h # Main subsystem
+│   │       │   ├── Models/RV_ShowroomModels.h # Data models
+│   │       │   └── RV_ShowroomsSDK.h # Plugin header
+│   │       └── Private/       # Implementation
+│   │           ├── RV_ShowroomsSubsystem.cpp # Main implementation
+│   │           └── RV_ShowroomsSubsystemDeepLink.cpp # Deep linking
+│   ├── README.md              # SDK documentation
+│   ├── DEEP_LINKING.md        # Deep linking guide
+│   ├── BLUEPRINT_USAGE_EXAMPLE.md # Blueprint examples
+│   └── MULTICAST_DELEGATE_EXAMPLE.md # Event system examples
+├── docs/                      # Documentation
+│   ├── ARCHITECTURE.md        # System design (OUTDATED)
+│   ├── API.md                 # API reference
+│   └── DEPLOY.md              # Deployment guide
+└── README.md                  # This file
 ```
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `SUPABASE_URL` | Supabase project URL | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key | Yes |
-| `SUPABASE_ANON_KEY` | Anonymous key | Yes |
-| `SUPABASE_BUCKET` | Storage bucket name | Yes |
-| `PUBLIC_BASE_URL` | Public URL for the service | Yes |
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `SUPABASE_URL` | Supabase project URL | Yes | - |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key | Yes | - |
+| `SUPABASE_ANON_KEY` | Anonymous key | Yes | - |
+| `JWT_SECRET` | JWT signing secret (32+ chars) | Yes | - |
+| `PUBLIC_BASE_URL` | Public URL for the service | Yes | - |
+| `CORS__AllowedOrigins__0` | Allowed CORS origin | No | localhost |
+| `ASSET_URL_TTL` | Asset URL expiration (seconds) | No | 3600 |
 
-### Unity Configuration
+### Security Configuration
 
-1. Set `ManifestUrl` to your backend URL
-2. Set `Slug` to your project slug
-3. Configure UI references in the inspector
+The application includes comprehensive security measures:
 
-## 📚 Documentation
+- **Row Level Security (RLS)** - Database-level access control
+- **Input Validation** - SQL injection and XSS prevention
+- **Rate Limiting** - 100 requests/minute per IP
+- **Security Headers** - CSP, HSTS, X-Frame-Options, etc.
+- **JWT Authentication** - Secure token-based auth
+- **CORS Protection** - Restricted cross-origin requests
 
-- **[Architecture](docs/ARCHITECTURE.md)** - System design and components
-- **[API Reference](docs/API.md)** - Complete API documentation
-- **[Deployment Guide](docs/DEPLOY.md)** - Production deployment steps
-- **[Server README](server/README.md)** - Backend setup and development
-- **[Unity README](unity-sample/README.md)** - Unity client setup
+See `server/SECURITY_CONFIG.md` for detailed security setup.
+
+## 📚 API Documentation
+
+### Authentication Endpoints
+- `POST /api/auth/magic-link` - Request magic link
+- `POST /api/auth/verify` - Verify magic link
+- `GET /api/auth/session` - Get current session
+- `POST /api/auth/logout` - Logout
+
+### Project Management
+- `GET /api/projects` - List user projects
+- `POST /api/projects` - Create new project
+- `GET /api/projects/{id}` - Get project details
+- `PUT /api/projects/{id}` - Update project
+- `DELETE /api/projects/{id}` - Delete project
+- `POST /api/projects/{id}/onboarding/step` - Save onboarding step
+- `POST /api/projects/{id}/onboarding/complete` - Complete onboarding
+- `POST /api/projects/{id}/publish` - Publish project
+- `POST /api/projects/{id}/unpublish` - Unpublish project
+
+### Showroom Data
+- `GET /api/showroom/games` - List published showrooms
+- `GET /api/showroom/games/{id}` - Get showroom details
+- `GET /api/showroom/{id}` - Get showroom manifest
+
+### File Upload
+- `POST /api/uploads/{projectId}` - Upload asset
+- `GET /api/uploads/{projectId}/project-urls` - Get asset URLs
+- `DELETE /api/uploads/{projectId}` - Delete asset
+
+### Organization Management
+- `GET /api/organizations` - List user organizations
+- `POST /api/organizations` - Create organization
+- `PUT /api/organizations/{id}` - Update organization
+- `DELETE /api/organizations/{id}` - Delete organization
 
 ## 🎮 Usage
 
 ### For Developers
 
 1. **Sign Up**: Visit the portal and request a magic link
-2. **Create Project**: Add title, description, and theme
-3. **Upload Assets**: Add logo, header, screenshots, and trailer
-4. **Get Manifest**: Use the public manifest URL in Unity
+2. **Create Project**: Complete the multi-step onboarding
+3. **Upload Assets**: Add logo, hero image, screenshots, trailer
+4. **Configure Showroom**: Set theme, lighting, and tier
+5. **Publish**: Make your showroom available to clients
 
-### For Unity Integration
+### For Unreal Engine Integration
 
-1. **Load Manifest**: Use `ShowroomLoader.LoadShowroom(slug)`
-2. **Display Content**: Assets are automatically loaded and displayed
-3. **Apply Theme**: Colors are applied to UI elements
-4. **Play Trailer**: Video player is configured automatically
+1. **Install SDK**: Copy to Plugins folder and enable
+2. **Configure**: Set `ApiBaseUrl` to your backend
+3. **Deep Linking**: Register protocol for web integration
+4. **Load Showrooms**: Use Blueprint or C++ functions
+5. **Handle Events**: Bind to completion delegates
 
-## 🔒 Security
 
-- **Authentication**: Magic link login (no passwords)
-- **Authorization**: Row-level security in Supabase
-- **File Upload**: Type validation and size limits
-- **Public Access**: Only manifest endpoint is public
-- **CORS**: Configured for specific domains
+## 🔒 Security Features
+
+### Database Security
+- **Row Level Security (RLS)** - Users can only access their own data
+- **Secure Functions** - Database functions with proper search_path
+- **Data Validation** - Input sanitization and type checking
+
+### API Security
+- **JWT Authentication** - Secure token-based authentication
+- **Rate Limiting** - Prevents abuse and DoS attacks
+- **Input Validation** - SQL injection and XSS prevention
+- **CORS Protection** - Restricted cross-origin requests
+
+### Client Security
+- **Deep Link Validation** - Secure protocol handling
+- **Asset Validation** - File type and size checking
+- **HTTPS Enforcement** - Secure communication only
 
 ## 🚀 Deployment
 
-### Render (Backend)
-- Automatic deployments from GitHub
-- Environment variable management
-- Built-in monitoring and logs
+### Render.com (Backend)
+- **Automatic Deployments** - GitHub integration
+- **Environment Management** - Secure variable storage
+- **Monitoring** - Built-in logs and metrics
+- **Scaling** - Auto-scaling based on demand
 
 ### Supabase (Database & Storage)
-- Managed PostgreSQL database
-- CDN-backed storage
-- Built-in authentication
+- **Managed PostgreSQL** - High availability database
+- **CDN Storage** - Global asset delivery
+- **Built-in Auth** - User management and security
+- **Real-time** - Live data updates (future feature)
 
-### Unity (Client)
-- Build for target platforms
-- Asset bundles for optimization
-- Platform-specific configurations
+### Docker (Containerization)
+- **Multi-stage Build** - Optimized container size
+- **Security Scanning** - Vulnerability detection
+- **Portable** - Run anywhere Docker is supported
 
 ## 📊 Performance
 
-- **Image Processing**: Automatic resizing and compression
-- **Caching**: Manifest responses cached for 5 minutes
-- **CDN**: Supabase CDN for asset delivery
-- **Optimization**: Lazy loading and efficient queries
+### Backend Optimizations
+- **Caching** - Response caching for static data
+- **CDN Integration** - Supabase CDN for assets
+- **Database Indexing** - Optimized queries
+- **Compression** - Gzip compression for responses
+
+### Frontend Optimizations
+- **Lazy Loading** - Assets load on demand
+- **Image Optimization** - Automatic resizing and compression
+- **Minification** - Compressed JavaScript and CSS
+- **Caching** - Browser caching for static assets
 
 ## 🔮 Future Enhancements
 
 ### Backend
-- Real-time updates via WebSockets
-- Advanced image processing
-- Video transcoding
-- Analytics and metrics
+- **Real-time Updates** - WebSocket integration
+- **Advanced Analytics** - Usage tracking and metrics
+- **Video Processing** - Automatic transcoding
+- **API Versioning** - Backward compatibility
 
 ### Frontend
-- Real-time preview
-- Drag-and-drop interface
-- Advanced theming
-- Mobile app
+- **Real-time Preview** - Live showroom updates
+- **Advanced Editor** - Drag-and-drop interface
+- **Collaboration** - Multi-user editing
+- **Mobile App** - Native mobile experience
 
-### Unity Client
-- 3D showroom environments
-- Interactive elements
-- Social features
-- Asset streaming
+### SDK Features
+- **3D Environments** - Immersive showroom spaces
+- **Interactive Elements** - Clickable objects and UI
+- **Social Features** - Sharing and collaboration
+- **Asset Streaming** - Progressive loading
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Setup
+
+```bash
+# Backend development
+cd server
+dotnet restore
+dotnet run
+
+# Frontend development
+# Edit files in server/wwwroot/
+# Changes are reflected immediately
+
+# Database development
+# Use Supabase SQL Editor for schema changes
+# Create migrations in server/db/migrations/
+```
 
 ## 📄 License
 
@@ -202,9 +359,31 @@ This project is provided as-is for demonstration purposes. Modify as needed for 
 
 ## 🆘 Support
 
-- Check the [documentation](docs/) for detailed guides
-- Review [troubleshooting](docs/DEPLOY.md#troubleshooting) for common issues
-- Open an issue for bugs or feature requests
+- **Documentation**: Check the [docs/](docs/) folder
+- **Security**: See [server/SECURITY_CONFIG.md](server/SECURITY_CONFIG.md)
+- **API Reference**: [docs/API.md](docs/API.md)
+- **Deployment**: [docs/DEPLOY.md](docs/DEPLOY.md)
+- **Issues**: Open an issue for bugs or feature requests
+
+## 🏆 Recent Updates
+
+### Security Enhancements
+- ✅ Row Level Security (RLS) enabled
+- ✅ Input validation and sanitization
+- ✅ Rate limiting and security headers
+- ✅ JWT authentication with secure cookies
+
+### Unreal Engine SDK
+- ✅ Deep linking support (`rvshowroom://`)
+- ✅ Automatic protocol registration
+- ✅ Multicast delegate system
+- ✅ Blueprint integration
+
+### Portal Improvements
+- ✅ Multi-step onboarding wizard
+- ✅ Asset upload and management
+- ✅ Showroom customization
+- ✅ Responsive design
 
 ---
 
