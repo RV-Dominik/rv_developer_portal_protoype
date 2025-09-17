@@ -374,6 +374,17 @@ class OnboardingWizard {
             this.data.hideScreenshotsLoading(screenshotsArea);
         }
         
+        // Persist empty screenshots to backend immediately
+        const payload = {
+            step: 'assets',
+            screenshotsKeys: JSON.stringify([])
+        };
+        this.data.saveOnboardingStep(payload).then(() => {
+            console.log('✅ Persisted empty screenshots to server');
+        }).catch(err => {
+            console.error('❌ Failed to persist empty screenshots:', err);
+        });
+        
         // Update controls
         this.updateScreenshotControls(screenshotsArea);
         this.updateScreenshotCount();
@@ -1135,12 +1146,8 @@ class OnboardingWizard {
     }
 
     bindModalEvents(modal) {
-        // Close modal when clicking outside
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this.handleModalClose();
-            }
-        });
+        // Disable click-outside-to-close behavior
+        // Modal can only be closed via the close button
 
         // Close modal with Escape key
         document.addEventListener('keydown', (e) => {
@@ -1151,12 +1158,7 @@ class OnboardingWizard {
     }
 
     handleModalClose() {
-        // For now, always show confirmation dialog to ensure user intent
-        const confirmed = confirm(
-            'Are you sure you want to exit? Your progress will be saved automatically.'
-        );
-        if (!confirmed) return;
-        
+        // Exit onboarding without confirmation dialog
         this.exitOnboarding();
     }
 

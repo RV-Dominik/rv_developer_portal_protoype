@@ -769,12 +769,8 @@ class OnboardingSteps {
             };
         }
 
-        // Close modal when clicking outside
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                this.hideReadyverseModal();
-            }
-        };
+        // Disable click-outside-to-close behavior
+        // Modal can only be closed via buttons
     }
 
     hideReadyverseModal() {
